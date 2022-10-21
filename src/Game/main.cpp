@@ -175,10 +175,16 @@ renderer::ShaderProgram shader4;
 renderer::UniformVariable viewUniform;
 renderer::UniformVariable projUniform;
 
-#include "tiny_obj_loader.h"
-#include <unordered_map>
-
 g3d::Camera camera;
+
+g3d::Model modelearth;
+g3d::Model modelmoon;
+g3d::Model modelbackground;
+
+renderer::Texture2D texture2dearth;
+renderer::Texture2D texture2dmoon;
+renderer::Texture2D texture2dbackground;
+
 
 scene::Transform trans;
 
@@ -197,11 +203,11 @@ int main(
 		//{
 		//	model.Create("../data/models/crate.obj");
 
-		//	shader2.CreateFromMemories(vertex_shader_text2, fragment_shader_text2);
-		//	mvpUniform2 = shader2.GetUniformVariable("MVP");
-		//	auto sampler = shader2.GetUniformVariable("uSampler");
-		//	shader2.Bind();
-		//	shader2.SetUniform(sampler, 0);
+		shader2.CreateFromMemories(vertex_shader_text2, fragment_shader_text2);
+		mvpUniform2 = shader2.GetUniformVariable("MVP");
+		auto sampler = shader2.GetUniformVariable("uSampler");
+		shader2.Bind();
+		shader2.SetUniform(sampler, 0);
 
 		//	renderer::Texture2DLoaderInfo info;
 		//	info.fileName = "../data/textures/crate.png";
@@ -213,7 +219,7 @@ int main(
 		//	shader3.SetUniform(sampler, 0);
 		//}
 
-		camera.SetSpeed(100);
+		camera.SetSpeed(60);
 
 		unsigned int amount = 100000;
 		glm::mat4* modelMatrices;
@@ -257,7 +263,7 @@ int main(
 		model.Create("../data/models/rock.obj", "../data/models/");
 		model.SetInstancedBuffer(&instancevb, vertTnsAttr);
 		shader4.CreateFromMemories(vertex_shader_text4, fragment_shader_text2);
-		auto sampler = shader4.GetUniformVariable("uSampler");
+		sampler = shader4.GetUniformVariable("uSampler");
 		shader4.Bind();
 		shader4.SetUniform(sampler, 0);
 		viewUniform = shader4.GetUniformVariable("view");
@@ -266,6 +272,21 @@ int main(
 		renderer::Texture2DLoaderInfo info;
 		info.fileName = "../data/models/rock.png";
 		texture2d.CreateFromFiles(info);
+
+
+		modelearth.Create("../data/models/sphere.obj");
+		modelmoon.Create("../data/models/sphere.obj");
+		modelbackground.Create("../data/models/sphere.obj");
+
+
+		info.fileName = "../data/textures/earth.png";
+		texture2dearth.CreateFromFiles(info);
+
+		info.fileName = "../data/textures/moon.png";
+		texture2dmoon.CreateFromFiles(info);
+
+		info.fileName = "../data/textures/starfield.png";
+		texture2dbackground.CreateFromFiles(info);
 
 		while (engine::IsRunningEngine())
 		{
@@ -287,8 +308,46 @@ int main(
 				shader4.Bind();
 				shader4.SetUniform(viewUniform, camera.GetViewMatrix());
 				shader4.SetUniform(projUniform, renderer::GetCurrentProjectionMatrix());
-
 				model.Draw();
+
+
+				{
+					shader2.Bind();
+
+					trans.Reset();
+					trans.SetPosition({ 4.0f, 0.0f, 0.0f });
+					glm::mat4 MVP = renderer::GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
+					shader2.SetUniform(mvpUniform2, MVP);
+					texture2dearth.Bind();
+					modelearth.Draw();
+				}
+
+				{
+					shader2.Bind();
+
+					static float timer = 0;
+					timer = timer + deltaTime;
+
+					trans.Reset();
+					trans.SetPosition({ cos(timer) * 5 + 4, sin(timer) * 5.0f, 0.0f});
+					trans.SetRotate({ 0, 0, timer - glm::pi<float>() / 2.0f});
+					trans.SetScale(glm::vec3(0.5f));
+					glm::mat4 MVP = renderer::GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
+					shader2.SetUniform(mvpUniform2, MVP);
+					texture2dmoon.Bind();
+					modelmoon.Draw();
+				}
+
+				{
+					shader2.Bind();
+
+					trans.Reset();
+					trans.SetScale(glm::vec3(500.0f));
+					glm::mat4 MVP = renderer::GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
+					shader2.SetUniform(mvpUniform2, MVP);
+					texture2dbackground.Bind();
+					modelbackground.Draw();
+				}
 
 				//shader2.Bind();
 				//texture2d.Bind();
