@@ -5,9 +5,6 @@
     <ClCompile Include="Engine.cpp">
       <Filter>MicroEngine</Filter>
     </ClCompile>
-    <ClCompile Include="glfwImpl.c">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClCompile>
     <ClCompile Include="..\3rdparty\glad\gl.c">
       <Filter>MicroEngine\3rdparty</Filter>
     </ClCompile>
@@ -15,6 +12,9 @@
       <Filter>MicroEngine\3rdparty</Filter>
     </ClCompile>
     <ClCompile Include="..\3rdparty\tiny_obj_loader.cpp">
+      <Filter>MicroEngine\3rdparty</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\glfwImpl.c">
       <Filter>MicroEngine\3rdparty</Filter>
     </ClCompile>
   </ItemGroup>

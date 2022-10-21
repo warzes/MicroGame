@@ -174,10 +174,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\3rdparty\glad\gl.c" />
+    <ClCompile Include="..\3rdparty\glfwImpl.c" />
     <ClCompile Include="..\3rdparty\stb.cpp" />
     <ClCompile Include="..\3rdparty\tiny_obj_loader.cpp" />
     <ClCompile Include="Engine.cpp" />
-    <ClCompile Include="glfwImpl.c" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
