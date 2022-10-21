@@ -9,6 +9,8 @@
 		- в сцену добавить варианты камер (то есть в рендере только набор данных, а в сцене управляющая типа от первого лица, полет и т.д.)
 		- возможно функция вращения объекта в сторону другого - https://github.com/opengl-tutorials/ogl/blob/master/common/quaternion_utils.cpp
 		- сделать возможность установки атрибутов в вао по типу (vec2, vec3, mat4, etc) чтобы не нужно было руками высчитывать размеры и отступы. (старый способ сохранить). не забыть это добавить в инстансинг
+	G3D TODO:
+		- в Model сейчас создается столько вао, сколько создано сабмешей. Нужно переделать под решение с одним вао и сдвигами по памяти через DrawElementsBaseVertex
 */
 
 #pragma region Header
@@ -408,6 +410,7 @@ namespace renderer
 		uint8_t* data = nullptr;
 		unsigned mipMapCount = 1; // TODO: only compressed
 		bool mipmap = true;
+		bool isTransparent = false;
 	};
 
 	class Texture2D
@@ -418,13 +421,14 @@ namespace renderer
 
 		void Destroy();
 
-		void Bind(unsigned slot = 0);
+		void Bind(unsigned slot = 0) const;
 
 		static void UnBind(unsigned slot = 0);
 
 		bool IsValid() const { return id > 0; }
 
 		unsigned id = 0;
+		bool isTransparent = false;
 	};
 
 	class VertexBuffer
@@ -679,33 +683,42 @@ namespace g3d
 		glm::vec3 specularColor = glm::vec3(0.0f);
 		float shininess = 1.0f;
 	};
+
+	class Mesh
+	{
+	public:
+		std::vector<renderer::Vertex_Pos3_TexCoord> vertices;
+		std::vector<uint32_t> indices;
+
+		Material material;
+
+		renderer::VertexBuffer vertexBuffer;
+		renderer::IndexBuffer indexBuffer;
+		renderer::VertexArrayBuffer vao;
+	};
 	
 	class Model
 	{
 	public:
 		bool Create(const char* fileName, const char* pathMaterialFiles = "./");
-		bool Create(std::vector<renderer::Vertex_Pos3_TexCoord>&& vertices, std::vector<uint32_t>&& indices); // TODO: правильно?
-		bool Create(const std::vector<renderer::Vertex_Pos3_TexCoord>& vertices, const std::vector<uint32_t>& indices);
+		bool Create(std::vector<Mesh>&& m_meshes); // TODO: правильно?
 		void Destroy();
 
 		void SetInstancedBuffer(renderer::VertexBuffer* instanceBuffer, const std::vector<renderer::VertexAttribute>& attribs);
 
 		void Draw(uint32_t instanceCount = 1);
-
-		bool IsValid() const { return m_vertexBuffer.IsValid() && m_indexBuffer.IsValid() && m_vao.IsValid(); }
-		const std::vector<renderer::Vertex_Pos3_TexCoord>& GetVertices() const { return m_vertices; }
-		const std::vector<uint32_t>& GetIndices() const { return m_indices; }
+		bool IsValid() const 
+		{ 
+			if (m_subMeshes.size() > 0)
+				return m_subMeshes[0].vertexBuffer.IsValid() && m_subMeshes[0].indexBuffer.IsValid() && m_subMeshes[0].vao.IsValid();
+			return false; 
+		}
+		//const std::vector<renderer::Vertex_Pos3_TexCoord>& GetVertices() const { return m_vertices; }
+		//const std::vector<uint32_t>& GetIndices() const { return m_indices; }
 
 	private:
 		bool createBuffer();
-		std::vector<renderer::Vertex_Pos3_TexCoord> m_vertices;
-		std::vector<uint32_t> m_indices;
-
-		Material m_material;
-
-		renderer::VertexBuffer m_vertexBuffer;
-		renderer::IndexBuffer m_indexBuffer;
-		renderer::VertexArrayBuffer m_vao;
+		std::vector<Mesh> m_subMeshes;
 	};
 
 	namespace ModelFileManager

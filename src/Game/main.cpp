@@ -116,7 +116,11 @@ out vec4 fragColor;
 
 void main()
 {
-	fragColor = texture(uSampler, vTexCoord);
+	vec4 textureClr = texture(uSampler, vTexCoord);
+	if (textureClr.a < 0.02)
+		discard;
+
+	fragColor = textureClr;
 }
 )";
 
@@ -187,6 +191,8 @@ renderer::Texture2D texture2dbackground;
 
 scene::Transform trans;
 
+g3d::Model modelTest;
+
 int main(
 	[[maybe_unused]] int   argc,
 	[[maybe_unused]] char* argv[])
@@ -211,6 +217,9 @@ int main(
 		shader2.Bind();
 		shader2.SetUniform(sampler, 0);
 
+
+		modelTest.Create("../data/models/test/test.obj", "../data/models/test/");
+
 		//	renderer::Texture2DLoaderInfo info;
 		//	info.fileName = "../data/textures/crate.png";
 		//	texture2d.CreateFromFiles(info);
@@ -221,7 +230,7 @@ int main(
 		//	shader3.SetUniform(sampler, 0);
 		//}
 
-		camera.SetSpeed(60);
+		//camera.SetSpeed(60);
 
 		unsigned int amount = 100000;
 		glm::mat4* modelMatrices;
@@ -305,6 +314,18 @@ int main(
 
 				camera.SimpleMove(deltaTime);
 				camera.Update();
+
+				texture2d.Bind();
+				shader2.Bind();
+				trans.Reset();
+				glm::mat4 MVP = renderer::GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
+				shader2.SetUniform(mvpUniform2, MVP);
+				modelTest.Draw();
+
+
+
+
+
 
 				texture2d.Bind();
 				shader4.Bind();

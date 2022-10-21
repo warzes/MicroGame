@@ -745,6 +745,9 @@ namespace renderer
 
 		ClearColor = createInfo.ClearColor;
 
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 		glEnable(GL_DEPTH_TEST);
 		glClearColor(ClearColor.x, ClearColor.y, ClearColor.z, 1.0f);
 		glClearDepth(1.0f);
@@ -1056,6 +1059,8 @@ namespace renderer
 	{
 		if (id > 0) Destroy();
 
+		isTransparent = createInfo.isTransparent;
+
 		// save prev pixel store state
 		GLint Alignment = 0;
 		glGetIntegerv(GL_UNPACK_ALIGNMENT, &Alignment);
@@ -1120,6 +1125,25 @@ namespace renderer
 			else if (nrChannels == STBI_rgb) format = TexelsFormat::RGB_U8;
 			else if (nrChannels == STBI_rgb_alpha) format = TexelsFormat::RGBA_U8;
 
+			// проверить на прозрачность
+			// TODO: может быть медленно, проверить скорость и поискать другое решение
+			createInfo.isTransparent = false;
+			if (format == TexelsFormat::RGBA_U8)
+			{
+				for (int i = 0; i < width * height * nrChannels; i += 4)
+				{
+					//uint8_t r = data[i];
+					//uint8_t g = data[i + 1];
+					//uint8_t b = data[i + 2];
+					const uint8_t& a = data[i + 3];
+					if (a < 255)
+					{
+						createInfo.isTransparent = true;
+						break;
+					}
+				}
+			}
+
 			createInfo.format = format;
 			createInfo.width = static_cast<uint16_t>(width);
 			createInfo.height = static_cast<uint16_t>(height);
@@ -1148,7 +1172,7 @@ namespace renderer
 		}
 	}
 
-	void Texture2D::Bind(unsigned slot)
+	void Texture2D::Bind(unsigned slot) const
 	{
 		if (currentTexture2D[slot] != id)
 		{
@@ -1740,9 +1764,15 @@ namespace g3d
 		auto& shapes = reader.GetShapes();
 		auto& materials = reader.GetMaterials();
 
-		std::vector<renderer::Vertex_Pos3_TexCoord> vertices;
-		std::vector<uint32_t> indices;
-		std::unordered_map<renderer::Vertex_Pos3_TexCoord, uint32_t> uniqueVertices;
+		const bool isFindMaterials = !materials.empty();
+
+		std::vector<Mesh> tempMesh(materials.size());
+		std::vector<std::unordered_map<renderer::Vertex_Pos3_TexCoord, uint32_t>> uniqueVertices(materials.size());
+		if (tempMesh.empty())
+		{
+			tempMesh.resize(1);
+			uniqueVertices.resize(1);
+		}
 
 		// Loop over shapes
 		for (size_t shapeId = 0; shapeId < shapes.size(); shapeId++)
@@ -1752,6 +1782,10 @@ namespace g3d
 			for (size_t faceId = 0; faceId < shapes[shapeId].mesh.num_face_vertices.size(); faceId++)
 			{
 				size_t fv = size_t(shapes[shapeId].mesh.num_face_vertices[faceId]);
+
+				// per-face material
+				int materialId = shapes[shapeId].mesh.material_ids[faceId];
+				if (materialId < 0) materialId = 0;
 
 				// Loop over vertices in the face.
 				for (size_t v = 0; v < fv; v++)
@@ -1788,80 +1822,128 @@ namespace g3d
 					glm::vec2 texCoord{ tx,ty };
 					renderer::Vertex_Pos3_TexCoord vertex{ position, texCoord };
 
-					if (uniqueVertices.count(vertex) == 0)
+					if (uniqueVertices[materialId].count(vertex) == 0)
 					{
-						uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-						vertices.emplace_back(vertex);
+						uniqueVertices[materialId][vertex] = static_cast<uint32_t>(tempMesh[materialId].vertices.size());
+						tempMesh[materialId].vertices.emplace_back(vertex);
 					}
 
-					indices.emplace_back(uniqueVertices[vertex]);
+					tempMesh[materialId].indices.emplace_back(uniqueVertices[materialId][vertex]);
 				}
 				index_offset += fv;
-
-				// per-face material
-				//shapes[shapeId].mesh.material_ids[faceId];
 			}
 		}
 
-		return Create(std::move(vertices), std::move(indices));
+		// load materials
+		bool isFindToTransparent = false;
+		if (isFindMaterials)
+		{
+			for (int i = 0; i < materials.size(); i++)
+			{
+				if (materials[i].diffuse_texname.empty()) continue;
+
+				std::string diffuseMap = pathMaterialFiles + materials[i].diffuse_texname;
+				tempMesh[i].material.diffuseTexture = renderer::TextureFileManager::LoadTexture2D(diffuseMap.c_str());
+				if (!isFindToTransparent && tempMesh[i].material.diffuseTexture)
+					isFindToTransparent = tempMesh[i].material.diffuseTexture->isTransparent;
+			}
+		}
+
+		// сортировка по прозрачности
+		if (isFindToTransparent)
+		{
+			std::vector<Mesh> tempMesh2;
+
+			// TODO: медленно, оптимизировать
+
+			// сначала непрозрачное
+			for (int i = 0; i < tempMesh.size(); i++)
+			{
+				if (!tempMesh[i].material.diffuseTexture)
+					tempMesh2.push_back(tempMesh[i]);
+				else if (!tempMesh[i].material.diffuseTexture->isTransparent)
+					tempMesh2.push_back(tempMesh[i]);
+			}
+			// теперь прозрачное
+			for (int i = 0; i < tempMesh.size(); i++)
+			{
+				if (tempMesh[i].material.diffuseTexture->isTransparent)
+					tempMesh2.push_back(tempMesh[i]);
+			}
+
+			return Create(std::move(tempMesh2));
+		}
+		else
+			return Create(std::move(tempMesh));
 	}
 
-	bool Model::Create(std::vector<renderer::Vertex_Pos3_TexCoord>&& vertices, std::vector<uint32_t>&& indices)
+	bool g3d::Model::Create(std::vector<Mesh>&& meshes)
 	{
 		Destroy();
-		m_vertices = std::move(vertices);
-		m_indices = std::move(indices);
-		return createBuffer();
-	}
-
-	bool Model::Create(const std::vector<renderer::Vertex_Pos3_TexCoord>& vertices, const std::vector<uint32_t>& indices)
-	{
-		Destroy();
-		m_vertices = vertices;
-		m_indices = indices;
+		m_subMeshes = std::move(meshes);
 		return createBuffer();
 	}
 
 	void Model::Destroy()
 	{
-		m_vertices.clear();
-		m_indices.clear();
+		for (int i = 0; i < m_subMeshes.size(); i++)
+		{
+			m_subMeshes[i].vertices.clear();
+			m_subMeshes[i].indices.clear();
 
-		m_vertexBuffer.Destroy();
-		m_indexBuffer.Destroy();
-		m_vao.Destroy();
+			m_subMeshes[i].vertexBuffer.Destroy();
+			m_subMeshes[i].indexBuffer.Destroy();
+			m_subMeshes[i].vao.Destroy();
+		}
+		m_subMeshes.clear();
 	}
 
 	void Model::SetInstancedBuffer(renderer::VertexBuffer* instanceBuffer, const std::vector<renderer::VertexAttribute>& attribs)
 	{
-		if (m_vao.IsValid()) m_vao.SetInstancedBuffer(instanceBuffer, attribs);
+		for (int i = 0; i < m_subMeshes.size(); i++)
+		{
+			if (m_subMeshes[i].vao.IsValid())
+				m_subMeshes[i].vao.SetInstancedBuffer(instanceBuffer, attribs);
+		}
 	}
 
 	void Model::Draw(uint32_t instanceCount)
 	{
-		if (m_vao.IsValid()) m_vao.Draw(renderer::PrimitiveDraw::Triangles, instanceCount);
+		for (int i = 0; i < m_subMeshes.size(); i++)
+		{
+			if (m_subMeshes[i].vao.IsValid())
+			{
+				const renderer::Texture2D* diffuseTexture = m_subMeshes[i].material.diffuseTexture;
+				if (diffuseTexture && diffuseTexture->IsValid())
+					diffuseTexture->Bind();
+				m_subMeshes[i].vao.Draw(renderer::PrimitiveDraw::Triangles, instanceCount);
+			}
+		}
 	}
 
 	bool Model::createBuffer()
 	{
-		if (!m_vertexBuffer.Create(renderer::RenderResourceUsage::Static, m_vertices.size(), sizeof(m_vertices[0]), m_vertices.data()))
+		for (int i = 0; i < m_subMeshes.size(); i++)
 		{
-			core::LogError("VertexBuffer create failed!");
-			Destroy();
-			return false;
-		}
-		if (!m_indexBuffer.Create(renderer::RenderResourceUsage::Static, m_indices.size(), sizeof(uint32_t), m_indices.data()))
-		{
-			core::LogError("IndexBuffer create failed!");
-			Destroy();
-			return false;
-		}
+			if (!m_subMeshes[i].vertexBuffer.Create(renderer::RenderResourceUsage::Static, m_subMeshes[i].vertices.size(), sizeof(m_subMeshes[i].vertices[0]), m_subMeshes[i].vertices.data()))
+			{
+				core::LogError("VertexBuffer create failed!");
+				Destroy();
+				return false;
+			}
+			if (!m_subMeshes[i].indexBuffer.Create(renderer::RenderResourceUsage::Static, m_subMeshes[i].indices.size(), sizeof(uint32_t), m_subMeshes[i].indices.data()))
+			{
+				core::LogError("IndexBuffer create failed!");
+				Destroy();
+				return false;
+			}
 
-		if (!m_vao.Create(&m_vertexBuffer, &m_indexBuffer, renderer::GetVertexAttributes<renderer::Vertex_Pos3_TexCoord>()))
-		{
-			core::LogError("VAO create failed!");
-			Destroy();
-			return false;
+			if (!m_subMeshes[i].vao.Create(&m_subMeshes[i].vertexBuffer, &m_subMeshes[i].indexBuffer, renderer::GetVertexAttributes<renderer::Vertex_Pos3_TexCoord>()))
+			{
+				core::LogError("VAO create failed!");
+				Destroy();
+				return false;
+			}
 		}
 		return true;
 	}
