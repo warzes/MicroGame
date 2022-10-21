@@ -245,14 +245,18 @@ namespace platform
 	bool IsMouseButtonUp(int button);               // Check if a mouse button is NOT being pressed
 	int GetMouseX();                                // Get mouse position X
 	int GetMouseY();                                // Get mouse position Y
-	glm::vec2 GetMousePosition();               // Get mouse position XY
-	glm::vec2 GetMouseDelta();                  // Get mouse delta between frames
+	glm::vec2 GetMousePosition();                   // Get mouse position XY
+	glm::vec2 GetMouseDelta();                      // Get mouse delta between frames
 	void SetMousePosition(int x, int y);            // Set mouse position XY
 	void SetMouseOffset(int offsetX, int offsetY);  // Set mouse offset
 	void SetMouseScale(float scaleX, float scaleY); // Set mouse scaling
 	float GetMouseWheelMove();                      // Get mouse wheel movement for X or Y, whichever is larger
-	glm::vec2 GetMouseWheelMoveV();             // Get mouse wheel movement for both X and Y
+	glm::vec2 GetMouseWheelMoveV();                 // Get mouse wheel movement for both X and Y
 	void SetMouseCursor(int cursor);                // Set mouse cursor
+
+	void EnableCursor();                            // Enables cursor (unlock cursor)
+	void DisableCursor();                           // Disables cursor (lock cursor)
+	bool IsCursorOnScreen();                        // Check if cursor is on the screen
 
 }
 #pragma endregion
@@ -662,11 +666,26 @@ namespace g3d
 		float m_movementSpeed = 5.0f;
 		float m_sensitivity = 0.1f;
 	};
+
+	class Material
+	{
+	public:
+
+	//private:
+		renderer::Texture2D* diffuseTexture = nullptr;
+
+		glm::vec3 ambientColor = glm::vec3(1.0f);
+		glm::vec3 diffuseColor = glm::vec3(1.0f);
+		glm::vec3 specularColor = glm::vec3(0.0f);
+		float shininess = 1.0f;
+	};
 	
 	class Model
 	{
 	public:
 		bool Create(const char* fileName, const char* pathMaterialFiles = "./");
+		bool Create(std::vector<renderer::Vertex_Pos3_TexCoord>&& vertices, std::vector<uint32_t>&& indices); // TODO: правильно?
+		bool Create(const std::vector<renderer::Vertex_Pos3_TexCoord>& vertices, const std::vector<uint32_t>& indices);
 		void Destroy();
 
 		void SetInstancedBuffer(renderer::VertexBuffer* instanceBuffer, const std::vector<renderer::VertexAttribute>& attribs);
@@ -678,8 +697,11 @@ namespace g3d
 		const std::vector<uint32_t>& GetIndices() const { return m_indices; }
 
 	private:
+		bool createBuffer();
 		std::vector<renderer::Vertex_Pos3_TexCoord> m_vertices;
 		std::vector<uint32_t> m_indices;
+
+		Material m_material;
 
 		renderer::VertexBuffer m_vertexBuffer;
 		renderer::IndexBuffer m_indexBuffer;
@@ -750,13 +772,13 @@ namespace scene
 			SetRotate(glm::vec3(0.0f, 0.0f, 0.0f));
 		}
 
-		void SetPosition(const glm::vec3& pos) { m_position = pos; m_update = true; }
+		void SetPosition(const glm::vec3& pos) { m_translation = pos; m_update = true; }
 		void SetScale(const glm::vec3& scale) { m_scale = scale; m_update = true; }
 		void SetRotate(const glm::vec3& radianAngle) { m_quaternion = glm::quat(radianAngle); m_update = true; }
 
 		const glm::mat4& GetWorldMatrix();
 	private:
-		glm::vec3 m_position = glm::vec3(0.0f, 0.0f, 0.0f);
+		glm::vec3 m_translation = glm::vec3(0.0f, 0.0f, 0.0f);
 		glm::vec3 m_scale = glm::vec3(1.0f, 1.0f, 1.0f);
 		glm::quat m_quaternion = glm::quat(glm::vec3(0.0f));
 		glm::mat4 m_worldMatrix;

@@ -433,6 +433,31 @@ namespace platform
 		//}
 	}
 
+	void EnableCursor()
+	{
+#if defined(__EMSCRIPTEN__)
+		emscripten_exit_pointerlock();
+#else
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+#endif
+		Mouse.cursorHidden = false;
+	}
+	
+	void DisableCursor()
+	{
+#if defined(__EMSCRIPTEN__)
+		emscripten_request_pointerlock("#canvas", 1);
+#else
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+#endif
+		Mouse.cursorHidden = true;
+	}
+
+	bool IsCursorOnScreen()
+	{
+		return Mouse.cursorOnScreen;
+	}
+
 	//-------------------------------------------------------------------------
 	// Window
 	//-------------------------------------------------------------------------
@@ -455,6 +480,11 @@ namespace platform
 
 		if (FrameBufferHeight < 1) FrameBufferHeight = 1;
 		FrameBufferAspectRatio = static_cast<float>(FrameBufferWidth) / static_cast<float>(FrameBufferHeight);
+	}
+
+	void cursorEnterCallback(GLFWwindow* /*window*/, int enter) noexcept
+	{
+		Mouse.cursorOnScreen = (enter == GLFW_TRUE);
 	}
 
 	void keyCallback(GLFWwindow* /*window*/, int key, int /*scancode*/, int action, int mods) noexcept
@@ -514,12 +544,6 @@ namespace platform
 	void mouseScrollCallback(GLFWwindow* /*window*/, double xoffset, double yoffset) noexcept
 	{
 		Mouse.currentWheelMove = { (float)xoffset, (float)yoffset };
-	}
-
-	void cursorEnterCallback(GLFWwindow* /*window*/, int enter) noexcept
-	{
-		if (enter == true) Mouse.cursorOnScreen = true;
-		else Mouse.cursorOnScreen = false;
 	}
 
 	bool CreateWindowSystem(const WindowCreateInfo& createInfo)
@@ -1699,8 +1723,6 @@ namespace g3d
 
 	bool Model::Create(const char* fileName, const char* pathMaterialFiles)
 	{
-		Destroy();
-
 		tinyobj::ObjReaderConfig readerConfig;
 		readerConfig.mtl_search_path = pathMaterialFiles; // Path to material files
 
@@ -1718,41 +1740,10 @@ namespace g3d
 		auto& shapes = reader.GetShapes();
 		auto& materials = reader.GetMaterials();
 
+		std::vector<renderer::Vertex_Pos3_TexCoord> vertices;
+		std::vector<uint32_t> indices;
 		std::unordered_map<renderer::Vertex_Pos3_TexCoord, uint32_t> uniqueVertices;
 
-#if 0
-		for (const auto& shape : shapes)
-		{
-			for (const auto& index : shape.mesh.indices)
-			{
-				// Construct a new (x, y, z) position for the current mesh index.
-				glm::vec3 position{
-					attributes.vertices[3 * index.vertex_index + 0],
-					attributes.vertices[3 * index.vertex_index + 1],
-					attributes.vertices[3 * index.vertex_index + 2] };
-
-				// Construct a new (u, v) texture coordinate for the current mesh index.
-				glm::vec2 texCoord{
-					attributes.texcoords[2 * index.texcoord_index + 0],
-					1.0f - attributes.texcoords[2 * index.texcoord_index + 1] };
-
-				// Construct a vertex with the extracted data.
-				renderer::Vertex_Pos3_TexCoord vertex{ position, texCoord };
-
-				// This will help deduplicate vertices - we maintain a hash map where an
-				// (x, y, z) position is used as a unique key with its value being which
-				// index can be used to locate the vertex. The actual vertex is only
-				// created and added if it has not been added before.
-				if (uniqueVertices.count(vertex) == 0)
-				{
-					uniqueVertices[vertex] = static_cast<uint32_t>(m_vertices.size());
-					m_vertices.push_back(vertex);
-				}
-
-				m_indices.push_back(uniqueVertices[vertex]);
-			}
-		}
-#else
 		// Loop over shapes
 		for (size_t shapeId = 0; shapeId < shapes.size(); shapeId++)
 		{
@@ -1799,11 +1790,11 @@ namespace g3d
 
 					if (uniqueVertices.count(vertex) == 0)
 					{
-						uniqueVertices[vertex] = static_cast<uint32_t>(m_vertices.size());
-						m_vertices.push_back(vertex);
+						uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+						vertices.emplace_back(vertex);
 					}
 
-					m_indices.push_back(uniqueVertices[vertex]);
+					indices.emplace_back(uniqueVertices[vertex]);
 				}
 				index_offset += fv;
 
@@ -1811,7 +1802,48 @@ namespace g3d
 				//shapes[shapeId].mesh.material_ids[faceId];
 			}
 		}
-#endif
+
+		return Create(std::move(vertices), std::move(indices));
+	}
+
+	bool Model::Create(std::vector<renderer::Vertex_Pos3_TexCoord>&& vertices, std::vector<uint32_t>&& indices)
+	{
+		Destroy();
+		m_vertices = std::move(vertices);
+		m_indices = std::move(indices);
+		return createBuffer();
+	}
+
+	bool Model::Create(const std::vector<renderer::Vertex_Pos3_TexCoord>& vertices, const std::vector<uint32_t>& indices)
+	{
+		Destroy();
+		m_vertices = vertices;
+		m_indices = indices;
+		return createBuffer();
+	}
+
+	void Model::Destroy()
+	{
+		m_vertices.clear();
+		m_indices.clear();
+
+		m_vertexBuffer.Destroy();
+		m_indexBuffer.Destroy();
+		m_vao.Destroy();
+	}
+
+	void Model::SetInstancedBuffer(renderer::VertexBuffer* instanceBuffer, const std::vector<renderer::VertexAttribute>& attribs)
+	{
+		if (m_vao.IsValid()) m_vao.SetInstancedBuffer(instanceBuffer, attribs);
+	}
+
+	void Model::Draw(uint32_t instanceCount)
+	{
+		if (m_vao.IsValid()) m_vao.Draw(renderer::PrimitiveDraw::Triangles, instanceCount);
+	}
+
+	bool Model::createBuffer()
+	{
 		if (!m_vertexBuffer.Create(renderer::RenderResourceUsage::Static, m_vertices.size(), sizeof(m_vertices[0]), m_vertices.data()))
 		{
 			core::LogError("VertexBuffer create failed!");
@@ -1831,27 +1863,7 @@ namespace g3d
 			Destroy();
 			return false;
 		}
-
 		return true;
-	}
-	void Model::Destroy()
-	{
-		m_vertices.clear();
-		m_indices.clear();
-
-		m_vertexBuffer.Destroy();
-		m_indexBuffer.Destroy();
-		m_vao.Destroy();
-	}
-
-	void Model::SetInstancedBuffer(renderer::VertexBuffer* instanceBuffer, const std::vector<renderer::VertexAttribute>& attribs)
-	{
-		if (m_vao.IsValid()) m_vao.SetInstancedBuffer(instanceBuffer, attribs);
-	}
-
-	void Model::Draw(uint32_t instanceCount)
-	{
-		if (m_vao.IsValid()) m_vao.Draw(renderer::PrimitiveDraw::Triangles, instanceCount);
 	}
 
 	namespace ModelFileManager
@@ -2335,7 +2347,7 @@ namespace scene
 	{
 		if (m_update)
 		{
-			glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), m_position);
+			glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), m_translation);
 			glm::mat4 rotationMatrix = glm::toMat4(m_quaternion);
 			glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), m_scale);
 

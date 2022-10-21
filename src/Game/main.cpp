@@ -185,7 +185,6 @@ renderer::Texture2D texture2dearth;
 renderer::Texture2D texture2dmoon;
 renderer::Texture2D texture2dbackground;
 
-
 scene::Transform trans;
 
 int main(
@@ -194,6 +193,9 @@ int main(
 {
 	if (engine::CreateEngine({}))
 	{
+		platform::DisableCursor();
+
+
 		//vb.Create(renderer::RenderResourceUsage::Static, 3, sizeof(vertices[0]), vertices);
 		//vao.Create(&vb, nullptr, renderer::GetVertexAttributes<renderer::Vertex_Pos2_Color>());
 
