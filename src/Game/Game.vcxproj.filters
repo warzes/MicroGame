@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Engine.cpp">
+      <Filter>MicroEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="glfwImpl.c">
+      <Filter>MicroEngine\3rdparty</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\glad\gl.c">
+      <Filter>MicroEngine\3rdparty</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\stb.cpp">
+      <Filter>MicroEngine\3rdparty</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\tiny_obj_loader.cpp">
+      <Filter>MicroEngine\3rdparty</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="MicroEngine">
+      <UniqueIdentifier>{9226570f-0c72-4013-b454-0697f540be56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MicroEngine\3rdparty">
+      <UniqueIdentifier>{86a6bab6-665f-43ea-ad04-d04d22e7bc8f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Engine.h">
+      <Filter>MicroEngine</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Engine.inl">
+      <Filter>MicroEngine</Filter>
+    </None>
+  </ItemGroup>
+</Project>
