@@ -24,6 +24,7 @@
 мин код
 	https://github.com/AlexMartinelle/PicoEngine
 	https://github.com/groverburger/g3d
+	https://github.com/michaelh800/thinmatrix-game-engine
 
 интерфейс похожий на это
 	https://cowthing.itch.io/magic-farm
@@ -33,6 +34,12 @@
 	https://itey.itch.io/royal-goblin-hunt
 	https://store.steampowered.com/app/1845670/Islands_of_the_Caliph/
 	https://www.youtube.com/watch?v=kXcER1fi8KQ
+
+3д стиль
+	https://sketchfab.com/3d-models/forest-clearing-3223835ead1040deb9b7b2a67b277d89
+	https://sketchfab.com/3d-models/pokemon-fan-art-sinnoh-battle-170e4943531847aaa6a994b509566dfb
+	https://sketchfab.com/3d-models/the-legend-of-zelda-links-awakening-dx-534951458de04bfaa6548c5deee98ac6
+	Legend Of Zelda: Link's Awakening
 
 другое
 	https://cenullum.itch.io/kingway
@@ -45,9 +52,13 @@
 	https://github.com/aoblet/luminolGL/
 	https://github.com/r-lyeh/FWK
 	https://www.youtube.com/channel/UCNz9gHQeGOC26GVwPQzr9EQ/videos
-
+	https://dissident-studio.itch.io/pyramid
 
 	https://matt-lucas.itch.io/level-buddy
+
+
+просто иеди
+	hexx game(1994)
 */
 
 
@@ -192,6 +203,7 @@ renderer::Texture2D texture2dbackground;
 scene::Transform trans;
 
 g3d::Model modelTest;
+g3d::Model modelTest2;
 
 int main(
 	[[maybe_unused]] int   argc,
@@ -218,7 +230,8 @@ int main(
 		shader2.SetUniform(sampler, 0);
 
 
-		modelTest.Create("../data/models/test/test.obj", "../data/models/test/");
+		//modelTest.Create("../data/models/test/test.obj", "../data/models/test/");
+		modelTest2.Create("../data/models/map.obj", "../data/models/");
 
 		//	renderer::Texture2DLoaderInfo info;
 		//	info.fileName = "../data/textures/crate.png";
@@ -322,7 +335,7 @@ int main(
 				shader2.SetUniform(mvpUniform2, MVP);
 				modelTest.Draw();
 
-
+				modelTest2.Draw();
 
 
 
