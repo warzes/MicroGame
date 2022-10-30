@@ -63,7 +63,7 @@ https://www.youtube.com/watch?v=-07InyEjtQU
 */
 
 
-static const renderer::Vertex_Pos2_Color vertices[3] =
+static const Vertex_Pos2_Color vertices[3] =
 {
 	{ {-0.6f, -0.4f}, {1.f, 0.f, 0.f} },
 	{ { 0.6f, -0.4f}, {0.f, 1.f, 0.f} },
@@ -173,23 +173,23 @@ void main()
 )";
 
 
-renderer::VertexArrayBuffer vao;
-renderer::VertexBuffer vb;
-renderer::ShaderProgram shader;
-renderer::UniformVariable mvpUniform;
+VertexArrayBuffer vao;
+VertexBuffer vb;
+ShaderProgram shader;
+UniformVariable mvpUniform;
 
 g3d::Model model;
-renderer::ShaderProgram shader2;
-renderer::UniformVariable mvpUniform2;
-renderer::Texture2D texture2d;
+ShaderProgram shader2;
+UniformVariable mvpUniform2;
+Texture2D texture2d;
 
-renderer::ShaderProgram shader3;
+ShaderProgram shader3;
 
 
-renderer::VertexBuffer instancevb;
-renderer::ShaderProgram shader4;
-renderer::UniformVariable viewUniform;
-renderer::UniformVariable projUniform;
+VertexBuffer instancevb;
+ShaderProgram shader4;
+UniformVariable viewUniform;
+UniformVariable projUniform;
 
 g3d::Camera camera;
 
@@ -197,9 +197,9 @@ g3d::Model modelearth;
 g3d::Model modelmoon;
 g3d::Model modelbackground;
 
-renderer::Texture2D texture2dearth;
-renderer::Texture2D texture2dmoon;
-renderer::Texture2D texture2dbackground;
+Texture2D texture2dearth;
+Texture2D texture2dmoon;
+Texture2D texture2dbackground;
 
 scene::Transform trans;
 
@@ -212,11 +212,11 @@ int main(
 {
 	if (engine::CreateEngine({}))
 	{
-		platform::DisableCursor();
+		SetMouseLock(true);
 
 
-		//vb.Create(renderer::RenderResourceUsage::Static, 3, sizeof(vertices[0]), vertices);
-		//vao.Create(&vb, nullptr, renderer::GetVertexAttributes<renderer::Vertex_Pos2_Color>());
+		//vb.Create(RenderResourceUsage::Static, 3, sizeof(vertices[0]), vertices);
+		//vao.Create(&vb, nullptr, GetVertexAttributes<Vertex_Pos2_Color>());
 
 		//shader.CreateFromMemories(vertex_shader_text, fragment_shader_text);
 		//mvpUniform = shader.GetUniformVariable("MVP");
@@ -234,7 +234,7 @@ int main(
 		//modelTest.Create("../data/models/test/test.obj", "../data/models/test/");
 		modelTest2.Create("../data/models/map.obj", "../data/models/");
 
-		//	renderer::Texture2DLoaderInfo info;
+		//	Texture2DLoaderInfo info;
 		//	info.fileName = "../data/textures/crate.png";
 		//	texture2d.CreateFromFiles(info);
 
@@ -277,12 +277,12 @@ int main(
 			modelMatrices[i] = model;
 		}
 
-		instancevb.Create(renderer::RenderResourceUsage::Static, amount, sizeof(glm::mat4), &modelMatrices[0]);
+		instancevb.Create(RenderResourceUsage::Static, amount, sizeof(glm::mat4), &modelMatrices[0]);
 
 
-		const std::vector<renderer::VertexAttribute> vertTnsAttr =
+		const std::vector<VertexAttribute> vertTnsAttr =
 		{
-			{.type = renderer::VertexAttributeType::Matrix4, .normalized = false},
+			{.type = VertexAttributeType::Matrix4, .normalized = false},
 		};
 
 		model.Create("../data/models/rock.obj", "../data/models/");
@@ -294,7 +294,7 @@ int main(
 		viewUniform = shader4.GetUniformVariable("view");
 		projUniform = shader4.GetUniformVariable("projection");
 
-		renderer::Texture2DLoaderInfo info;
+		Texture2DLoaderInfo info;
 		info.fileName = "../data/models/rock.png";
 		texture2d.CreateFromFiles(info);
 
@@ -318,7 +318,7 @@ int main(
 			const float deltaTime = engine::GetDeltaTime();
 			engine::BeginFrameEngine();
 			{
-			//	float ratio = platform::GetFrameBufferAspectRatio();
+			//	float ratio = GetFrameBufferAspectRatio();
 			//	glm::mat4 mvp = glm::mat4(1.0f);
 			////	mvp = glm::rotate(mvp, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 			//	mvp = glm::ortho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f) * mvp;
@@ -332,7 +332,7 @@ int main(
 				texture2d.Bind();
 				shader2.Bind();
 				trans.Reset();
-				glm::mat4 MVP = renderer::GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
+				glm::mat4 MVP = GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
 				shader2.SetUniform(mvpUniform2, MVP);
 				modelTest.Draw();
 
@@ -344,7 +344,7 @@ int main(
 				texture2d.Bind();
 				shader4.Bind();
 				shader4.SetUniform(viewUniform, camera.GetViewMatrix());
-				shader4.SetUniform(projUniform, renderer::GetCurrentProjectionMatrix());
+				shader4.SetUniform(projUniform, GetCurrentProjectionMatrix());
 				model.Draw();
 
 
@@ -353,7 +353,7 @@ int main(
 
 					trans.Reset();
 					trans.SetPosition({ 4.0f, 0.0f, 0.0f });
-					glm::mat4 MVP = renderer::GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
+					glm::mat4 MVP = GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
 					shader2.SetUniform(mvpUniform2, MVP);
 					texture2dearth.Bind();
 					modelearth.Draw();
@@ -369,7 +369,7 @@ int main(
 					trans.SetPosition({ cos(timer) * 5 + 4, sin(timer) * 5.0f, 0.0f});
 					trans.SetRotate({ 0, 0, timer - glm::pi<float>() / 2.0f});
 					trans.SetScale(glm::vec3(0.5f));
-					glm::mat4 MVP = renderer::GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
+					glm::mat4 MVP = GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
 					shader2.SetUniform(mvpUniform2, MVP);
 					texture2dmoon.Bind();
 					modelmoon.Draw();
@@ -380,7 +380,7 @@ int main(
 
 					trans.Reset();
 					trans.SetScale(glm::vec3(500.0f));
-					glm::mat4 MVP = renderer::GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
+					glm::mat4 MVP = GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
 					shader2.SetUniform(mvpUniform2, MVP);
 					texture2dbackground.Bind();
 					modelbackground.Draw();
@@ -390,7 +390,7 @@ int main(
 				//texture2d.Bind();
 
 				//trans.Reset();
-				//glm::mat4 MVP = renderer::GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
+				//glm::mat4 MVP = GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
 				//shader2.SetUniform(mvpUniform2, MVP);
 				////model.Draw();
 
@@ -398,7 +398,7 @@ int main(
 				//	trans.Reset();
 				//	trans.SetPosition(glm::vec3(2.0f, 0.0f, 0.0f));
 				//	trans.SetRotate(glm::vec3(glm::radians(45.0f), glm::radians(45.0f), 0.0f));
-				//	MVP = renderer::GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
+				//	MVP = GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
 				//	shader2.SetUniform(mvpUniform2, MVP);
 				//	//model.Draw();
 				//}
@@ -406,7 +406,7 @@ int main(
 				//{
 				//	trans.Reset();
 				//	trans.SetPosition(glm::vec3(-2.0f, 1.0f, 0.0f));
-				//	MVP = renderer::GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
+				//	MVP = GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
 				//	shader2.SetUniform(mvpUniform2, MVP);
 				//	//model.Draw();
 				//}
@@ -427,7 +427,7 @@ int main(
 
 				//		trans.Reset();
 				//		trans.SetPosition(glm::vec3(x, y, z));
-				//		MVP = renderer::GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
+				//		MVP = GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
 				//		shader3.SetUniform(("MVPs[" + std::to_string(i) + "]").c_str(), MVP);
 				//	}
 				//	model.Draw(200);
@@ -435,11 +435,11 @@ int main(
 			}
 			engine::EndFrameEngine();
 
-			if (platform::IsKeyPressed(platform::KEY_SPACE))
-				core::LogPrint("space");
+			if (IsKeyPressed(KEY_SPACE))
+				LogPrint("space");
 
-			auto x = platform::GetMouseX();
-			auto y = platform::GetMouseY();
+			auto x = GetMouseX();
+			auto y = GetMouseY();
 
 			//std::cout << x << ":" << y << std::endl;
 		}

@@ -18,6 +18,21 @@
       <Filter>MicroEngine\3rdparty</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="3_Core.cpp">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="6_Platform.cpp">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="8_Renderer.cpp">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="9_Graphics.cpp">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="13_Scene.cpp">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MicroEngine">
@@ -41,10 +56,47 @@
     <ClInclude Include="0_EngineConfig.h">
       <Filter>MicroEngine\Engine</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Engine.inl">
-      <Filter>MicroEngine</Filter>
-    </None>
+    <ClInclude Include="2_Base.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="3_Core.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="4_Math.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="5_Utility.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="6_Platform.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="7_Audio.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="8_Renderer.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="9_Graphics.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="10_Physics.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="13_Scene.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="14_World.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="11_UI.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="12_Navigation.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="glmHeader.h">
+      <Filter>MicroEngine\3rdparty</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
