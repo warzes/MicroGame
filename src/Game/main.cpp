@@ -280,9 +280,9 @@ int main(
 		instancevb.Create(RenderResourceUsage::Static, amount, sizeof(glm::mat4), &modelMatrices[0]);
 
 
-		const std::vector<VertexAttribute> vertTnsAttr =
+		const std::vector<VertexAttributeOld> vertTnsAttr =
 		{
-			{.type = VertexAttributeType::Matrix4, .normalized = false},
+			{.type = VertexAttributeTypeOld::Matrix4, .normalized = false},
 		};
 
 		model.Create("../data/models/rock.obj", "../data/models/");

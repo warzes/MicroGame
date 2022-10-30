@@ -5,6 +5,19 @@
 
 #include <stb/stb_image.h>
 
+#if defined(_WIN32)
+extern "C"
+{
+	// NVIDIA: Force usage of NVidia GPU in case there is an integrated graphics unit as well, if we don't do this we risk getting the integrated graphics unit and hence a horrible performance
+	// -> See "Enabling High Performance Graphics Rendering on Optimus Systems" http://developer.download.nvidia.com/devzone/devcenter/gamegraphics/files/OptimusRenderingPolicies.pdf
+	_declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+
+	// AMD: Force usage of AMD GPU in case there is an integrated graphics unit as well, if we don't do this we risk getting the integrated graphics unit and hence a horrible performance
+	// -> Named "Dynamic Switchable Graphics", found no official documentation, only https://community.amd.com/message/1307599#comment-1307599 - "Can an OpenGL app default to the discrete GPU on an Enduro system?"
+	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+#endif // _WIN32
+
 namespace
 {
 	int RenderWidth = 0;
@@ -35,7 +48,7 @@ void debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity
 	//             a defined base level and cannot be used for texture mapping. (severity: low)
 	if ((id == 131169) || (id == 131185) || (id == 131218) || (id == 131204)) return;
 
-	const char* msgSource = nullptr;
+	std::string msgSource;
 	switch (source)
 	{
 	case GL_DEBUG_SOURCE_API: msgSource = "API"; break;
@@ -47,7 +60,7 @@ void debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity
 	default: break;
 	}
 
-	const char* msgType = nullptr;
+	std::string msgType;
 	switch (type)
 	{
 	case GL_DEBUG_TYPE_ERROR: msgType = "ERROR"; break;
@@ -62,7 +75,7 @@ void debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity
 	default: break;
 	}
 
-	const char* msgSeverity = "DEFAULT";
+	std::string msgSeverity = "DEFAULT";
 	switch (severity)
 	{
 	case GL_DEBUG_SEVERITY_LOW: msgSeverity = "LOW"; break;
@@ -73,14 +86,109 @@ void debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity
 	}
 
 	LogError("GL: OpenGL debug message: " + std::string(message));
-	LogError("    > Type: " + std::string(msgType));
-	LogError("    > Source = " + std::string(msgSource));
-	LogError("    > Severity = " + std::string(msgSeverity));
+	LogError("    > Type: " + msgType);
+	LogError("    > Source: " + msgSource);
+	LogError("    > Severity: " + msgSeverity);
 }
 #endif
 
-bool CreateRenderSystem(const RendererCreateInfo& createInfo)
+//=============================================================================
+// Vertex Attributes
+//=============================================================================
+
+constexpr const uint8_t s_attribTypeSizeD3D1x[static_cast<size_t>(VertexAttributeType::Count)][4] =
 {
+	{  1,  2,  4,  4 }, // Uint8
+	{  4,  4,  4,  4 }, // Uint10
+	{  2,  4,  8,  8 }, // Int16
+	{  2,  4,  8,  8 }, // Half
+	{  4,  8, 12, 16 }, // Float
+};
+
+constexpr const uint8_t s_attribTypeSizeGl[static_cast<size_t>(VertexAttributeType::Count)][4] =
+{
+	{  1,  2,  4,  4 }, // Uint8
+	{  4,  4,  4,  4 }, // Uint10
+	{  2,  4,  6,  8 }, // Int16
+	{  2,  4,  6,  8 }, // Half
+	{  4,  8, 12, 16 }, // Float
+};
+
+constexpr const uint8_t(*s_attribTypeSize)[static_cast<size_t>(VertexAttributeType::Count)][4] =
+{
+	//&s_attribTypeSizeD3D1x, // Direct3D11/Direct3D12/Vulkan/WebGPU
+	&s_attribTypeSizeGl, // OpenGLES/OpenGL
+};
+//-----------------------------------------------------------------------------
+VertexLayout& VertexLayout::Begin()
+{
+	m_hash = 0;
+	m_stride = 0;
+	memset(m_attributes, 0xff, sizeof(m_attributes));
+	memset(m_offset, 0, sizeof(m_offset));
+	return *this;
+}
+//-----------------------------------------------------------------------------
+void VertexLayout::End()
+{
+	HashMurmur2A murmur;
+	murmur.Begin();
+	murmur.Add(m_attributes, sizeof(m_attributes));
+	murmur.Add(m_offset, sizeof(m_offset));
+	murmur.Add(m_stride);
+	m_hash = murmur.End();
+}
+//-----------------------------------------------------------------------------
+VertexLayout& VertexLayout::Add(VertexAttribute attrib, uint8_t num, VertexAttributeType type, bool normalized, bool asInt)
+{
+	const uint16_t encodedNorm = (normalized & 1) << 7;
+	const uint16_t encodedType = (static_cast<size_t>(type) & 7) << 3;
+	const uint16_t encodedNum = (num - 1) & 3;
+	const uint16_t encodeAsInt = (asInt & (!!"\x1\x1\x1\x0\x0"[static_cast<size_t>(type)])) << 8;
+	m_attributes[static_cast<size_t>(attrib)] = encodedNorm | encodedType | encodedNum | encodeAsInt;
+
+	m_offset[static_cast<size_t>(attrib)] = m_stride;
+	m_stride += (*s_attribTypeSize)[static_cast<size_t>(type)][num - 1];
+
+	return *this;
+}
+//-----------------------------------------------------------------------------
+VertexLayout& VertexLayout::Skip(uint8_t num)
+{
+	m_stride +=num;
+	return *this;
+}
+//-----------------------------------------------------------------------------
+void VertexLayout::Decode(VertexAttribute attrib, uint8_t& num, VertexAttributeType& type, bool& normalized, bool& asInt) const
+{
+	uint16_t val = m_attributes[static_cast<size_t>(attrib)];
+	num = (val & 3) + 1;
+	type = static_cast<VertexAttributeType>((val >> 3) & 7);
+	normalized = !!(val & (1 << 7));
+	asInt = !!(val & (1 << 8));
+}
+//-----------------------------------------------------------------------------
+//=============================================================================
+// Render System
+//=============================================================================
+//-----------------------------------------------------------------------------
+bool RenderSystem::Create(const RenderSystem::CreateInfo& createInfo)
+{
+	LogPrint("OpenGL device information:");
+	LogPrint("    > Vendor:   " + std::string((const char*)glGetString(GL_VENDOR)));
+	LogPrint("    > Renderer: " + std::string((const char*)glGetString(GL_RENDERER)));
+	LogPrint("    > Version:  " + std::string((const char*)glGetString(GL_VERSION)));
+	LogPrint("    > GLSL:     " + std::string((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION)));
+
+	LogPrint("OpenGL limits:");
+	GLint capability = 0;
+	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, &capability);
+	LogPrint("    > GL_MAX_VERTEX_UNIFORM_COMPONENTS: " + std::to_string(capability));
+	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &capability);
+	LogPrint("    > GL_MAX_FRAGMENT_UNIFORM_COMPONENTS : " + std::to_string(capability));
+	glGetIntegerv(GL_MAX_UNIFORM_LOCATIONS, &capability);
+	LogPrint("    > GL_MAX_UNIFORM_LOCATIONS: " + std::to_string(capability));
+
 #if defined(_DEBUG)
 	if ((glDebugMessageCallback != NULL) && (glDebugMessageControl != NULL))
 	{
@@ -114,27 +222,28 @@ bool CreateRenderSystem(const RendererCreateInfo& createInfo)
 
 	return true;
 }
-
-void DestroyRenderSystem()
+//-----------------------------------------------------------------------------
+void RenderSystem::Destroy()
 {
 
 }
-
-void BeginRenderFrame()
+//-----------------------------------------------------------------------------
+void RenderSystem::BeginFrame()
 {
 	if (RenderWidth != GetFrameBufferWidth() || RenderHeight != GetFrameBufferHeight())
 	{
 		RenderWidth = GetFrameBufferWidth();
 		RenderHeight = GetFrameBufferHeight();
 		glViewport(0, 0, RenderWidth, RenderHeight);
-		const float FOVY2 = glm::radians(perspectiveFOV);
 		const float FOVY = glm::atan(glm::tan(glm::radians(perspectiveFOV) / 2.0f) / GetFrameBufferAspectRatio()) * 2.0f;
 		projectionMatrix = glm::perspective(FOVY, GetFrameBufferAspectRatio(), perspectiveNear, perspectiveFar);
-
 	}
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
+//-----------------------------------------------------------------------------
+
+
 
 inline GLenum translate(RenderResourceUsage usage)
 {
@@ -620,16 +729,16 @@ inline GLenum translate(PrimitiveDraw p)
 	return 0;
 }
 
-inline GLenum translate(VertexAttributeType p)
+inline GLenum translate(VertexAttributeTypeOld p)
 {
 	switch (p)
 	{
-	case VertexAttributeType::Float:     return GL_FLOAT;
+	case VertexAttributeTypeOld::Float:     return GL_FLOAT;
 	}
 	return 0;
 }
 
-bool VertexArrayBuffer::Create(VertexBuffer* vbo, IndexBuffer* ibo, const std::vector<VertexAttribute>& attribs)
+bool VertexArrayBuffer::Create(VertexBuffer* vbo, IndexBuffer* ibo, const std::vector<VertexAttributeOld>& attribs)
 {
 	if (m_id > 0) Destroy();
 	if (!vbo || attribs.empty()) return false;
@@ -655,7 +764,7 @@ bool VertexArrayBuffer::Create(VertexBuffer* vbo, IndexBuffer* ibo, const std::v
 	return true;
 }
 
-bool VertexArrayBuffer::Create(VertexBuffer* vbo, IndexBuffer* ibo, VertexBuffer* instanceBuffer, const std::vector<VertexAttribute>& attribs, const std::vector<VertexAttribute>& instanceAttribs)
+bool VertexArrayBuffer::Create(VertexBuffer* vbo, IndexBuffer* ibo, VertexBuffer* instanceBuffer, const std::vector<VertexAttributeOld>& attribs, const std::vector<VertexAttributeOld>& instanceAttribs)
 {
 	if (!Create(vbo, ibo, attribs))
 		return false;
@@ -664,7 +773,7 @@ bool VertexArrayBuffer::Create(VertexBuffer* vbo, IndexBuffer* ibo, VertexBuffer
 	return true;
 }
 
-bool VertexArrayBuffer::Create(const std::vector<VertexBuffer*> vbo, IndexBuffer* ibo, const std::vector<VertexAttribute>& attribs)
+bool VertexArrayBuffer::Create(const std::vector<VertexBuffer*>& vbo, IndexBuffer* ibo, const std::vector<VertexAttributeOld>& attribs)
 {
 	if (m_id > 0) Destroy();
 	if (vbo.size() != attribs.size()) return false;
@@ -678,7 +787,7 @@ bool VertexArrayBuffer::Create(const std::vector<VertexBuffer*> vbo, IndexBuffer
 	for (size_t i = 0; i < vbo.size(); i++)
 	{
 		const auto& att = attribs[i];
-		glEnableVertexAttribArray(i);
+		glEnableVertexAttribArray(static_cast<GLuint>(i));
 		vbo[i]->Bind();
 		glVertexAttribPointer(i, att.size, translate(att.type), att.normalized ? GL_TRUE : GL_FALSE, att.stride, att.pointer);
 	}
@@ -701,7 +810,7 @@ void VertexArrayBuffer::Destroy()
 	m_instanceBuffer = nullptr;
 }
 
-void VertexArrayBuffer::SetInstancedBuffer(VertexBuffer* instanceBuffer, const std::vector<VertexAttribute>& attribs)
+void VertexArrayBuffer::SetInstancedBuffer(VertexBuffer* instanceBuffer, const std::vector<VertexAttributeOld>& attribs)
 {
 	if (m_instanceBuffer == instanceBuffer) return;
 
@@ -746,7 +855,7 @@ void VertexArrayBuffer::SetInstancedBuffer(VertexBuffer* instanceBuffer, const s
 			m_instancedAttribsCount = m_instancedAttribsCount + i;
 			const auto& att = attribs[i];
 
-			if (att.type == VertexAttributeType::Matrix4)
+			if (att.type == VertexAttributeTypeOld::Matrix4)
 			{
 				glEnableVertexAttribArray(m_instancedAttribsCount);
 				glVertexAttribPointer(m_instancedAttribsCount, 4, GL_FLOAT, att.normalized ? GL_TRUE : GL_FALSE, sizeof(glm::mat4), (void*)0);

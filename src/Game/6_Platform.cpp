@@ -377,24 +377,6 @@ bool CreateWindowSystem(const WindowCreateInfo& createInfo)
 		return false;
 	FrameBufferAspectRatio = static_cast<float>(FrameBufferWidth) / static_cast<float>(FrameBufferHeight);
 
-	LogPrint("OpenGL device information:");
-	LogPrint("    > Vendor:   " + std::string((const char*)glGetString(GL_VENDOR)));
-	LogPrint("    > Renderer: " + std::string((const char*)glGetString(GL_RENDERER)));
-	LogPrint("    > Version:  " + std::string((const char*)glGetString(GL_VERSION)));
-	LogPrint("    > GLSL:     " + std::string((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION)));
-
-
-	LogPrint("OpenGL limits:");
-	GLint capability = 0;
-	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, &capability);
-	LogPrint("    > GL_MAX_VERTEX_UNIFORM_COMPONENTS: " + std::to_string(capability));
-	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &capability);
-	LogPrint("    > GL_MAX_FRAGMENT_UNIFORM_COMPONENTS : " + std::to_string(capability));
-	glGetIntegerv(GL_MAX_UNIFORM_LOCATIONS, &capability);
-	LogPrint("    > GL_MAX_UNIFORM_LOCATIONS: " + std::to_string(capability));
-
-
-
 	return true;
 }
 

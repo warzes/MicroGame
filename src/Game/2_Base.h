@@ -3,8 +3,34 @@
 #include "0_EngineConfig.h"
 #include "1_BaseHeader.h"
 
+#if defined(_MSC_VER)
+#	define SE_FORCE_INLINE __forceinline
+#	define SE_CONST_FUNC  __declspec(noalias)
+#elif defined(__clang__) || defined(__GNUC__)
+#	define SE_FORCE_INLINE inline __attribute__( (__always_inline__) )
+#	define SE_CONST_FUNC  __attribute__( (pure) )
+#endif
+
+#define SE_CONSTEXPR_FUNC constexpr SE_CONST_FUNC
+
 namespace base
 {
+	template<typename Ty>
+	inline SE_CONSTEXPR_FUNC bool IsAligned(Ty _a, int32_t _align)
+	{
+		const Ty mask = Ty(_align - 1);
+		return 0 == (_a & mask);
+	}
+
+	template<typename Ty>
+	inline SE_CONSTEXPR_FUNC bool IsAligned(const Ty* _ptr, int32_t _align)
+	{
+		union { const void* ptr; uintptr_t addr; } un = { _ptr };
+		return IsAligned(un.addr, _align);
+	}
+
+
+
 	inline constexpr int Min(int a, int b) { return a < b ? a : b; }
 	inline constexpr float Min(float a, float b) { return a < b ? a : b; }
 	//template<typename T> inline constexpr T Min(const T& a, const T& b) { return a < b ? a : b; }

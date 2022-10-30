@@ -1,21 +1,157 @@
-#pragma once
+п»ї#pragma once
 
 #include "0_EngineConfig.h"
 #include "1_BaseHeader.h"
 
-struct RendererCreateInfo
-{
-	float PerspectiveFOV = 45.0f;
-	float PerspectiveNear = 0.01f;
-	float PerspectiveFar = 1000.0f;
+//=============================================================================
+// TODO:
+// - РёРґС‹ РІ СЂРµСЃСѓСЂСЃР°С… - РІРѕР·РјРѕР¶РЅРѕ РїРµСЂРµРґР°С‚СЊ С‚Р°Рє uint16_t idx = kInvalidHandle; uint16_t kInvalidHandle = UINT16_MAX;
+//=============================================================================
 
-	glm::vec3 ClearColor = { 0.4f, 0.6f, 1.0f };
+//=============================================================================
+// Vertex Attributes
+//=============================================================================
+
+enum class VertexAttribute
+{
+	// Corresponds to vertex shader attribute.
+	Position,  // a_position
+	Normal,    // a_normal
+	Tangent,   // a_tangent
+	Bitangent, // a_bitangent
+	Color0,    // a_color0
+	Color1,    // a_color1
+	Color2,    // a_color2
+	Color3,    // a_color3
+	Indices,   // a_indices
+	Weight,    // a_weight
+	TexCoord0, // a_texcoord0
+	TexCoord1, // a_texcoord1
+	TexCoord2, // a_texcoord2
+	TexCoord3, // a_texcoord3
+	TexCoord4, // a_texcoord4
+	TexCoord5, // a_texcoord5
+	TexCoord6, // a_texcoord6
+	TexCoord7, // a_texcoord7
+	TexCoord8, // a_texcoord8
+	TexCoord9, // a_texcoord9
+	TexCoord10, // a_texcoord10
+	TexCoord11, // a_texcoord11
+	TexCoord12, // a_texcoord12
+	TexCoord13, // a_texcoord13
+	TexCoord14, // a_texcoord14
+	TexCoord15, // a_texcoord15
+
+	Count
 };
 
-bool CreateRenderSystem(const RendererCreateInfo& createInfo);
-void DestroyRenderSystem();
+// Vertex attribute type enum.
+enum class VertexAttributeType
+{
+	Uint8,
+	Uint10,
+	Int16,
+	Half,
+	Float,
 
-void BeginRenderFrame();
+	Count
+};
+
+enum class VertexAttributeTypeOld
+{
+	Float,
+	Matrix4
+};
+
+struct VertexAttributeOld
+{
+	unsigned size;       // ignore in instanceAttr
+	VertexAttributeTypeOld type;
+	bool normalized;
+	unsigned stride;     // = sizeof Vertex, ignore in instanceAttr
+	const void* pointer; // (void*)offsetof(Vertex, tex_coord)}, ignore in instanceAttr
+};
+/*
+EXAMPLE:
+
+VertexLayout layout;
+layout
+	.Begin()
+	.Add(VertexAttribute::Position, 3, VertexAttributeType::Float)
+	.Add(VertexAttribute::Color0,   4, VertexAttributeType::Uint8, true)
+	.End();
+*/
+class VertexLayout
+{
+public:
+	VertexLayout& Begin();
+	void End();
+
+	// Add attribute to VertexLayout.
+	/// @param[in] _attrib Attribute semantics.
+	/// @param[in] _num Number of elements 1, 2, 3 or 4.
+	/// @param[in] _type Element type.
+	/// @param[in] _normalized When using fixed point AttribType (f.e. Uint8)
+	///   value will be normalized for vertex shader usage. When normalized
+	///   is set to true, AttribType::Uint8 value in range 0-255 will be
+	///   in range 0.0-1.0 in vertex shader.
+	/// @param[in] _asInt Packaging rule for vertexPack, vertexUnpack, and
+	///   vertexConvert for AttribType::Uint8 and AttribType::Int16.
+	///   Unpacking code must be implemented inside vertex shader.
+	/// @returns Returns itself.
+	///
+	/// @remarks
+	///   Must be called between begin/end.
+	VertexLayout& Add(VertexAttribute attrib, uint8_t num, VertexAttributeType type, bool normalized = false, bool asInt = false);
+
+	// Skip _num bytes in vertex stream.
+	VertexLayout& Skip(uint8_t _num);
+
+	// Decode attribute.
+	void Decode(VertexAttribute attrib, uint8_t& num, VertexAttributeType& type, bool& normalized, bool& asInt) const;
+
+	// Returns `true` if VertexLayout contains attribute.
+	bool Has(VertexAttribute attrib) const { return UINT16_MAX != m_attributes[static_cast<size_t>(attrib)]; }
+
+	// Returns relative attribute offset from the vertex.
+	uint16_t GetOffset(VertexAttribute attrib) const { return m_offset[static_cast<size_t>(attrib)]; }
+
+	// Returns vertex stride.
+	uint16_t getStride() const { return m_stride; }
+
+	/// Returns size of vertex buffer for number of vertices.
+	uint32_t GetSize(uint32_t num) const { return num * m_stride; }
+private:
+	uint32_t m_hash = 0;
+	uint16_t m_stride = 0;
+	uint16_t m_offset[static_cast<size_t>(VertexAttribute::Count)] = { 0 };
+	uint16_t m_attributes[static_cast<size_t>(VertexAttribute::Count)] = { 0 };
+};
+
+//=============================================================================
+// Render System
+//=============================================================================
+
+namespace RenderSystem
+{
+	struct CreateInfo
+	{
+		float PerspectiveFOV = 45.0f;
+		float PerspectiveNear = 0.01f;
+		float PerspectiveFar = 1000.0f;
+
+		glm::vec3 ClearColor = { 0.4f, 0.6f, 1.0f };
+	};
+
+	bool Create(const CreateInfo& createInfo);
+	void Destroy();
+
+	void BeginFrame();
+}
+
+
+
+
 
 enum class RenderResourceUsage
 {
@@ -32,7 +168,7 @@ struct UniformVariable
 	int id = -1;
 };
 
-// TODO: юниформы хранящие свой тип данных (и статус изменения)
+// TODO: СЋРЅРёС„РѕСЂРјС‹ С…СЂР°РЅСЏС‰РёРµ СЃРІРѕР№ С‚РёРї РґР°РЅРЅС‹С… (Рё СЃС‚Р°С‚СѓСЃ РёР·РјРµРЅРµРЅРёСЏ)
 
 class ShaderProgram
 {
@@ -214,20 +350,7 @@ private:
 	unsigned m_indexSize = 0;
 };
 
-enum class VertexAttributeType
-{
-	Float,
-	Matrix4
-};
 
-struct VertexAttribute
-{
-	unsigned size;       // ignore in instanceAttr
-	VertexAttributeType type;
-	bool normalized;
-	unsigned stride;     // = sizeof Vertex, ignore in instanceAttr
-	const void* pointer; // (void*)offsetof(Vertex, tex_coord)}, ignore in instanceAttr
-};
 
 enum class PrimitiveDraw
 {
@@ -239,26 +362,26 @@ enum class PrimitiveDraw
 class VertexArrayBuffer
 {
 public:
-	bool Create(VertexBuffer* vbo, IndexBuffer* ibo, const std::vector<VertexAttribute>& attribs);
-	bool Create(VertexBuffer* vbo, IndexBuffer* ibo, VertexBuffer* instanceBuffer, const std::vector<VertexAttribute>& attribs, const std::vector<VertexAttribute>& instanceAttribs);
-	bool Create(const std::vector<VertexBuffer*> vbo, IndexBuffer* ibo, const std::vector<VertexAttribute>& attribs);
+	bool Create(VertexBuffer* vbo, IndexBuffer* ibo, const std::vector<VertexAttributeOld>& attribs);
+	bool Create(VertexBuffer* vbo, IndexBuffer* ibo, VertexBuffer* instanceBuffer, const std::vector<VertexAttributeOld>& attribs, const std::vector<VertexAttributeOld>& instanceAttribs);
+	bool Create(const std::vector<VertexBuffer*>& vbo, IndexBuffer* ibo, const std::vector<VertexAttributeOld>& attribs);
 
 	void Destroy();
 
-	// есть два варианта инстансинга
-	//	1) массив юниформ. Недостаток: кол-во юниформ ограничено и зависит от железа
-	//		в этом случае в шейдере нужно создать массив юниформ, например uniform mat4 MVPs[200];
-	//		обращение в коде шейдера: gl_Position = MVPs[gl_InstanceID] * vec4(aPos, 1.0);
-	//		записать значения shader3.SetUniform(("MVPs[" + std::to_string(i) + "]").c_str(), MVP);
-	//		в VAO в Draw() отрисовать нужное число model.Draw(200); 
+	// РµСЃС‚СЊ РґРІР° РІР°СЂРёР°РЅС‚Р° РёРЅСЃС‚Р°РЅСЃРёРЅРіР°
+	//	1) РјР°СЃСЃРёРІ СЋРЅРёС„РѕСЂРј. РќРµРґРѕСЃС‚Р°С‚РѕРє: РєРѕР»-РІРѕ СЋРЅРёС„РѕСЂРј РѕРіСЂР°РЅРёС‡РµРЅРѕ Рё Р·Р°РІРёСЃРёС‚ РѕС‚ Р¶РµР»РµР·Р°
+	//		РІ СЌС‚РѕРј СЃР»СѓС‡Р°Рµ РІ С€РµР№РґРµСЂРµ РЅСѓР¶РЅРѕ СЃРѕР·РґР°С‚СЊ РјР°СЃСЃРёРІ СЋРЅРёС„РѕСЂРј, РЅР°РїСЂРёРјРµСЂ uniform mat4 MVPs[200];
+	//		РѕР±СЂР°С‰РµРЅРёРµ РІ РєРѕРґРµ С€РµР№РґРµСЂР°: gl_Position = MVPs[gl_InstanceID] * vec4(aPos, 1.0);
+	//		Р·Р°РїРёСЃР°С‚СЊ Р·РЅР°С‡РµРЅРёСЏ shader3.SetUniform(("MVPs[" + std::to_string(i) + "]").c_str(), MVP);
+	//		РІ VAO РІ Draw() РѕС‚СЂРёСЃРѕРІР°С‚СЊ РЅСѓР¶РЅРѕРµ С‡РёСЃР»Рѕ model.Draw(200); 
 	//	
-	//	2) инстансбуффер. Позволит больше отрисовать.
-	//		в шейдере прописываются атрибуты layout(location = 2) in mat4 instanceMatrix;
-	//		работа: gl_Position = projection * view * instanceMatrix * vec4(aPos, 1.0);
-	//		создается вершинный буфер с кол-вом инстансом - instancevb.Create(Static, amount, sizeof(glm::mat4), &modelMatrices[0]);
-	//		в вао вызывается SetInstancedBuffer().
-	//		в Draw можно указать кол-во инстансов (но это не обязательно)
-	void SetInstancedBuffer(VertexBuffer* instanceBuffer, const std::vector<VertexAttribute>& attribs);
+	//	2) РёРЅСЃС‚Р°РЅСЃР±СѓС„С„РµСЂ. РџРѕР·РІРѕР»РёС‚ Р±РѕР»СЊС€Рµ РѕС‚СЂРёСЃРѕРІР°С‚СЊ.
+	//		РІ С€РµР№РґРµСЂРµ РїСЂРѕРїРёСЃС‹РІР°СЋС‚СЃСЏ Р°С‚СЂРёР±СѓС‚С‹ layout(location = 2) in mat4 instanceMatrix;
+	//		СЂР°Р±РѕС‚Р°: gl_Position = projection * view * instanceMatrix * vec4(aPos, 1.0);
+	//		СЃРѕР·РґР°РµС‚СЃСЏ РІРµСЂС€РёРЅРЅС‹Р№ Р±СѓС„РµСЂ СЃ РєРѕР»-РІРѕРј РёРЅСЃС‚Р°РЅСЃРѕРј - instancevb.Create(Static, amount, sizeof(glm::mat4), &modelMatrices[0]);
+	//		РІ РІР°Рѕ РІС‹Р·С‹РІР°РµС‚СЃСЏ SetInstancedBuffer().
+	//		РІ Draw РјРѕР¶РЅРѕ СѓРєР°Р·Р°С‚СЊ РєРѕР»-РІРѕ РёРЅСЃС‚Р°РЅСЃРѕРІ (РЅРѕ СЌС‚Рѕ РЅРµ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ)
+	void SetInstancedBuffer(VertexBuffer* instanceBuffer, const std::vector<VertexAttributeOld>& attribs);
 
 
 	void Draw(PrimitiveDraw primitive = PrimitiveDraw::Triangles, uint32_t instanceCount = 1);
@@ -341,52 +464,52 @@ struct Vertex_Pos3_Normal_TexCoord
 	glm::vec2 texCoord;
 };
 
-template<typename T> std::vector<VertexAttribute> GetVertexAttributes();
+template<typename T> std::vector<VertexAttributeOld> GetVertexAttributes();
 
-template<> inline std::vector<VertexAttribute> GetVertexAttributes<Vertex_Pos2>()
+template<> inline std::vector<VertexAttributeOld> GetVertexAttributes<Vertex_Pos2>()
 {
 	using T = Vertex_Pos2;
 	return
 	{
-		{.size = 2, .type = VertexAttributeType::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)}
+		{.size = 2, .type = VertexAttributeTypeOld::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)}
 	};
 }
 
-template<> inline std::vector<VertexAttribute> GetVertexAttributes<Vertex_Pos2_TexCoord>()
+template<> inline std::vector<VertexAttributeOld> GetVertexAttributes<Vertex_Pos2_TexCoord>()
 {
 	using T = Vertex_Pos2_TexCoord;
 	return
 	{
-		{.size = 2, .type = VertexAttributeType::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)},
-		{.size = 2, .type = VertexAttributeType::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, texCoord)}
+		{.size = 2, .type = VertexAttributeTypeOld::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)},
+		{.size = 2, .type = VertexAttributeTypeOld::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, texCoord)}
 	};
 }
 
-template<> inline std::vector<VertexAttribute> GetVertexAttributes<Vertex_Pos2_Color>()
+template<> inline std::vector<VertexAttributeOld> GetVertexAttributes<Vertex_Pos2_Color>()
 {
 	using T = Vertex_Pos2_Color;
 	return
 	{
-		{.size = 2, .type = VertexAttributeType::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)},
-		{.size = 3, .type = VertexAttributeType::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, color)}
+		{.size = 2, .type = VertexAttributeTypeOld::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)},
+		{.size = 3, .type = VertexAttributeTypeOld::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, color)}
 	};
 }
 
-template<> inline std::vector<VertexAttribute> GetVertexAttributes<Vertex_Pos3>()
+template<> inline std::vector<VertexAttributeOld> GetVertexAttributes<Vertex_Pos3>()
 {
 	using T = Vertex_Pos3;
 	return
 	{
-		{.size = 3, .type = VertexAttributeType::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)}
+		{.size = 3, .type = VertexAttributeTypeOld::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)}
 	};
 }
-template<> inline std::vector<VertexAttribute> GetVertexAttributes<Vertex_Pos3_TexCoord>()
+template<> inline std::vector<VertexAttributeOld> GetVertexAttributes<Vertex_Pos3_TexCoord>()
 {
 	using T = Vertex_Pos3_TexCoord;
 	return
 	{
-		{.size = 3, .type = VertexAttributeType::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)},
-		{.size = 2, .type = VertexAttributeType::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, texCoord)}
+		{.size = 3, .type = VertexAttributeTypeOld::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)},
+		{.size = 2, .type = VertexAttributeTypeOld::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, texCoord)}
 	};
 }
 

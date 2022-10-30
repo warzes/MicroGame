@@ -35,7 +35,7 @@ namespace engine
 	{
 		LogCreateInfo Log;
 		WindowCreateInfo Window;
-		RendererCreateInfo Render;
+		RenderSystem::CreateInfo Render;
 	};
 
 	bool CreateEngine(const EngineCreateInfo& createInfo);
