@@ -1,4 +1,5 @@
-﻿#include "Engine.h"
+﻿#include "stdafx.h"
+#include "Engine.h"
 #include <iostream>
 //-----------------------------------------------------------------------------
 //https://github.com/Chr157i4n/OpenGL_Game

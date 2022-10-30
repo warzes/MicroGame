@@ -17,6 +17,7 @@
     <ClCompile Include="..\3rdparty\glfwImpl.c">
       <Filter>MicroEngine\3rdparty</Filter>
     </ClCompile>
+    <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MicroEngine">
@@ -25,10 +26,20 @@
     <Filter Include="MicroEngine\3rdparty">
       <UniqueIdentifier>{86a6bab6-665f-43ea-ad04-d04d22e7bc8f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MicroEngine\Engine">
+      <UniqueIdentifier>{b42f46d1-9048-470e-9844-ffc7ad6d3ac7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
       <Filter>MicroEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="1_BaseHeader.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="0_EngineConfig.h">
+      <Filter>MicroEngine\Engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
