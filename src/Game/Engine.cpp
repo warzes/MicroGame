@@ -70,17 +70,6 @@ extern "C" __declspec(dllimport) void __stdcall OutputDebugStringA(const char*);
 #pragma region Base
 namespace base
 {
-	inline char* strConcat(const char* first, const char* second)
-		{
-			const size_t sizeBuff = strlen(first) + strlen(second) + 1;
-			char* buff = static_cast<char*>(calloc(sizeBuff, sizeof(char)));
-			if (buff == nullptr) return nullptr;
-
-			strcpy_s(buff, sizeBuff, first);
-			strcat_s(buff, sizeBuff, second);
-
-			return buff;
-		}
 }
 #pragma endregion
 //=============================================================================
@@ -96,43 +85,35 @@ namespace core
 #endif
 
 	void logPrint(const char* simplePrefix, const char* clrPrefix, const char* str)
-		{
-			char* buffSimpleStr = nullptr;
-			if (simplePrefix) buffSimpleStr = base::strConcat(simplePrefix, str);
-			char* buffClrStr = nullptr;
-			if (clrPrefix) buffClrStr = base::strConcat(clrPrefix, str);
-
+	{
 #if defined(__ANDROID__)
-			__android_log_write(ANDROID_LOG_INFO, "SE_APP", str);
+		__android_log_write(ANDROID_LOG_INFO, "SE_APP", str);
 #elif defined(__EMSCRIPTEN__)
-			emscripten_log(EM_LOG_CONSOLE, "%s", str);
+		emscripten_log(EM_LOG_CONSOLE, "%s", str);
 #else
 #	if defined(_WIN32) && defined(_DEBUG)
 
-			if (buffSimpleStr)
-				OutputDebugStringA(buffSimpleStr);
-			else
-				OutputDebugStringA(str);
-			OutputDebugStringA("\n");
+		if (simplePrefix)
+			OutputDebugStringA((std::string(simplePrefix) + str).c_str());
+		else
+			OutputDebugStringA(str);
+		OutputDebugStringA("\n");
 #	endif
 
-			if (buffClrStr)
-				puts(buffClrStr);
+		if (clrPrefix)
+			puts((std::string(clrPrefix) + str).c_str());
+		else
+			puts(str);
+
+		if (logFile)
+		{
+			if (simplePrefix)
+				fputs((std::string(simplePrefix) + str).c_str(), logFile);
 			else
-				puts(str);
-
-			if (logFile)
-			{
-				if (buffSimpleStr)
-					fputs(buffSimpleStr, logFile);
-				else
-					fputs(str, logFile);
-				fputs("\n", logFile);
-			}
+				fputs(str, logFile);
+			fputs("\n", logFile);
+		}
 #endif
-
-			if (buffSimpleStr) free(buffSimpleStr);
-			if (buffClrStr) free(buffClrStr);
 		}
 
 	bool CreateLogSystem(const core::LogCreateInfo& createInfo)
@@ -152,14 +133,11 @@ namespace core
 		const std::time_t rawtime = time(nullptr);
 		char str[26] = { 0 };
 		ctime_s(str, sizeof str, &rawtime);
-		char* buff = base::strConcat(str, "Log Started.");
 
 		LogPrint(LogSeperator);
-		LogPrint(buff);
+		LogPrint(std::string(str) + "Log Started.");
 		LogPrint(LogSeperator);
 		LogPrint("");
-
-		free(buff);
 
 		return true;
 	}
@@ -169,14 +147,11 @@ namespace core
 		const std::time_t rawtime = time(nullptr);
 		char str[26] = { 0 };
 		ctime_s(str, sizeof str, &rawtime);
-		char* buff = base::strConcat(str, "Log Ended.");
 
 		LogPrint("");
 		LogPrint(LogSeperator);
-		LogPrint(buff);
+		LogPrint(std::string(str) + "Log Ended.");
 		LogPrint(LogSeperator);
-
-		free(buff);
 
 #if defined(_WIN32) || defined(__linux__)
 		if (logFile)
@@ -191,30 +166,15 @@ namespace core
 	{
 		logPrint(nullptr, nullptr, str);
 	}
-
-	void LogPrint(const std::string& str)
-	{
-		LogPrint(str.c_str());
-	}
-	
+		
 	void LogWarning(const char* str)
 	{
 		logPrint("[ WARNING ] : ", "[ \033[33mWARNING\033[0m ] : ", str);
 	}
 
-	void LogWarning(const std::string& str)
-	{
-		LogWarning(str.c_str());
-	}
-
 	void LogError(const char* str)
 	{
 		logPrint("[ ERROR   ] : ", "[ \033[31mERROR\033[0m   ] : ", str);
-	}
-
-	void LogError(const std::string& str)
-	{
-		LogError(str.c_str());
 	}
 }
 #pragma endregion
@@ -465,12 +425,12 @@ namespace platform
 	int FrameBufferWidth = 0;
 	int FrameBufferHeight = 0;
 	float FrameBufferAspectRatio = 0.0f;
+	bool IsEngineExit = true;
 		
 	void errorCallback(int /*error*/, const char* description) noexcept
 	{
-		char* err = base::strConcat("Error: ", description);
-		core::LogError(err);
-		free(err);
+		core::LogError("Error: " + std::string(description));
+		IsEngineExit = true;
 	}
 
 	void windowSizeCallback(GLFWwindow* /*window*/, int width, int height) noexcept
@@ -615,11 +575,14 @@ namespace platform
 		glGetIntegerv(GL_MAX_UNIFORM_LOCATIONS, &capability);
 		core::LogPrint("    > GL_MAX_UNIFORM_LOCATIONS: " + std::to_string(capability));
 
+		IsEngineExit = false;
+
 		return true;
 	}
 
 	void DestroyWindowSystem()
 	{
+		IsEngineExit = true;
 		glfwDestroyWindow(window);
 		window = nullptr;
 		glfwTerminate();
@@ -627,7 +590,7 @@ namespace platform
 
 	bool WindowShouldClose()
 	{
-		return glfwWindowShouldClose(window) == GLFW_TRUE;
+		return IsEngineExit || glfwWindowShouldClose(window) == GLFW_TRUE;
 	}
 
 	void UpdateWindow()

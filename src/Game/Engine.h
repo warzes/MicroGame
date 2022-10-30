@@ -82,6 +82,22 @@ namespace core
 	void LogPrint(const char* str);
 	void LogWarning(const char* str);
 	void LogError(const char* str);
+
+
+	inline void LogPrint(const std::string& str)
+	{
+		LogPrint(str.c_str());
+	}
+
+	inline void LogWarning(const std::string& str)
+	{
+		LogWarning(str.c_str());
+	}
+
+	inline void LogError(const std::string& str)
+	{
+		LogError(str.c_str());
+	}
 }
 #pragma endregion
 

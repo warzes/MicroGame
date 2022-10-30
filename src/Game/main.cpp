@@ -1,8 +1,5 @@
 ﻿#include "Engine.h"
 #include <iostream>
-https://www.youtube.com/watch?v=55fGgHhF2DM
-https://www.youtube.com/watch?v=-07InyEjtQU
-
 //-----------------------------------------------------------------------------
 //https://github.com/Chr157i4n/OpenGL_Game
 // https://github.com/yagero/glsl-demo
@@ -10,19 +7,16 @@ https://www.youtube.com/watch?v=-07InyEjtQU
 // https://kingscrook.itch.io/kings-crook
 // https://www.youtube.com/user/badsectoracula/videos
 
-
-
 /*
 идеи
 
 по коду
-	glfw
 	брать минималку с рейлиба
 	но принци такой:
 		- системы из глобальных функций в неймспейсе
 		- объекты - классы с методами
 
-
+		спрайты оружий поискать с модов майнкрафта
 
 мин код
 	https://github.com/AlexMartinelle/PicoEngine
@@ -58,6 +52,9 @@ https://www.youtube.com/watch?v=-07InyEjtQU
 	https://dissident-studio.itch.io/pyramid
 
 	https://matt-lucas.itch.io/level-buddy
+	https://www.youtube.com/watch?v=55fGgHhF2DM
+https://www.youtube.com/watch?v=-07InyEjtQU
+
 
 
 просто иеди
