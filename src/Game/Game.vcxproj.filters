@@ -44,6 +44,9 @@
     <Filter Include="MicroEngine\Engine">
       <UniqueIdentifier>{b42f46d1-9048-470e-9844-ffc7ad6d3ac7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Test">
+      <UniqueIdentifier>{91d5147d-f507-453d-bfc2-847de32dbeb6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
@@ -97,6 +100,10 @@
     </ClInclude>
     <ClInclude Include="glmHeader.h">
       <Filter>MicroEngine\3rdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="LauncherApp.h" />
+    <ClInclude Include="Test1Triangles.h">
+      <Filter>Test</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

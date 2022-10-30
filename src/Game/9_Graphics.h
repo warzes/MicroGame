@@ -93,7 +93,7 @@ namespace g3d
 		bool Create(std::vector<Mesh>&& m_meshes); // TODO: правильно?
 		void Destroy();
 
-		void SetInstancedBuffer(VertexBuffer* instanceBuffer, const std::vector<VertexAttributeOld>& attribs);
+		void SetInstancedBuffer(VertexBuffer* instanceBuffer, const std::vector<VertexAttributeRaw>& attribs);
 
 		void Draw(uint32_t instanceCount = 1);
 		bool IsValid() const

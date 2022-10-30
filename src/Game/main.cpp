@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "Engine.h"
+#include "LauncherApp.h"
 #include <iostream>
 //-----------------------------------------------------------------------------
 //https://github.com/Chr157i4n/OpenGL_Game
@@ -62,7 +63,7 @@ https://www.youtube.com/watch?v=-07InyEjtQU
 	hexx game(1994)
 */
 
-
+#if !USE_TEST
 static const Vertex_Pos2_Color vertices[3] =
 {
 	{ {-0.6f, -0.4f}, {1.f, 0.f, 0.f} },
@@ -205,13 +206,16 @@ scene::Transform trans;
 
 g3d::Model modelTest;
 g3d::Model modelTest2;
-
+#endif
 int main(
 	[[maybe_unused]] int   argc,
 	[[maybe_unused]] char* argv[])
 {
 	if (engine::CreateEngine({}))
 	{
+#if USE_TEST
+		InitTest();
+#else
 		SetMouseLock(true);
 
 
@@ -280,9 +284,9 @@ int main(
 		instancevb.Create(RenderResourceUsage::Static, amount, sizeof(glm::mat4), &modelMatrices[0]);
 
 
-		const std::vector<VertexAttributeOld> vertTnsAttr =
+		const std::vector<VertexAttributeRaw> vertTnsAttr =
 		{
-			{.type = VertexAttributeTypeOld::Matrix4, .normalized = false},
+			{.type = VertexAttributeTypeRaw::Matrix4, .normalized = false},
 		};
 
 		model.Create("../data/models/rock.obj", "../data/models/");
@@ -312,19 +316,22 @@ int main(
 
 		info.fileName = "../data/textures/starfield.png";
 		texture2dbackground.CreateFromFiles(info);
-
+#endif
 		while (engine::IsRunningEngine())
 		{
 			const float deltaTime = engine::GetDeltaTime();
 			engine::BeginFrameEngine();
+#if USE_TEST
+			FrameTest(deltaTime);
+#else
 			{
-			//	float ratio = GetFrameBufferAspectRatio();
-			//	glm::mat4 mvp = glm::mat4(1.0f);
-			////	mvp = glm::rotate(mvp, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-			//	mvp = glm::ortho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f) * mvp;
-			//	shader.Bind();
-			//	shader.SetUniform(mvpUniform, mvp);
-			//	vao.Draw();
+				//	float ratio = GetFrameBufferAspectRatio();
+				//	glm::mat4 mvp = glm::mat4(1.0f);
+				////	mvp = glm::rotate(mvp, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+				//	mvp = glm::ortho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f) * mvp;
+				//	shader.Bind();
+				//	shader.SetUniform(mvpUniform, mvp);
+				//	vao.Draw();
 
 				camera.SimpleMove(deltaTime);
 				camera.Update();
@@ -366,8 +373,8 @@ int main(
 					timer = timer + deltaTime;
 
 					trans.Reset();
-					trans.SetPosition({ cos(timer) * 5 + 4, sin(timer) * 5.0f, 0.0f});
-					trans.SetRotate({ 0, 0, timer - glm::pi<float>() / 2.0f});
+					trans.SetPosition({ cos(timer) * 5 + 4, sin(timer) * 5.0f, 0.0f });
+					trans.SetRotate({ 0, 0, timer - glm::pi<float>() / 2.0f });
 					trans.SetScale(glm::vec3(0.5f));
 					glm::mat4 MVP = GetCurrentProjectionMatrix() * camera.GetViewMatrix() * trans.GetWorldMatrix();
 					shader2.SetUniform(mvpUniform2, MVP);
@@ -433,8 +440,7 @@ int main(
 				//	model.Draw(200);
 				//}
 			}
-			engine::EndFrameEngine();
-
+			
 			if (IsKeyPressed(KEY_SPACE))
 				LogPrint("space");
 
@@ -442,7 +448,12 @@ int main(
 			auto y = GetMouseY();
 
 			//std::cout << x << ":" << y << std::endl;
+		
+#endif
+			engine::EndFrameEngine();
 		}
 	}
+
+
 	engine::DestroyEngine();
 }

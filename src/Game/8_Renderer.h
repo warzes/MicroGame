@@ -57,16 +57,16 @@ enum class VertexAttributeType
 	Count
 };
 
-enum class VertexAttributeTypeOld
+enum class VertexAttributeTypeRaw
 {
 	Float,
 	Matrix4
 };
 
-struct VertexAttributeOld
+struct VertexAttributeRaw
 {
 	unsigned size;       // ignore in instanceAttr
-	VertexAttributeTypeOld type;
+	VertexAttributeTypeRaw type;
 	bool normalized;
 	unsigned stride;     // = sizeof Vertex, ignore in instanceAttr
 	const void* pointer; // (void*)offsetof(Vertex, tex_coord)}, ignore in instanceAttr
@@ -362,9 +362,9 @@ enum class PrimitiveDraw
 class VertexArrayBuffer
 {
 public:
-	bool Create(VertexBuffer* vbo, IndexBuffer* ibo, const std::vector<VertexAttributeOld>& attribs);
-	bool Create(VertexBuffer* vbo, IndexBuffer* ibo, VertexBuffer* instanceBuffer, const std::vector<VertexAttributeOld>& attribs, const std::vector<VertexAttributeOld>& instanceAttribs);
-	bool Create(const std::vector<VertexBuffer*>& vbo, IndexBuffer* ibo, const std::vector<VertexAttributeOld>& attribs);
+	bool Create(VertexBuffer* vbo, IndexBuffer* ibo, const std::vector<VertexAttributeRaw>& attribs);
+	bool Create(VertexBuffer* vbo, IndexBuffer* ibo, VertexBuffer* instanceBuffer, const std::vector<VertexAttributeRaw>& attribs, const std::vector<VertexAttributeRaw>& instanceAttribs);
+	bool Create(const std::vector<VertexBuffer*>& vbo, IndexBuffer* ibo, const std::vector<VertexAttributeRaw>& attribs);
 
 	void Destroy();
 
@@ -381,7 +381,7 @@ public:
 	//		создается вершинный буфер с кол-вом инстансом - instancevb.Create(Static, amount, sizeof(glm::mat4), &modelMatrices[0]);
 	//		в вао вызывается SetInstancedBuffer().
 	//		в Draw можно указать кол-во инстансов (но это не обязательно)
-	void SetInstancedBuffer(VertexBuffer* instanceBuffer, const std::vector<VertexAttributeOld>& attribs);
+	void SetInstancedBuffer(VertexBuffer* instanceBuffer, const std::vector<VertexAttributeRaw>& attribs);
 
 
 	void Draw(PrimitiveDraw primitive = PrimitiveDraw::Triangles, uint32_t instanceCount = 1);
@@ -464,52 +464,52 @@ struct Vertex_Pos3_Normal_TexCoord
 	glm::vec2 texCoord;
 };
 
-template<typename T> std::vector<VertexAttributeOld> GetVertexAttributes();
+template<typename T> std::vector<VertexAttributeRaw> GetVertexAttributes();
 
-template<> inline std::vector<VertexAttributeOld> GetVertexAttributes<Vertex_Pos2>()
+template<> inline std::vector<VertexAttributeRaw> GetVertexAttributes<Vertex_Pos2>()
 {
 	using T = Vertex_Pos2;
 	return
 	{
-		{.size = 2, .type = VertexAttributeTypeOld::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)}
+		{.size = 2, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)}
 	};
 }
 
-template<> inline std::vector<VertexAttributeOld> GetVertexAttributes<Vertex_Pos2_TexCoord>()
+template<> inline std::vector<VertexAttributeRaw> GetVertexAttributes<Vertex_Pos2_TexCoord>()
 {
 	using T = Vertex_Pos2_TexCoord;
 	return
 	{
-		{.size = 2, .type = VertexAttributeTypeOld::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)},
-		{.size = 2, .type = VertexAttributeTypeOld::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, texCoord)}
+		{.size = 2, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)},
+		{.size = 2, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, texCoord)}
 	};
 }
 
-template<> inline std::vector<VertexAttributeOld> GetVertexAttributes<Vertex_Pos2_Color>()
+template<> inline std::vector<VertexAttributeRaw> GetVertexAttributes<Vertex_Pos2_Color>()
 {
 	using T = Vertex_Pos2_Color;
 	return
 	{
-		{.size = 2, .type = VertexAttributeTypeOld::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)},
-		{.size = 3, .type = VertexAttributeTypeOld::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, color)}
+		{.size = 2, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)},
+		{.size = 3, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, color)}
 	};
 }
 
-template<> inline std::vector<VertexAttributeOld> GetVertexAttributes<Vertex_Pos3>()
+template<> inline std::vector<VertexAttributeRaw> GetVertexAttributes<Vertex_Pos3>()
 {
 	using T = Vertex_Pos3;
 	return
 	{
-		{.size = 3, .type = VertexAttributeTypeOld::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)}
+		{.size = 3, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)}
 	};
 }
-template<> inline std::vector<VertexAttributeOld> GetVertexAttributes<Vertex_Pos3_TexCoord>()
+template<> inline std::vector<VertexAttributeRaw> GetVertexAttributes<Vertex_Pos3_TexCoord>()
 {
 	using T = Vertex_Pos3_TexCoord;
 	return
 	{
-		{.size = 3, .type = VertexAttributeTypeOld::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)},
-		{.size = 2, .type = VertexAttributeTypeOld::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, texCoord)}
+		{.size = 3, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)},
+		{.size = 2, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, texCoord)}
 	};
 }
 

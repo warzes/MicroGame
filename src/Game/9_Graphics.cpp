@@ -308,7 +308,7 @@ namespace g3d
 		m_subMeshes.clear();
 	}
 
-	void Model::SetInstancedBuffer(VertexBuffer* instanceBuffer, const std::vector<VertexAttributeOld>& attribs)
+	void Model::SetInstancedBuffer(VertexBuffer* instanceBuffer, const std::vector<VertexAttributeRaw>& attribs)
 	{
 		for (int i = 0; i < m_subMeshes.size(); i++)
 		{
@@ -410,9 +410,9 @@ namespace g3d
 
 			vertexBuf.Create(RenderResourceUsage::Dynamic, 2, 3 * sizeof(float), vertexData);
 
-			const std::vector<VertexAttributeOld> attribs =
+			const std::vector<VertexAttributeRaw> attribs =
 			{
-				{.size = 3, .type = VertexAttributeTypeOld::Float, .normalized = false, .stride = 0, .pointer = (void*)0},
+				{.size = 3, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = 0, .pointer = (void*)0},
 			};
 			vao.Create(&vertexBuf, nullptr, attribs);
 
@@ -504,9 +504,9 @@ outColor = vec4(1.0, 1.0, 1.0, 1.0);
 			vertexBuf.Create(RenderResourceUsage::Static, 8, 3 * sizeof(float), vertexData);
 			indexBuf.Create(RenderResourceUsage::Static, 24, sizeof(uint16_t), indexData);
 
-			const std::vector<VertexAttributeOld> attribs =
+			const std::vector<VertexAttributeRaw> attribs =
 			{
-				{.size = 3, .type = VertexAttributeTypeOld::Float, .normalized = false, .stride = 0, .pointer = (void*)0},
+				{.size = 3, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = 0, .pointer = (void*)0},
 			};
 			vao.Create(&vertexBuf, &indexBuf, attribs);
 

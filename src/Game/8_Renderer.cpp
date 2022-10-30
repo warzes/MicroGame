@@ -729,16 +729,16 @@ inline GLenum translate(PrimitiveDraw p)
 	return 0;
 }
 
-inline GLenum translate(VertexAttributeTypeOld p)
+inline GLenum translate(VertexAttributeTypeRaw p)
 {
 	switch (p)
 	{
-	case VertexAttributeTypeOld::Float:     return GL_FLOAT;
+	case VertexAttributeTypeRaw::Float:     return GL_FLOAT;
 	}
 	return 0;
 }
 
-bool VertexArrayBuffer::Create(VertexBuffer* vbo, IndexBuffer* ibo, const std::vector<VertexAttributeOld>& attribs)
+bool VertexArrayBuffer::Create(VertexBuffer* vbo, IndexBuffer* ibo, const std::vector<VertexAttributeRaw>& attribs)
 {
 	if (m_id > 0) Destroy();
 	if (!vbo || attribs.empty()) return false;
@@ -764,7 +764,7 @@ bool VertexArrayBuffer::Create(VertexBuffer* vbo, IndexBuffer* ibo, const std::v
 	return true;
 }
 
-bool VertexArrayBuffer::Create(VertexBuffer* vbo, IndexBuffer* ibo, VertexBuffer* instanceBuffer, const std::vector<VertexAttributeOld>& attribs, const std::vector<VertexAttributeOld>& instanceAttribs)
+bool VertexArrayBuffer::Create(VertexBuffer* vbo, IndexBuffer* ibo, VertexBuffer* instanceBuffer, const std::vector<VertexAttributeRaw>& attribs, const std::vector<VertexAttributeRaw>& instanceAttribs)
 {
 	if (!Create(vbo, ibo, attribs))
 		return false;
@@ -773,7 +773,7 @@ bool VertexArrayBuffer::Create(VertexBuffer* vbo, IndexBuffer* ibo, VertexBuffer
 	return true;
 }
 
-bool VertexArrayBuffer::Create(const std::vector<VertexBuffer*>& vbo, IndexBuffer* ibo, const std::vector<VertexAttributeOld>& attribs)
+bool VertexArrayBuffer::Create(const std::vector<VertexBuffer*>& vbo, IndexBuffer* ibo, const std::vector<VertexAttributeRaw>& attribs)
 {
 	if (m_id > 0) Destroy();
 	if (vbo.size() != attribs.size()) return false;
@@ -810,7 +810,7 @@ void VertexArrayBuffer::Destroy()
 	m_instanceBuffer = nullptr;
 }
 
-void VertexArrayBuffer::SetInstancedBuffer(VertexBuffer* instanceBuffer, const std::vector<VertexAttributeOld>& attribs)
+void VertexArrayBuffer::SetInstancedBuffer(VertexBuffer* instanceBuffer, const std::vector<VertexAttributeRaw>& attribs)
 {
 	if (m_instanceBuffer == instanceBuffer) return;
 
@@ -855,7 +855,7 @@ void VertexArrayBuffer::SetInstancedBuffer(VertexBuffer* instanceBuffer, const s
 			m_instancedAttribsCount = m_instancedAttribsCount + i;
 			const auto& att = attribs[i];
 
-			if (att.type == VertexAttributeTypeOld::Matrix4)
+			if (att.type == VertexAttributeTypeRaw::Matrix4)
 			{
 				glEnableVertexAttribArray(m_instancedAttribsCount);
 				glVertexAttribPointer(m_instancedAttribsCount, 4, GL_FLOAT, att.normalized ? GL_TRUE : GL_FALSE, sizeof(glm::mat4), (void*)0);
