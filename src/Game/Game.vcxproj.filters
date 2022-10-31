@@ -24,13 +24,16 @@
     <ClCompile Include="6_Platform.cpp">
       <Filter>MicroEngine\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="8_Renderer.cpp">
+    <ClCompile Include="8_oRenderer.cpp">
       <Filter>MicroEngine\Engine</Filter>
     </ClCompile>
     <ClCompile Include="9_Graphics.cpp">
       <Filter>MicroEngine\Engine</Filter>
     </ClCompile>
     <ClCompile Include="13_Scene.cpp">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="8_Renderer.cpp">
       <Filter>MicroEngine\Engine</Filter>
     </ClCompile>
   </ItemGroup>
@@ -77,7 +80,7 @@
     <ClInclude Include="7_Audio.h">
       <Filter>MicroEngine\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="8_Renderer.h">
+    <ClInclude Include="8_oRenderer.h">
       <Filter>MicroEngine\Engine</Filter>
     </ClInclude>
     <ClInclude Include="9_Graphics.h">
@@ -104,6 +107,9 @@
     <ClInclude Include="LauncherApp.h" />
     <ClInclude Include="Test1Triangles.h">
       <Filter>Test</Filter>
+    </ClInclude>
+    <ClInclude Include="8_Renderer.h">
+      <Filter>MicroEngine\Engine</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

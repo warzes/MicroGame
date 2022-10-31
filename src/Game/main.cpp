@@ -64,43 +64,6 @@ https://www.youtube.com/watch?v=-07InyEjtQU
 */
 
 #if !USE_TEST
-static const Vertex_Pos2_Color vertices[3] =
-{
-	{ {-0.6f, -0.4f}, {1.f, 0.f, 0.f} },
-	{ { 0.6f, -0.4f}, {0.f, 1.f, 0.f} },
-	{ {  0.f,  0.6f}, {0.f, 0.f, 1.f} }
-};
-
-static const char* vertex_shader_text = R"(
-#version 330 core
-
-layout(location = 0) in vec2 vPos;
-layout(location = 1) in vec3 vCol;
-
-uniform mat4 MVP;
-
-out vec3 color;
-
-void main()
-{
-	gl_Position = MVP * vec4(vPos, 0.0, 1.0);
-	color = vCol;
-}
-)";
-
-static const char* fragment_shader_text = R"(
-#version 330 core
-
-in vec3 color;
-
-out vec4 fragColor;
-
-void main()
-{
-	fragColor = vec4(color, 1.0);
-}
-)";
-
 static const char* vertex_shader_text2 = R"(
 #version 330 core
 
@@ -218,13 +181,6 @@ int main(
 #else
 		SetMouseLock(true);
 
-
-		//vb.Create(RenderResourceUsage::Static, 3, sizeof(vertices[0]), vertices);
-		//vao.Create(&vb, nullptr, GetVertexAttributes<Vertex_Pos2_Color>());
-
-		//shader.CreateFromMemories(vertex_shader_text, fragment_shader_text);
-		//mvpUniform = shader.GetUniformVariable("MVP");
-
 		//{
 		//	model.Create("../data/models/crate.obj");
 
@@ -325,14 +281,6 @@ int main(
 			FrameTest(deltaTime);
 #else
 			{
-				//	float ratio = GetFrameBufferAspectRatio();
-				//	glm::mat4 mvp = glm::mat4(1.0f);
-				////	mvp = glm::rotate(mvp, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-				//	mvp = glm::ortho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f) * mvp;
-				//	shader.Bind();
-				//	shader.SetUniform(mvpUniform, mvp);
-				//	vao.Draw();
-
 				camera.SimpleMove(deltaTime);
 				camera.Update();
 

@@ -2,6 +2,7 @@
 
 #include "0_EngineConfig.h"
 #include "1_BaseHeader.h"
+#include "8_oRenderer.h"
 
 
 #pragma region Graphics3D

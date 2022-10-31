@@ -204,6 +204,7 @@
     <ClCompile Include="13_Scene.cpp" />
     <ClCompile Include="3_Core.cpp" />
     <ClCompile Include="6_Platform.cpp" />
+    <ClCompile Include="8_oRenderer.cpp" />
     <ClCompile Include="8_Renderer.cpp" />
     <ClCompile Include="9_Graphics.cpp" />
     <ClCompile Include="Engine.cpp" />
@@ -229,6 +230,7 @@
     <ClInclude Include="5_Utility.h" />
     <ClInclude Include="6_Platform.h" />
     <ClInclude Include="7_Audio.h" />
+    <ClInclude Include="8_oRenderer.h" />
     <ClInclude Include="8_Renderer.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="9_Graphics.h" />

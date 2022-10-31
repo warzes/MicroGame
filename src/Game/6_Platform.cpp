@@ -343,6 +343,8 @@ bool CreateWindowSystem(const WindowCreateInfo& createInfo)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_FALSE);
 #if defined(_DEBUG)
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+#else
+	glfwWindowHint(GLFW_CONTEXT_NO_ERROR, GLFW_TRUE);
 #endif
 
 	glfwWindowHint(GLFW_RESIZABLE, createInfo.Resizable ? GL_TRUE : GL_FALSE);
