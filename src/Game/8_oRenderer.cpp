@@ -640,6 +640,67 @@ bool VertexArrayBuffer::Create(const std::vector<VertexBuffer*>& vbo, IndexBuffe
 	return true;
 }
 
+bool VertexArrayBuffer::Create(VertexBuffer* vbo, IndexBuffer* ibo, ShaderProgram* shaders)
+{
+	if (!shaders || !shaders->IsValid()) return false;
+
+	auto attribInfo = shaders->GetAttribInfo();
+	if (attribInfo.empty()) return false;
+
+	size_t stride = 0;
+	size_t offset = 0;
+	std::vector<VertexAttributeRaw> attribs(attribInfo.size());
+	for (int i = 0; i < attribInfo.size(); i++)
+	{
+		if (attribInfo[i].location != i)
+		{
+			// TODO: сделать возможность указания локации атрибутов. сейчас подразумевается что первый атрибут - 0, второй - 1 и о порядку
+			LogError("Shader attribute location: " + std::to_string(attribInfo[i].location) + " not support!");
+			return false;
+		}
+
+		size_t sizeType = 0;
+
+		attribs[i].normalized = false;
+		switch (attribInfo[i].typeId)
+		{
+		case GL_FLOAT:
+			attribs[i].size = 1;
+			attribs[i].type = VertexAttributeTypeRaw::Float;
+			sizeType = attribs[i].size * sizeof(float);
+			break;
+		case GL_FLOAT_VEC2:
+			attribs[i].size = 2;
+			attribs[i].type = VertexAttributeTypeRaw::Float;
+			sizeType = attribs[i].size * sizeof(float);
+			break;
+		case GL_FLOAT_VEC3:
+			attribs[i].size = 3;
+			attribs[i].type = VertexAttributeTypeRaw::Float;
+			sizeType = attribs[i].size * sizeof(float);
+			break;
+		case GL_FLOAT_VEC4:
+			attribs[i].size = 4;
+			attribs[i].type = VertexAttributeTypeRaw::Float;
+			sizeType = attribs[i].size * sizeof(float);
+			break;
+
+		default:
+			LogError("Shader attribute type: " + attribInfo[i].typeName + " not support!");
+			return false;
+		}
+
+		attribs[i].pointer = (void*)+offset;
+		offset += sizeType;
+	}
+	for (int i = 0; i < attribs.size(); i++)
+	{
+		attribs[i].stride = offset;
+	}
+
+	return Create(vbo, ibo, attribs);
+}
+
 void VertexArrayBuffer::Destroy()
 {
 	if (m_id > 0 && currentVAO == m_id)

@@ -396,7 +396,7 @@ namespace g3d
 		static VertexArrayBuffer vao;
 		static VertexBuffer vertexBuf;
 		static ShaderProgram shaderProgram;
-		static UniformVariable MatrixID;
+		static UniformLocation MatrixID;
 
 		if (!isCreate)
 		{
@@ -467,8 +467,8 @@ outColor = vec4(1.0, 1.0, 1.0, 1.0);
 		static VertexBuffer vertexBuf;
 		static IndexBuffer indexBuf;
 		static ShaderProgram shaderProgram;
-		static UniformVariable MatrixID;
-		static UniformVariable ColorID;
+		static UniformLocation MatrixID;
+		static UniformLocation ColorID;
 
 		if (!isCreate)
 		{
@@ -589,8 +589,8 @@ namespace g2d
 
 	static std::vector<Font> m_cacheFont;
 	static ShaderProgram cacheShader;
-	static UniformVariable m_idAttributeTextColor;
-	static UniformVariable m_idAttributeWorldViewProjMatrix;
+	static UniformLocation m_idAttributeTextColor;
+	static UniformLocation m_idAttributeWorldViewProjMatrix;
 
 	constexpr const char* fontVertexShaderSource = R"(
 #version 330 core

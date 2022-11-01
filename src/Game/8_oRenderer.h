@@ -338,6 +338,8 @@ public:
 		return Create(vbo, ibo, GetVertexAttributes<T>());
 	}
 
+	bool Create(VertexBuffer* vbo, IndexBuffer* ibo, ShaderProgram* shaders);
+
 	void Destroy();
 
 	// есть два варианта инстансинга

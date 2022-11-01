@@ -43,15 +43,26 @@ void main()
 VertexArrayBuffer vao;
 VertexBuffer vb;
 ShaderProgram shader;
-UniformVariable mvpUniform;
+UniformLocation mvpUniform;
 
 void InitTest()
 {
-	vb.Create(RenderResourceUsage::Static, 3, sizeof(vertices[0]), vertices);
-	vao.Create<Vertex_Pos2_Color>(&vb, nullptr);
-
 	shader.CreateFromMemories(vertex_shader_text, fragment_shader_text);
 	mvpUniform = shader.GetUniformVariable("MVP");
+
+	vb.Create(RenderResourceUsage::Static, 3, sizeof(vertices[0]), vertices);
+
+	/*
+	* Example variants:
+	*	Example 1:
+	*		vao.Create(&vb, nullptr, GetVertexAttributes<Vertex_Pos2_Color>());
+	*	Example 2:
+	*		vao.Create<Vertex_Pos2_Color>(&vb, nullptr);
+	*	Example 3:
+	*		std::vector<VertexAttributeRaw> attrs = {{.size = 3, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(Vertex_Pos3), .pointer = (void*)offsetof(Vertex_Pos3, position)}};
+	*		vao.Create<Vertex_Pos2_Color>(&vb, nullptr, attrs);
+	*/
+	vao.Create(&vb, nullptr, &shader);
 }
 
 void CloseTest()
@@ -60,6 +71,76 @@ void CloseTest()
 	vao.Destroy();
 	shader.Destroy();
 }
+
+struct CommandBuffer
+{
+	VertexArrayBuffer* vao = nullptr;
+	ShaderProgram* shader = nullptr;
+
+	struct Uniforms
+	{
+		enum class UniformDataType
+		{
+			Int,
+			Float,
+			Mat4
+		};
+
+		union UniformData
+		{
+			int Int;
+			float Float;
+			glm::mat4 Mat4;
+		};
+
+		UniformData data;
+		UniformDataType type;
+	};
+
+	std::vector<std::pair<UniformLocation, Uniforms>> uniforms;
+
+	void SetUniform(UniformLocation var, Uniforms type)
+	{
+		bool isFind = false;
+		for (size_t i = 0; i < uniforms.size(); i++)
+		{
+			if (uniforms[i].first == var) 
+			{
+				uniforms[i].second = type;
+				isFind = true;
+				break;
+			}
+		}
+		if (isFind == false)
+		{
+			uniforms.emplace_back(std::make_pair(var, type));
+		}
+	}
+
+	void SetUniform(UniformLocation var, const glm::mat4& mat)
+	{
+		Uniforms type;
+		type.type = Uniforms::UniformDataType::Mat4;
+		type.data.Mat4 = mat;
+		SetUniform(var, type);
+	}
+
+	void Submit()
+	{
+		if (shader && shader->IsValid())
+		{
+			shader->Bind();
+			for (size_t i = 0; i < uniforms.size(); i++)
+			{
+				Uniforms::UniformDataType currentDataType = uniforms[i].second.type;
+				if (currentDataType == Uniforms::UniformDataType::Mat4)
+					shader->SetUniform(uniforms[i].first, uniforms[i].second.data.Mat4);
+			}
+		}
+		if (vao && vao->IsValid())
+			vao->Draw();
+	}
+};
 
 void FrameTest(float deltaTime)
 {
@@ -70,8 +151,16 @@ void FrameTest(float deltaTime)
 	glm::mat4 mvp = glm::mat4(1.0f);
 	mvp = glm::rotate(mvp, dt, glm::vec3(0.0f, 0.0f, 1.0f));
 	mvp = glm::ortho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f) * mvp;
+
+	CommandBuffer cb;
+	cb.vao = &vao;
+	cb.shader = &shader;
+
+	cb.SetUniform(mvpUniform, mvp);
+
+	cb.Submit();
 	
-	shader.Bind();
-	shader.SetUniform(mvpUniform, mvp);
-	vao.Draw();
+	//shader.Bind();
+	//shader.SetUniform(mvpUniform, mvp);
+	//vao.Draw();
 }
