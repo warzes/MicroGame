@@ -162,3 +162,25 @@ namespace g2d
 	};
 }
 #pragma endregion
+
+class TransformComponent;
+
+class Light
+{
+public:
+	Light(const glm::vec3& col = glm::vec3(1, 1, 1), float b = 1) : m_color(col), m_brightness(b) {}
+	virtual ~Light() = default;
+
+	void SetColor(const glm::vec3& col) { m_color = col; m_Update = true; }
+	glm::vec3 GetColor() const { return m_color; }
+	void SetBrightness(float b) { m_brightness = b; m_Update = true; }
+	float GetBrightness() const { return m_brightness; }
+
+	virtual void SetShadowEnabled(bool enabled) {}
+	virtual bool IsShadowEnabled() { return false; }
+	virtual void GenerateShadow(TransformComponent* pTransform) {}
+protected:
+	glm::vec3 m_color;
+	float m_brightness;
+	bool m_Update = true;
+};

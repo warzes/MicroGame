@@ -892,7 +892,7 @@ bool Texture2D::CreateFromMemories(const Texture2DCreateInfo& createInfo)
 	GLenum oglType = GL_UNSIGNED_BYTE;
 	getTextureFormatType(createInfo.format, GL_TEXTURE_2D, format, internalFormat, oglType);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, format, oglType, createInfo.data);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, format, oglType, createInfo.pixelData);
 	if (createInfo.mipmap)
 		glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -915,8 +915,8 @@ bool Texture2D::CreateFromFiles(const Texture2DLoaderInfo& loaderInfo)
 		int height = 0;
 		int nrChannels = 0;
 		TexelsFormat format = TexelsFormat::RGB_U8;
-		uint8_t* data = stbi_load(loaderInfo.fileName, &width, &height, &nrChannels, 0);
-		if (!data || nrChannels < STBI_grey || nrChannels > STBI_rgb_alpha || width == 0 || height == 0)
+		uint8_t* pixelData = stbi_load(loaderInfo.fileName, &width, &height, &nrChannels, 0);
+		if (!pixelData || nrChannels < STBI_grey || nrChannels > STBI_rgb_alpha || width == 0 || height == 0)
 		{
 			LogError("Texture loading failed! Filename='" + std::string(loaderInfo.fileName) + "'");
 			return false;
@@ -933,10 +933,10 @@ bool Texture2D::CreateFromFiles(const Texture2DLoaderInfo& loaderInfo)
 		{
 			for (int i = 0; i < width * height * nrChannels; i += 4)
 			{
-				//uint8_t r = data[i];
-				//uint8_t g = data[i + 1];
-				//uint8_t b = data[i + 2];
-				const uint8_t& a = data[i + 3];
+				//uint8_t r = pixelData[i];
+				//uint8_t g = pixelData[i + 1];
+				//uint8_t b = pixelData[i + 2];
+				const uint8_t& a = pixelData[i + 3];
 				if (a < 255)
 				{
 					createInfo.isTransparent = true;
@@ -949,10 +949,10 @@ bool Texture2D::CreateFromFiles(const Texture2DLoaderInfo& loaderInfo)
 		createInfo.width = static_cast<uint16_t>(width);
 		createInfo.height = static_cast<uint16_t>(height);
 		createInfo.depth = 1;
-		createInfo.data = data;
+		createInfo.pixelData = pixelData;
 
 		bool isValid = CreateFromMemories(createInfo);
-		stbi_image_free((void*)data);
+		stbi_image_free((void*)pixelData);
 		if (!isValid) return false;
 	}
 
@@ -989,6 +989,67 @@ void Texture2D::UnBind(unsigned slot)
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	currentTexture2D[slot] = 0;
+}
+//-----------------------------------------------------------------------------
+bool CubeMap::CreateFromFiles(const Texture2DLoaderInfo& loaderInfo)
+{
+	std::string assetFile = loaderInfo.fileName;
+
+	//Get the filenames
+	size_t dotPos = assetFile.find_last_of('.');
+	std::string filestringBegin = assetFile.substr(0, dotPos);
+	std::string filestringEnd = assetFile.substr(dotPos);
+	std::vector<std::string> textureFaces;
+	textureFaces.push_back(filestringBegin + "PX" + filestringEnd); // TODO: устанавливать в loaderInfo
+	textureFaces.push_back(filestringBegin + "NX" + filestringEnd); // TODO: устанавливать в loaderInfo
+	textureFaces.push_back(filestringBegin + "PY" + filestringEnd); // TODO: устанавливать в loaderInfo
+	textureFaces.push_back(filestringBegin + "NY" + filestringEnd); // TODO: устанавливать в loaderInfo
+	textureFaces.push_back(filestringBegin + "PZ" + filestringEnd); // TODO: устанавливать в loaderInfo
+	textureFaces.push_back(filestringBegin + "NZ" + filestringEnd); // TODO: устанавливать в loaderInfo
+
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+
+	int width, height;
+	for (GLuint i = 0; i < textureFaces.size(); i++)
+	{
+		if (loaderInfo.verticallyFlip)
+			stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+
+		int width = 0;
+		int height = 0;
+		int nrChannels = 0;
+		TexelsFormat format = TexelsFormat::RGB_U8;
+		uint8_t* pixelData = stbi_load(loaderInfo.fileName, &width, &height, &nrChannels, 0);
+		if (!pixelData || nrChannels < STBI_grey || nrChannels > STBI_rgb_alpha || width == 0 || height == 0)
+		{
+			LogError("Texture loading failed! Filename='" + std::string(loaderInfo.fileName) + "'");
+			return false;
+		}
+		if (nrChannels == STBI_grey) format = TexelsFormat::R_U8;
+		else if (nrChannels == STBI_grey_alpha) format = TexelsFormat::RG_U8;
+		else if (nrChannels == STBI_rgb) format = TexelsFormat::RGB_U8;
+		else if (nrChannels == STBI_rgb_alpha) format = TexelsFormat::RGBA_U8;
+
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+			0, /*m_UseSrgb ? GL_SRGB :*/ GL_RGB, width, height,
+			0, GL_RGB, GL_UNSIGNED_BYTE, pixelData);
+
+		stbi_image_free((void*)pixelData);
+	}
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+	int NumMipMaps = 1 + (int)floor(log10((float)std::max(width, height)) / log10(2.0));
+
+	return true;
 }
 //-----------------------------------------------------------------------------
 namespace TextureLoader

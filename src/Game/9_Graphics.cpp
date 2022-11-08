@@ -712,7 +712,7 @@ void main()
 			createInfo.width = font_.atlasWidth;
 			createInfo.height = font_.atlasHeight;
 			createInfo.depth = 1;
-			createInfo.data = atlasData;
+			createInfo.pixelData = atlasData;
 			createInfo.mipmap = false;
 
 			//font_.texture.CreateFromMemories(GL_RGB, GL_RED, GL_UNSIGNED_BYTE, font_.atlasWidth, font_.atlasHeight, atlasData.get());

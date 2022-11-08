@@ -179,7 +179,7 @@ struct Texture2DCreateInfo
 	uint16_t width = 1;
 	uint16_t height = 1;
 	uint16_t depth = 1;
-	uint8_t* data = nullptr;
+	uint8_t* pixelData = nullptr;
 	unsigned mipMapCount = 1; // TODO: only compressed
 	bool mipmap = true;
 	bool isTransparent = false;
@@ -210,6 +210,31 @@ private:
 	unsigned m_id = 0;
 	unsigned m_width = 0;
 	unsigned m_height = 0;
+};
+
+// TODO: доделать
+class CubeMap
+{
+public:
+	bool CreateFromFiles(const Texture2DLoaderInfo& loaderInfo);
+
+	void Destroy();
+
+	void Bind(unsigned slot = 0) const;
+
+	static void UnBind(unsigned slot = 0);
+
+	int GetNumMipMaps() { return m_numMipMaps; }
+
+	bool IsValid() const { return m_id > 0; }
+
+	bool operator==(const CubeMap&) const = default;
+
+private:
+	unsigned m_id = 0;
+	unsigned m_width = 0;
+	unsigned m_height = 0;
+	int m_numMipMaps = 0;
 };
 
 namespace TextureLoader

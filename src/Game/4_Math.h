@@ -5,6 +5,36 @@
 
 namespace math
 {
+	struct Plane
+	{
+		Plane() = default;
+		Plane(const glm::vec3& normal, const glm::vec3& det)
+		{
+			n = normal;
+			d = det;
+		}
+		Plane(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c)
+		{
+			d = a;
+			n = glm::normalize(glm::cross(-b + a, c - a));
+		}
+
+		glm::vec3 n = glm::vec3(0, 1, 0);
+		glm::vec3 d = glm::vec3(0, 0, 0);
+	};
+
+	struct Sphere
+	{
+		Sphere() = default;
+		Sphere(const glm::vec3& position, float size)
+		{
+			pos = position;
+			radius = size;
+		}
+		glm::vec3 pos = glm::vec3(0, 0, 0);
+		float radius = 1.0f;
+	};
+
 	// Returns true if axis-aligned bounding boxes intersect.
 	inline bool IntersectAABB(glm::vec3 a_position, glm::vec3 a_size, glm::vec3 b_position, glm::vec3 b_size)
 	{

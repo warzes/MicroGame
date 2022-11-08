@@ -9,13 +9,15 @@ constexpr const char* vertex_shader_text = R"(
 layout(location = 0) in vec3 vPos;
 layout(location = 1) in vec2 aTexCoord;
 
-uniform mat4 MVP;
+uniform mat4 uWorld;
+uniform mat4 uView;
+uniform mat4 uProjection;
 
 out vec2 vTexCoord;
 
 void main()
 {
-	gl_Position = MVP * vec4(vPos, 1.0);
+	gl_Position = uProjection * uView * uWorld * vec4(vPos, 1.0);
 	vTexCoord = aTexCoord;
 }
 )";
@@ -38,7 +40,9 @@ void main()
 
 ShaderProgram shader;
 Texture2D texture2d;
-UniformLocation mvpUniform;
+UniformLocation worldUniform;
+UniformLocation viewUniform;
+UniformLocation projectionUniform;
 g3d::Model model;
 g3d::Camera camera;
 
@@ -51,7 +55,9 @@ void InitTest()
 		shader.CreateFromMemories(vertex_shader_text, fragment_shader_text);
 		shader.Bind();
 		shader.SetUniform("uSampler", 0);
-		mvpUniform = shader.GetUniformVariable("MVP");
+		worldUniform = shader.GetUniformVariable("uWorld");
+		viewUniform = shader.GetUniformVariable("uView");
+		projectionUniform = shader.GetUniformVariable("uProjection");
 	}
 
 	// Load Texture
@@ -80,7 +86,9 @@ void FrameTest(float deltaTime)
 
 	texture2d.Bind(0);
 	shader.Bind();
-	glm::mat4 MVP = GetCurrentProjectionMatrix() * camera.GetViewMatrix();
-	shader.SetUniform(mvpUniform, MVP);
+	shader.SetUniform(worldUniform, glm::mat4(1.0f));
+	shader.SetUniform(viewUniform, camera.GetViewMatrix());
+	shader.SetUniform(projectionUniform, GetCurrentProjectionMatrix());
+
 	model.Draw();
 }
