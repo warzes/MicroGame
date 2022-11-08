@@ -197,12 +197,19 @@ public:
 
 	static void UnBind(unsigned slot = 0);
 
-	bool IsValid() const { return id > 0; }
+	unsigned GetWidth() const { return m_width; }
+	unsigned GetHeight() const { return m_height; }
+
+	bool IsValid() const { return m_id > 0; }
 
 	bool operator==(const Texture2D&) const = default;
 
-	unsigned id = 0;
 	bool isTransparent = false;
+
+private:
+	unsigned m_id = 0;
+	unsigned m_width = 0;
+	unsigned m_height = 0;
 };
 
 namespace TextureLoader

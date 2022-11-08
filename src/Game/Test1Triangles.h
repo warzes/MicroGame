@@ -71,7 +71,7 @@ void CloseTest()
 {
 	vb.Destroy();
 	vao.Destroy();
-	//shader.Destroy();
+	shader->Destroy();
 }
 
 // TODO: в графику?

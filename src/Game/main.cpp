@@ -402,6 +402,10 @@ int main(
 #endif
 			engine::EndFrameEngine();
 		}
+
+#if USE_TEST
+		CloseTest();
+#endif
 	}
 
 

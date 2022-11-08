@@ -276,7 +276,8 @@ void ShaderProgram::Destroy()
 	if (m_id > 0)
 	{
 		if (currentRenderState::shaderProgram == m_id) UnBind();
-		glDeleteProgram(m_id);
+		if (!ShaderLoader::IsLoad(*this)) // TODO: не удалять шейдер если он загружен через менеджер, в будущем сделать подсчет ссылок и удалять если нет
+			glDeleteProgram(m_id);
 		m_id = 0;
 	}
 }
@@ -855,9 +856,11 @@ inline bool getTextureFormatType(TexelsFormat inFormat, GLenum textureType, GLen
 //-----------------------------------------------------------------------------
 bool Texture2D::CreateFromMemories(const Texture2DCreateInfo& createInfo)
 {
-	if (id > 0) Destroy();
+	if (m_id > 0) Destroy();
 
 	isTransparent = createInfo.isTransparent;
+	m_width = createInfo.width;
+	m_height = createInfo.height;
 
 	// save prev pixel store state
 	GLint Alignment = 0;
@@ -865,9 +868,9 @@ bool Texture2D::CreateFromMemories(const Texture2DCreateInfo& createInfo)
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	// gen texture res
-	glGenTextures(1, &id);
+	glGenTextures(1, &m_id);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, id);
+	glBindTexture(GL_TEXTURE_2D, m_id);
 
 	// set the texture wrapping parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, translate(createInfo.wrapS));
@@ -889,7 +892,7 @@ bool Texture2D::CreateFromMemories(const Texture2DCreateInfo& createInfo)
 	GLenum oglType = GL_UNSIGNED_BYTE;
 	getTextureFormatType(createInfo.format, GL_TEXTURE_2D, format, internalFormat, oglType);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, createInfo.width, createInfo.height, 0, format, oglType, createInfo.data);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, format, oglType, createInfo.data);
 	if (createInfo.mipmap)
 		glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -958,25 +961,26 @@ bool Texture2D::CreateFromFiles(const Texture2DLoaderInfo& loaderInfo)
 //-----------------------------------------------------------------------------
 void Texture2D::Destroy()
 {
-	if (id > 0)
+	if (m_id > 0)
 	{
 		for (unsigned i = 0; i < 8; i++)
 		{
-			if (currentTexture2D[i] == id)
+			if (currentTexture2D[i] == m_id)
 				Texture2D::UnBind(i);
 		}
-		glDeleteTextures(1, &id);
-		id = 0;
+		if (!TextureLoader::IsLoad(*this)) // TODO: не удалять текстуру если она загружена через менеджер, в будущем сделать подсчет ссылок и удалять если нет
+			glDeleteTextures(1, &m_id);
+		m_id = 0;
 	}
 }
 //-----------------------------------------------------------------------------
 void Texture2D::Bind(unsigned slot) const
 {
-	if (currentTexture2D[slot] != id)
+	if (currentTexture2D[slot] != m_id)
 	{
-		currentTexture2D[slot] = id;
+		currentTexture2D[slot] = m_id;
 		glActiveTexture(GL_TEXTURE0 + slot);
-		glBindTexture(GL_TEXTURE_2D, id);
+		glBindTexture(GL_TEXTURE_2D, m_id);
 	}
 }
 //-----------------------------------------------------------------------------
