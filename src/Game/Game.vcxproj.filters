@@ -159,5 +159,8 @@
     <ClInclude Include="Test3Model.h">
       <Filter>Test</Filter>
     </ClInclude>
+    <ClInclude Include="Test4ManyModels.h">
+      <Filter>Test</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
