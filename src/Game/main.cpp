@@ -6,7 +6,6 @@
 //-----------------------------------------------------------------------------
 //https://github.com/Chr157i4n/OpenGL_Game
 // https://github.com/yagero/glsl-demo
-
 // https://kingscrook.itch.io/kings-crook
 // https://www.youtube.com/user/badsectoracula/videos
 
@@ -57,9 +56,7 @@
 
 	https://matt-lucas.itch.io/level-buddy
 	https://www.youtube.com/watch?v=55fGgHhF2DM
-https://www.youtube.com/watch?v=-07InyEjtQU
-
-
+	https://www.youtube.com/watch?v=-07InyEjtQU
 
 просто иеди
 	hexx game(1994)
@@ -144,7 +141,7 @@ VertexBuffer vb;
 ShaderProgram shader;
 UniformVariable mvpUniform;
 
-g3d::Model model;
+
 ShaderProgram shader2;
 UniformVariable mvpUniform2;
 Texture2D texture2d;
@@ -184,8 +181,6 @@ int main(
 		SetMouseLock(true);
 
 		//{
-		//	model.Create("../data/models/crate.obj");
-
 		shader2.CreateFromMemories(vertex_shader_text2, fragment_shader_text2);
 		mvpUniform2 = shader2.GetUniformVariable("MVP");
 		auto sampler = shader2.GetUniformVariable("uSampler");
@@ -295,15 +290,11 @@ int main(
 
 				modelTest2.Draw();
 
-
-
-
 				texture2d.Bind();
 				shader4.Bind();
 				shader4.SetUniform(viewUniform, camera.GetViewMatrix());
 				shader4.SetUniform(projUniform, GetCurrentProjectionMatrix());
 				model.Draw();
-
 
 				{
 					shader2.Bind();

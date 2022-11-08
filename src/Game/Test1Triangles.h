@@ -1,15 +1,19 @@
 #pragma once
 
+#define USE_TESTCOMMANDBUFFER 1
+#define USE_LOADSHADERFROMMEMORY 1
+
 #include "6_Platform.h"
 #include "8_oRenderer.h"
 
-constexpr Vertex_Pos2_Color vertices[3] =
+constexpr Vertex_Pos2_Color vertices[] =
 {
 	{ {-0.6f, -0.4f}, {1.f, 0.f, 0.f} },
 	{ { 0.6f, -0.4f}, {0.f, 1.f, 0.f} },
 	{ {  0.f,  0.6f}, {0.f, 0.f, 1.f} }
 };
 
+#if USE_LOADSHADERFROMMEMORY
 constexpr const char* vertex_shader_text = R"(
 #version 330 core
 
@@ -26,7 +30,6 @@ void main()
 	color = vCol;
 }
 )";
-
 constexpr const char* fragment_shader_text = R"(
 #version 330 core
 
@@ -39,6 +42,7 @@ void main()
 	fragColor = vec4(color, 1.0);
 }
 )";
+#endif
 
 VertexArrayBuffer vao;
 VertexBuffer vb;
@@ -47,24 +51,33 @@ UniformLocation mvpUniform;
 
 void InitTest()
 {
-	//shader.CreateFromMemories(vertex_shader_text, fragment_shader_text);
-	shader = ShaderLoader::Load("../data/shaders/Test1Triangles.glsl");
+	// Load shader
+	{
+#if USE_LOADSHADERFROMMEMORY
+		shader = new ShaderProgram();
+		shader->CreateFromMemories(vertex_shader_text, fragment_shader_text);
+#else
+		shader = ShaderLoader::Load("../data/shaders/Test1Triangles.glsl");
+#endif
+		mvpUniform = shader->GetUniformVariable("MVP");
+	}
 
-	mvpUniform = shader->GetUniformVariable("MVP");
+	// Load geometry
+	{
+		vb.Create(RenderResourceUsage::Static, 3, sizeof(vertices[0]), vertices);
 
-	vb.Create(RenderResourceUsage::Static, 3, sizeof(vertices[0]), vertices);
-
-	/*
-	* Example variants:
-	*	Example 1:
-	*		vao.Create(&vb, nullptr, GetVertexAttributes<Vertex_Pos2_Color>());
-	*	Example 2:
-	*		vao.Create<Vertex_Pos2_Color>(&vb, nullptr);
-	*	Example 3:
-	*		std::vector<VertexAttributeRaw> attrs = {{.size = 3, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(Vertex_Pos3), .pointer = (void*)offsetof(Vertex_Pos3, position)}};
-	*		vao.Create<Vertex_Pos2_Color>(&vb, nullptr, attrs);
-	*/
-	vao.Create(&vb, nullptr, shader);
+		/*
+		* Example variants:
+		*	Example 1:
+		*		vao.Create(&vb, nullptr, GetVertexAttributes<Vertex_Pos2_Color>());
+		*	Example 2:
+		*		vao.Create<Vertex_Pos2_Color>(&vb, nullptr);
+		*	Example 3:
+		*		std::vector<VertexAttributeRaw> attrs = {{.size = 3, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(Vertex_Pos3), .pointer = (void*)offsetof(Vertex_Pos3, position)}};
+		*		vao.Create<Vertex_Pos2_Color>(&vb, nullptr, attrs);
+		*/
+		vao.Create(&vb, nullptr, shader);
+	}	
 }
 
 void CloseTest()
@@ -72,8 +85,10 @@ void CloseTest()
 	vb.Destroy();
 	vao.Destroy();
 	shader->Destroy();
+	delete shader;
 }
 
+#if USE_TESTCOMMANDBUFFER
 // TODO: в графику?
 struct CommandBuffer
 {
@@ -144,6 +159,7 @@ struct CommandBuffer
 			vao->Draw();
 	}
 };
+#endif
 
 void FrameTest(float deltaTime)
 {
@@ -155,15 +171,15 @@ void FrameTest(float deltaTime)
 	mvp = glm::rotate(mvp, dt, glm::vec3(0.0f, 0.0f, 1.0f));
 	mvp = glm::ortho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f) * mvp;
 
+#if USE_TESTCOMMANDBUFFER
 	CommandBuffer cb;
 	cb.vao = &vao;
 	cb.shader = shader;
-
 	cb.SetUniform(mvpUniform, mvp);
-
 	cb.Submit();
-	
-	//shader.Bind();
-	//shader.SetUniform(mvpUniform, mvp);
-	//vao.Draw();
+#else	
+	shader->Bind();
+	shader->SetUniform(mvpUniform, mvp);
+	vao.Draw();
+#endif
 }

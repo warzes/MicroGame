@@ -153,5 +153,11 @@
     <ClInclude Include="..\3rdparty\glmHeader.h">
       <Filter>MicroEngine\3rdparty</Filter>
     </ClInclude>
+    <ClInclude Include="Test2TextureQuads.h">
+      <Filter>Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Test3Model.h">
+      <Filter>Test</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
