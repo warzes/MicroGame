@@ -203,6 +203,7 @@
     </ClCompile>
     <ClCompile Include="13_Scene.cpp" />
     <ClCompile Include="3_Core.cpp" />
+    <ClCompile Include="4_Math.cpp" />
     <ClCompile Include="6_Platform.cpp" />
     <ClCompile Include="8_oRenderer.cpp" />
     <ClCompile Include="8_Renderer.cpp" />

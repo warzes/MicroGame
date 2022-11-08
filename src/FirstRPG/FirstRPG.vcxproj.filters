@@ -15,28 +15,10 @@
     <ClCompile Include="..\3rdparty\glad\gl.c">
       <Filter>MicroEngine\3rdparty</Filter>
     </ClCompile>
-    <ClCompile Include="..\Game\Engine.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Game\3_Core.cpp">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Game\6_Platform.cpp">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Game\8_oRenderer.cpp">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Game\8_Renderer.cpp">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Game\9_Graphics.cpp">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Game\13_Scene.cpp">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClCompile>
     <ClCompile Include="immo.cpp" />
+    <ClCompile Include="EngineImpl.cpp">
+      <Filter>MicroEngine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MicroEngine">
@@ -45,68 +27,11 @@
     <Filter Include="MicroEngine\3rdparty">
       <UniqueIdentifier>{86a6bab6-665f-43ea-ad04-d04d22e7bc8f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="MicroEngine\Engine">
-      <UniqueIdentifier>{b42f46d1-9048-470e-9844-ffc7ad6d3ac7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MicroEngine\Engine\Engine">
-      <UniqueIdentifier>{d2288888-33a2-43da-912f-326eb69b6fd4}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="..\3rdparty\glmHeader.h">
       <Filter>MicroEngine\3rdparty</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Game\Engine.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Game\0_EngineConfig.h">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Game\1_BaseHeader.h">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Game\2_Base.h">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Game\3_Core.h">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Game\4_Math.h">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Game\5_Utility.h">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Game\6_Platform.h">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Game\7_Audio.h">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Game\8_oRenderer.h">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Game\8_Renderer.h">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Game\9_Graphics.h">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Game\10_Physics.h">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Game\11_UI.h">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Game\12_Navigation.h">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Game\13_Scene.h">
-      <Filter>MicroEngine\Engine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Game\14_World.h">
-      <Filter>MicroEngine\Engine\Engine</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

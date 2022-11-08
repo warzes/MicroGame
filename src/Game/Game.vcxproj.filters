@@ -42,6 +42,9 @@
     <ClCompile Include="Main22.cpp">
       <Filter>unrimp</Filter>
     </ClCompile>
+    <ClCompile Include="4_Math.cpp">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MicroEngine">
@@ -61,6 +64,9 @@
     </Filter>
     <Filter Include="Game">
       <UniqueIdentifier>{c98ed44a-8da1-49fb-8216-8ac1dda2c1c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MicroEngine\NewCode">
+      <UniqueIdentifier>{d8e8c732-1b75-41da-a29d-13d0064cdd68}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

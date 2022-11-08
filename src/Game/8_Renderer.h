@@ -38,6 +38,7 @@ class ShaderProgram
 {
 public:
 	bool CreateFromMemories(const std::string& vertexShaderMemory, const std::string& fragmentShaderMemory);
+	bool CreateFromMemories(const std::string& vertexShaderMemory, const std::string& geometryShaderMemory, const std::string& fragmentShaderMemory);
 	void Destroy();
 
 	void Bind();
@@ -72,12 +73,19 @@ private:
 	enum class ShaderType
 	{
 		Vertex,
+		Geometry,
 		Fragment
 	};
 	unsigned createShader(ShaderType type, const std::string& source) const;
 
 	unsigned m_id = 0;
 };
+
+namespace ShaderLoader
+{
+	void Destroy();
+	ShaderProgram* Load(const char* name);
+}
 
 //=============================================================================
 // Render System

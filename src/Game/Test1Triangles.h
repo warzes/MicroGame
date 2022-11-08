@@ -42,13 +42,15 @@ void main()
 
 VertexArrayBuffer vao;
 VertexBuffer vb;
-ShaderProgram shader;
+ShaderProgram* shader;
 UniformLocation mvpUniform;
 
 void InitTest()
 {
-	shader.CreateFromMemories(vertex_shader_text, fragment_shader_text);
-	mvpUniform = shader.GetUniformVariable("MVP");
+	//shader.CreateFromMemories(vertex_shader_text, fragment_shader_text);
+	shader = ShaderLoader::Load("../data/shaders/Test1Triangles.glsl");
+
+	mvpUniform = shader->GetUniformVariable("MVP");
 
 	vb.Create(RenderResourceUsage::Static, 3, sizeof(vertices[0]), vertices);
 
@@ -62,14 +64,14 @@ void InitTest()
 	*		std::vector<VertexAttributeRaw> attrs = {{.size = 3, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(Vertex_Pos3), .pointer = (void*)offsetof(Vertex_Pos3, position)}};
 	*		vao.Create<Vertex_Pos2_Color>(&vb, nullptr, attrs);
 	*/
-	vao.Create(&vb, nullptr, &shader);
+	vao.Create(&vb, nullptr, shader);
 }
 
 void CloseTest()
 {
 	vb.Destroy();
 	vao.Destroy();
-	shader.Destroy();
+	//shader.Destroy();
 }
 
 // TODO: в графику?
@@ -155,7 +157,7 @@ void FrameTest(float deltaTime)
 
 	CommandBuffer cb;
 	cb.vao = &vao;
-	cb.shader = &shader;
+	cb.shader = shader;
 
 	cb.SetUniform(mvpUniform, mvp);
 

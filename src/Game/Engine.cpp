@@ -18,7 +18,6 @@ namespace engine
 		bool IsExitRequested = true;
 	}
 
-
 	bool CreateEngine(const EngineCreateInfo& createInfo)
 	{
 		if (!CreateLogSystem(createInfo.Log))
@@ -40,6 +39,7 @@ namespace engine
 	{
 		IsExitRequested = true;
 		g3d::ModelFileManager::Destroy();
+		ShaderLoader::Destroy();
 		TextureFileManager::Destroy();
 		RenderSystem::Destroy();
 		DestroyWindowSystem();

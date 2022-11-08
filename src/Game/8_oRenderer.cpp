@@ -817,4 +817,9 @@ namespace TextureFileManager
 			return &FileTextures[textureLoaderInfo.fileName];
 		}
 	}
+
+	bool IsLoad(Texture2D* texture)
+	{
+		return false;
+	}
 }

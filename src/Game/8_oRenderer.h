@@ -469,4 +469,6 @@ namespace TextureFileManager
 	void Destroy();
 	Texture2D* LoadTexture2D(const char* name);
 	Texture2D* LoadTexture2D(const Texture2DLoaderInfo& loaderInfo);
+
+	bool IsLoad(Texture2D* texture);
 }

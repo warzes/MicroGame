@@ -195,18 +195,29 @@ namespace currentRenderState
 //-----------------------------------------------------------------------------
 bool ShaderProgram::CreateFromMemories(const std::string& vertexShaderMemory, const std::string& fragmentShaderMemory)
 {
+	return CreateFromMemories(vertexShaderMemory, "", fragmentShaderMemory);
+}
+//-----------------------------------------------------------------------------
+bool ShaderProgram::CreateFromMemories(const std::string& vertexShaderMemory, const std::string& geometryShaderMemory, const std::string& fragmentShaderMemory)
+{
 	if (vertexShaderMemory.empty() || fragmentShaderMemory.empty()) return false;
 	if (vertexShaderMemory == "" || fragmentShaderMemory == "") return false;
 	if (m_id > 0) Destroy();
 
 	const GLuint glShaderVertex = createShader(ShaderType::Vertex, vertexShaderMemory);
 	const GLuint glShaderFragment = createShader(ShaderType::Fragment, fragmentShaderMemory);
+	GLuint glShaderGeometry = 0;
+	if (!geometryShaderMemory.empty() && geometryShaderMemory != "")
+		glShaderGeometry = createShader(ShaderType::Geometry, geometryShaderMemory);
 
 	if (glShaderVertex > 0 && glShaderFragment > 0)
 	{
 		m_id = glCreateProgram();
+
 		GL_CHECK(glAttachShader(m_id, glShaderVertex));
 		GL_CHECK(glAttachShader(m_id, glShaderFragment));
+		if (glShaderGeometry > 0)
+			GL_CHECK(glAttachShader(m_id, glShaderGeometry));
 
 		GL_CHECK(glLinkProgram(m_id));
 
@@ -227,6 +238,8 @@ bool ShaderProgram::CreateFromMemories(const std::string& vertexShaderMemory, co
 
 	GL_CHECK(glDeleteShader(glShaderVertex));
 	GL_CHECK(glDeleteShader(glShaderFragment));
+	if (glShaderGeometry > 0)
+		GL_CHECK(glDeleteShader(glShaderGeometry));
 
 	LogPrint("Program " + std::to_string(m_id));
 
@@ -249,8 +262,8 @@ bool ShaderProgram::CreateFromMemories(const std::string& vertexShaderMemory, co
 			LogPrint("\t" + uniformInfo[i].GetText());
 		}
 	}
-	
-	
+
+
 	return IsValid();
 }
 //-----------------------------------------------------------------------------
@@ -527,8 +540,9 @@ unsigned ShaderProgram::createShader(ShaderType type, const std::string& shaderS
 		
 	GLenum glShaderType = 0;
 	if (type == ShaderType::Vertex) glShaderType = GL_VERTEX_SHADER;
+	else if (type == ShaderType::Geometry) glShaderType = GL_GEOMETRY_SHADER;
 	else if (type == ShaderType::Fragment) glShaderType = GL_FRAGMENT_SHADER;
-	
+		
 	const GLuint shaderId = glCreateShader(glShaderType);
 
 	{
@@ -548,12 +562,187 @@ unsigned ShaderProgram::createShader(ShaderType type, const std::string& shaderS
 		std::vector<GLchar> errorInfo(infoLogSize);
 		glGetShaderInfoLog(shaderId, errorInfo.size(), nullptr, &errorInfo[0]);
 		glDeleteShader(shaderId);
-		LogError("Shader compilation failed : " + std::string(&errorInfo[0]) + ", Source: " + shaderString);
+
+		std::string shaderName;
+		switch (glShaderType)
+		{
+		case GL_VERTEX_SHADER: shaderName = "Vertex "; break;
+		case GL_GEOMETRY_SHADER: shaderName = "Geometry "; break;
+		case GL_FRAGMENT_SHADER: shaderName = "Fragment "; break;
+		}
+		LogError(shaderName + "Shader compilation failed : " + std::string(&errorInfo[0]) + ", Source: " + shaderString);
 		return 0;
 	}
 
 	return shaderId;
 }
+//-----------------------------------------------------------------------------
+namespace ShaderLoader
+{
+	std::unordered_map<std::string, ShaderProgram> FileShaderPrograms;
+
+	bool ReplaceInclude(std::string& line, const std::string& assetFile)
+	{
+		std::string basePath = "";
+		size_t lastFS = assetFile.rfind("/");
+		size_t lastBS = assetFile.rfind("\\");
+		size_t lastS = (size_t)std::max((int)lastFS, (int)lastBS);
+		if (!(lastS == std::string::npos))basePath = assetFile.substr(0, lastS) + "/";
+
+		size_t firstQ = line.find("\"");
+		size_t lastQ = line.rfind("\"");
+		if ((firstQ == std::string::npos) ||
+			(lastQ == std::string::npos) ||
+			lastQ <= firstQ)
+		{
+			LogError("invalid include syntax.\n" + line);
+			return false;
+		}
+		firstQ++;
+		std::string path = basePath + line.substr(firstQ, lastQ - firstQ);
+
+		std::ifstream shaderFile;
+		shaderFile.open(path);
+		if (!shaderFile)
+		{
+			LogError("Opening shader file \"" + path + "\" failed.");
+			return false;
+		}
+		std::string ret;
+		std::string extractedLine;
+		while (shaderFile.eof() == false)
+		{
+			//Get the line
+			getline(shaderFile, extractedLine);
+
+			//Includes
+			if (extractedLine.find("#include") != std::string::npos)
+			{
+				if (!(ReplaceInclude(extractedLine, assetFile)))
+				{
+					LogError("Opening shader file failed.");
+					return false;
+				}
+			}
+
+			ret += extractedLine;
+			ret += "\n";
+		}
+		shaderFile.close();
+		line = ret;
+		return true;
+	}
+
+	void Destroy()
+	{
+		for (auto it = FileShaderPrograms.begin(); it != FileShaderPrograms.end(); ++it)
+			it->second.Destroy();
+		FileShaderPrograms.clear();
+	}
+	
+	ShaderProgram* Load(const char* name)
+	{
+		auto it = FileShaderPrograms.find(name);
+		if (it != FileShaderPrograms.end())
+		{
+			return &it->second;
+		}
+		else
+		{
+			LogPrint("Load shader programs: " + std::string(name));
+
+			std::string vertSource;
+			std::string geoSource;
+			std::string fragSource;
+
+			enum ParseState {
+				INIT,
+				VERT,
+				GEO,
+				FRAG
+			} state = ParseState::INIT;
+			bool useGeo = false;
+			std::string extractedLine;
+			std::ifstream shaderFile;
+			shaderFile.open(name);
+			if (!shaderFile)
+			{
+				LogError("Opening shader file failed.");
+				return nullptr;
+			}
+			while (shaderFile.eof() == false)
+			{
+				//Get the line
+				getline(shaderFile, extractedLine);
+
+				//Includes
+				if (extractedLine.find("#include") != std::string::npos)
+				{
+					if (!(ReplaceInclude(extractedLine, name)))
+					{
+						LogError("Opening shader file failed.");
+						return nullptr;
+					}
+				}
+
+				//Precompile types
+				switch (state)
+				{
+				case INIT:
+					if (extractedLine.find("<VERTEX>") != std::string::npos)
+					{
+						state = ParseState::VERT;
+					}
+					if (extractedLine.find("<GEOMETRY>") != std::string::npos)
+					{
+						useGeo = true;
+						state = ParseState::GEO;
+					}
+					if (extractedLine.find("<FRAGMENT>") != std::string::npos)
+					{
+						state = ParseState::FRAG;
+					}
+					break;
+				case VERT:
+					if (extractedLine.find("</VERTEX>") != std::string::npos)
+					{
+						state = ParseState::INIT;
+						break;
+					}
+					vertSource += extractedLine;
+					vertSource += "\n";
+					break;
+				case GEO:
+					if (extractedLine.find("</GEOMETRY>") != std::string::npos)
+					{
+						state = ParseState::INIT;
+						break;
+					}
+					geoSource += extractedLine;
+					geoSource += "\n";
+					break;
+				case FRAG:
+					if (extractedLine.find("</FRAGMENT>") != std::string::npos)
+					{
+						state = ParseState::INIT;
+						break;
+					}
+					fragSource += extractedLine;
+					fragSource += "\n";
+					break;
+				}
+			}
+			shaderFile.close();
+
+			ShaderProgram shaders;
+			if (!shaders.CreateFromMemories(vertSource, geoSource, fragSource) || !shaders.IsValid())
+				return nullptr;
+
+			FileShaderPrograms[name] = shaders;
+			return &FileShaderPrograms[name];
+		}
+	}
+} // ShaderManager
 //-----------------------------------------------------------------------------
 //=============================================================================
 // Render System

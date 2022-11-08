@@ -201,13 +201,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\Game\13_Scene.cpp" />
-    <ClCompile Include="..\Game\3_Core.cpp" />
-    <ClCompile Include="..\Game\6_Platform.cpp" />
-    <ClCompile Include="..\Game\8_oRenderer.cpp" />
-    <ClCompile Include="..\Game\8_Renderer.cpp" />
-    <ClCompile Include="..\Game\9_Graphics.cpp" />
-    <ClCompile Include="..\Game\Engine.cpp" />
+    <ClCompile Include="EngineImpl.cpp" />
     <ClCompile Include="immo.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -224,23 +218,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\3rdparty\glmHeader.h" />
-    <ClInclude Include="..\Game\0_EngineConfig.h" />
-    <ClInclude Include="..\Game\10_Physics.h" />
-    <ClInclude Include="..\Game\11_UI.h" />
-    <ClInclude Include="..\Game\12_Navigation.h" />
-    <ClInclude Include="..\Game\13_Scene.h" />
-    <ClInclude Include="..\Game\14_World.h" />
-    <ClInclude Include="..\Game\1_BaseHeader.h" />
-    <ClInclude Include="..\Game\2_Base.h" />
-    <ClInclude Include="..\Game\3_Core.h" />
-    <ClInclude Include="..\Game\4_Math.h" />
-    <ClInclude Include="..\Game\5_Utility.h" />
-    <ClInclude Include="..\Game\6_Platform.h" />
-    <ClInclude Include="..\Game\7_Audio.h" />
-    <ClInclude Include="..\Game\8_oRenderer.h" />
-    <ClInclude Include="..\Game\8_Renderer.h" />
-    <ClInclude Include="..\Game\9_Graphics.h" />
-    <ClInclude Include="..\Game\Engine.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
