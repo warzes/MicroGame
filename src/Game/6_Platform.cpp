@@ -76,24 +76,24 @@ void UpdateInput()
 	glfwPollEvents();
 }
 
-bool IsKeyPressed(int key)
+bool IsKeyboardKeyPressed(int key)
 {
 	bool pressed = false;
 	if ((Keyboard.previousKeyState[key] == 0) && (Keyboard.currentKeyState[key] == 1)) pressed = true;
 	return pressed;
 }
-bool IsKeyDown(int key)
+bool IsKeyboardKeyDown(int key)
 {
 	if (Keyboard.currentKeyState[key] == 1) return true;
 	else return false;
 }
-bool IsKeyReleased(int key)
+bool IsKeyboardKeyReleased(int key)
 {
 	bool released = false;
 	if ((Keyboard.previousKeyState[key] == 1) && (Keyboard.currentKeyState[key] == 0)) released = true;
 	return released;
 }
-bool IsKeyUp(int key)
+bool IsKeyboardKeyUp(int key)
 {
 	if (Keyboard.currentKeyState[key] == 0) return true;
 	else return false;
@@ -196,14 +196,14 @@ void SetMouseScale(float scaleX, float scaleY)
 {
 	Mouse.scale = { scaleX, scaleY };
 }
-float GetMouseWheelMove()
+float GetMouseWheelDelta()
 {
 	float result = 0.0f;
 	if (fabsf(Mouse.currentWheelMove.x) > fabsf(Mouse.currentWheelMove.y)) result = (float)Mouse.currentWheelMove.x;
 	else result = (float)Mouse.currentWheelMove.y;
 	return result;
 }
-glm::vec2 GetMouseWheelMoveV()
+glm::vec2 GetMouseWheelDeltaV()
 {
 	glm::vec2 result = glm::vec2{ 0 };
 	result = Mouse.currentWheelMove;

@@ -140,30 +140,6 @@ private:
 	uint16_t m_attributes[static_cast<size_t>(VertexAttribute::Count)] = { 0 };
 };
 
-//=============================================================================
-// Render System
-//=============================================================================
-
-namespace RenderSystem
-{
-	struct CreateInfo
-	{
-		float PerspectiveFOV = 45.0f;
-		float PerspectiveNear = 0.01f;
-		float PerspectiveFar = 1000.0f;
-
-		glm::vec3 ClearColor = { 0.4f, 0.6f, 1.0f };
-	};
-
-	bool Create(const CreateInfo& createInfo);
-	void Destroy();
-
-	void BeginFrame();
-}
-
-
-
-
 
 enum class RenderResourceUsage
 {

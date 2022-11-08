@@ -2,6 +2,7 @@
 #include "Engine.h"
 #include "LauncherApp.h"
 #include <iostream>
+#include <array>
 //-----------------------------------------------------------------------------
 //https://github.com/Chr157i4n/OpenGL_Game
 // https://github.com/yagero/glsl-demo
@@ -39,6 +40,7 @@
 	https://sketchfab.com/3d-models/pokemon-fan-art-sinnoh-battle-170e4943531847aaa6a994b509566dfb
 	https://sketchfab.com/3d-models/the-legend-of-zelda-links-awakening-dx-534951458de04bfaa6548c5deee98ac6
 	Legend Of Zelda: Link's Awakening
+	Dawn of Darkness - https://www.old-games.ru/game/10212.html
 
 другое
 	https://cenullum.itch.io/kingway

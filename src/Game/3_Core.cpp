@@ -129,6 +129,40 @@ std::string GetCurrentTime()
 	return str;
 }
 //-----------------------------------------------------------------------------
+Time::Time()
+{
+	Start();
+}
+//-----------------------------------------------------------------------------
+void Time::Start()
+{
+	m_begin = std::chrono::high_resolution_clock::now();
+	m_last = m_begin;
+}
+//-----------------------------------------------------------------------------
+void Time::Update()
+{
+	auto end = std::chrono::high_resolution_clock::now();
+	m_deltaTime = ((float)(std::chrono::duration_cast<std::chrono::nanoseconds>(end - m_last).count())) * 1e-9f;
+	m_last = end;
+}
+//-----------------------------------------------------------------------------
+float Time::GetTime()
+{
+	auto end = std::chrono::high_resolution_clock::now();
+	return ((float)(std::chrono::duration_cast<std::chrono::nanoseconds>(end - m_begin).count())) * 1e-9f;
+}
+//-----------------------------------------------------------------------------
+float Time::DeltaTime()
+{
+	return m_deltaTime;
+}
+//-----------------------------------------------------------------------------
+float Time::FPS()
+{
+	return (1.f / m_deltaTime);
+}
+//-----------------------------------------------------------------------------
 //=============================================================================
 // Logging
 //=============================================================================

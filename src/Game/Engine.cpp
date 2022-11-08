@@ -15,7 +15,7 @@ namespace engine
 		int64_t frameTimeLast = 0;
 		int64_t frameTimeDelta = 0;
 		float deltaTime = 0.0f;
-		bool IsEngineExit = true;
+		bool IsExitRequested = true;
 	}
 
 
@@ -32,13 +32,13 @@ namespace engine
 
 		startTime = std::chrono::high_resolution_clock::now();
 
-		IsEngineExit = false;
+		IsExitRequested = false;
 
 		return true;
 	}
 	void DestroyEngine()
 	{
-		IsEngineExit = true;
+		IsExitRequested = true;
 		g3d::ModelFileManager::Destroy();
 		TextureFileManager::Destroy();
 		RenderSystem::Destroy();
@@ -48,7 +48,7 @@ namespace engine
 
 	bool IsRunningEngine()
 	{
-		return IsEngineExit || !WindowShouldClose();
+		return IsExitRequested || !WindowShouldClose();
 	}
 	void BeginFrameEngine()
 	{
@@ -72,5 +72,10 @@ namespace engine
 	float GetDeltaTime()
 	{
 		return deltaTime;
+	}
+
+	void ExitRequested()
+	{
+		IsExitRequested = true;
 	}
 }

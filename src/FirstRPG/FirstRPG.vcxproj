@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{46a22e9a-b4ec-47e1-9ba1-fa629887023a}</ProjectGuid>
+    <ProjectGuid>{64C1D668-DD4A-4C09-8F1D-D74DE20F5189}</ProjectGuid>
     <RootNamespace>Game</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -98,7 +98,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;$(SolutionDir)Game\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CallingConvention>FastCall</CallingConvention>
@@ -120,7 +120,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;$(SolutionDir)Game\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <CallingConvention>FastCall</CallingConvention>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -141,7 +141,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;$(SolutionDir)Game\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CallingConvention>FastCall</CallingConvention>
@@ -163,7 +163,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;$(SolutionDir)Game\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <CallingConvention>FastCall</CallingConvention>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -201,34 +201,20 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="13_Scene.cpp" />
-    <ClCompile Include="3_Core.cpp" />
-    <ClCompile Include="6_Platform.cpp" />
-    <ClCompile Include="8_oRenderer.cpp" />
-    <ClCompile Include="8_Renderer.cpp" />
-    <ClCompile Include="9_Graphics.cpp" />
-    <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="..\Game\13_Scene.cpp" />
+    <ClCompile Include="..\Game\3_Core.cpp" />
+    <ClCompile Include="..\Game\6_Platform.cpp" />
+    <ClCompile Include="..\Game\8_oRenderer.cpp" />
+    <ClCompile Include="..\Game\8_Renderer.cpp" />
+    <ClCompile Include="..\Game\9_Graphics.cpp" />
+    <ClCompile Include="..\Game\Engine.cpp" />
+    <ClCompile Include="immo.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Main22.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="OpenGLRhi.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -238,34 +224,24 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\3rdparty\glmHeader.h" />
-    <ClInclude Include="10_Physics.h" />
-    <ClInclude Include="11_UI.h" />
-    <ClInclude Include="12_Navigation.h" />
-    <ClInclude Include="13_Scene.h" />
-    <ClInclude Include="14_World.h" />
-    <ClInclude Include="1_BaseHeader.h" />
-    <ClInclude Include="0_EngineConfig.h" />
-    <ClInclude Include="2_Base.h" />
-    <ClInclude Include="3_Core.h" />
-    <ClInclude Include="4_Math.h" />
-    <ClInclude Include="5_Utility.h" />
-    <ClInclude Include="6_Platform.h" />
-    <ClInclude Include="7_Audio.h" />
-    <ClInclude Include="8_oRenderer.h" />
-    <ClInclude Include="8_Renderer.h" />
-    <ClInclude Include="DefaultLog.h" />
-    <ClInclude Include="DungeonCrawler.h" />
-    <ClInclude Include="Engine.h" />
-    <ClInclude Include="9_Graphics.h" />
-    <ClInclude Include="ExampleSDL2_GLSL_410.h" />
-    <ClInclude Include="ExampleSDL2_GLSL_450.h" />
-    <ClInclude Include="ExampleSDL2_GLSL_ES3.h" />
-    <ClInclude Include="ExampleSDL2_HLSL_D3D9_D3D10_D3D11_D3D12.h" />
-    <ClInclude Include="ExampleSDL2_Null.h" />
-    <ClInclude Include="LauncherApp.h" />
-    <ClInclude Include="Rhi.h" />
+    <ClInclude Include="..\Game\0_EngineConfig.h" />
+    <ClInclude Include="..\Game\10_Physics.h" />
+    <ClInclude Include="..\Game\11_UI.h" />
+    <ClInclude Include="..\Game\12_Navigation.h" />
+    <ClInclude Include="..\Game\13_Scene.h" />
+    <ClInclude Include="..\Game\14_World.h" />
+    <ClInclude Include="..\Game\1_BaseHeader.h" />
+    <ClInclude Include="..\Game\2_Base.h" />
+    <ClInclude Include="..\Game\3_Core.h" />
+    <ClInclude Include="..\Game\4_Math.h" />
+    <ClInclude Include="..\Game\5_Utility.h" />
+    <ClInclude Include="..\Game\6_Platform.h" />
+    <ClInclude Include="..\Game\7_Audio.h" />
+    <ClInclude Include="..\Game\8_oRenderer.h" />
+    <ClInclude Include="..\Game\8_Renderer.h" />
+    <ClInclude Include="..\Game\9_Graphics.h" />
+    <ClInclude Include="..\Game\Engine.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="Test1Triangles.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

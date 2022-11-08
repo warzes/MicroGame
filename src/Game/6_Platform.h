@@ -148,13 +148,14 @@ enum KeyboardKey
 	KEY_VOLUME_DOWN = 25     // Key: Android volume down button
 };
 
-bool IsKeyPressed(int key);  // Check if a key has been pressed once
-bool IsKeyDown(int key);     // Check if a key is being pressed
-bool IsKeyReleased(int key); // Check if a key has been released once
-bool IsKeyUp(int key);       // Check if a key is NOT being pressed
+// Keyboard
+bool IsKeyboardKeyPressed(int key);  // Check if a key has been pressed once
+bool IsKeyboardKeyDown(int key);     // Check if a key is being pressed
+bool IsKeyboardKeyReleased(int key); // Check if a key has been released once
+bool IsKeyboardKeyUp(int key);       // Check if a key is NOT being pressed
 int GetKeyPressed();         // Get key pressed (keycode), call it multiple times for keys queued, returns 0 when the queue is empty
 int GetCharPressed();        // Get char pressed (unicode), call it multiple times for chars queued, returns 0 when the queue is empty
-
+//Mouse
 bool IsMouseButtonPressed(int button);          // Check if a mouse button has been pressed once
 bool IsMouseButtonDown(int button);             // Check if a mouse button is being pressed
 bool IsMouseButtonReleased(int button);         // Check if a mouse button has been released once
@@ -166,10 +167,8 @@ glm::vec2 GetMouseDelta();                      // Get mouse delta between frame
 void SetMousePosition(int x, int y);            // Set mouse position XY
 void SetMouseOffset(int offsetX, int offsetY);  // Set mouse offset
 void SetMouseScale(float scaleX, float scaleY); // Set mouse scaling
-float GetMouseWheelMove();                      // Get mouse wheel movement for X or Y, whichever is larger
-glm::vec2 GetMouseWheelMoveV();                 // Get mouse wheel movement for both X and Y
+float GetMouseWheelDelta();                     // Get mouse wheel movement for X or Y, whichever is larger
+glm::vec2 GetMouseWheelDeltaV();                // Get mouse wheel movement for both X and Y
 void SetMouseCursor(int cursor);                // Set mouse cursor
-
-
 void SetMouseLock(bool lock);                   // Enables/Disables cursor(lock/unlock cursor)
 bool IsCursorOnScreen();                        // Check if cursor is on the screen

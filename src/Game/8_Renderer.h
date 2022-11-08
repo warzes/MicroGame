@@ -33,7 +33,6 @@ struct ShaderUniformInfo
 	std::string GetText() const { return ""; }
 };
 
-
 // TODO: юниформы хранящие свой тип данных (и статус изменения)
 class ShaderProgram
 {
@@ -79,3 +78,24 @@ private:
 
 	unsigned m_id = 0;
 };
+
+//=============================================================================
+// Render System
+//=============================================================================
+
+namespace RenderSystem
+{
+	struct CreateInfo
+	{
+		float PerspectiveFOV = 45.0f;
+		float PerspectiveNear = 0.01f;
+		float PerspectiveFar = 1000.0f;
+
+		glm::vec3 ClearColor = { 0.4f, 0.6f, 1.0f };
+	};
+
+	bool Create(const CreateInfo& createInfo);
+	void Destroy();
+
+	void BeginFrame();
+}

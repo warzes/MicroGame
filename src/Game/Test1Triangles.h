@@ -72,6 +72,7 @@ void CloseTest()
 	shader.Destroy();
 }
 
+// TODO: в графику?
 struct CommandBuffer
 {
 	VertexArrayBuffer* vao = nullptr;

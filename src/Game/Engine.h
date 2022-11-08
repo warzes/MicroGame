@@ -46,4 +46,6 @@ namespace engine
 	void EndFrameEngine();
 
 	float GetDeltaTime();
+
+	void ExitRequested();
 }

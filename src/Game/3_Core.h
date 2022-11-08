@@ -44,6 +44,23 @@ public:
 
 std::string GetCurrentTime();
 
+class Time
+{
+public:
+	Time();
+
+	void Start();
+	void Update();
+	float GetTime();
+	float DeltaTime();
+	float FPS();
+
+private:
+	std::chrono::steady_clock::time_point m_begin;
+	std::chrono::steady_clock::time_point m_last;
+	float m_deltaTime;
+};
+
 //=============================================================================
 // Logging
 //=============================================================================

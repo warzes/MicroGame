@@ -79,30 +79,30 @@ namespace g3d
 		lastPosY = ypos;
 
 		constexpr float speedMod = 1.0f;
-		if (IsKeyDown(KEY_W))
+		if (IsKeyboardKeyDown(KEY_W))
 			MoveForward(deltaTime, speedMod);
-		if (IsKeyDown(KEY_S))
+		if (IsKeyboardKeyDown(KEY_S))
 			MoveBackward(deltaTime, speedMod);
-		if (IsKeyDown(KEY_D))
+		if (IsKeyboardKeyDown(KEY_D))
 			MoveRight(deltaTime, speedMod);
-		if (IsKeyDown(KEY_A))
+		if (IsKeyboardKeyDown(KEY_A))
 			MoveLeft(deltaTime, speedMod);
 
 		constexpr float speedRotateMod = 1600.0f;
-		if (IsKeyDown(KEY_E))
+		if (IsKeyboardKeyDown(KEY_E))
 			Rotate(speedRotateMod * deltaTime, 0.0f);
-		if (IsKeyDown(KEY_Q))
+		if (IsKeyboardKeyDown(KEY_Q))
 			Rotate(-speedRotateMod * deltaTime, 0.0f);
 
 #ifdef _DEBUG
-		if (IsKeyDown(KEY_T))
+		if (IsKeyboardKeyDown(KEY_T))
 			MoveUp(deltaTime, speedMod / 2.0f);
-		if (IsKeyDown(KEY_G))
+		if (IsKeyboardKeyDown(KEY_G))
 			MoveDown(deltaTime, speedMod / 2.0f);
 
-		if (IsKeyDown(KEY_R))
+		if (IsKeyboardKeyDown(KEY_R))
 			Rotate(0.0f, speedRotateMod * deltaTime);
-		if (IsKeyDown(KEY_F))
+		if (IsKeyboardKeyDown(KEY_F))
 			Rotate(0.0f, -speedRotateMod * deltaTime);
 #endif
 

@@ -1,4 +1,15 @@
 ﻿https://store.steampowered.com/app/444470/Moor/?l=russian
+https://www.youtube.com/watch?v=-9LNKcxCoFo
+https://www.youtube.com/watch?v=3pNGwTZjyoA
+https://www.youtube.com/watch?v=6yqObNCkiiY
+
+
+идея
+	симуляция мира
+		вид сверху, генерируется мир. каждый пиксель это какая-то лока - там может быть трава, горы, лес. а озже города, крепости и данжи.
+		или графика как worldbox
+
+
 
 пираты
 	https://swsandra.itch.io/treasure-hunter

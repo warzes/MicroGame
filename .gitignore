@@ -9,4 +9,6 @@ Thumbs.db
 /*/ipch/
 /bin/x64/Game_Debug.*
 /bin/x64/Game_Release.*
+/bin/x64/FirstRPG_Debug.*
+/bin/x64/FirstRPG_Release.*
 /bin/Log.txt
