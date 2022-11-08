@@ -44,7 +44,8 @@ UniformLocation worldUniform;
 UniformLocation viewUniform;
 UniformLocation projectionUniform;
 g3d::Model model;
-g3d::Camera camera;
+g3d::FreeCamera camera;
+Transform transform;
 
 void InitTest()
 {
@@ -86,7 +87,7 @@ void FrameTest(float deltaTime)
 
 	texture2d.Bind(0);
 	shader.Bind();
-	shader.SetUniform(worldUniform, glm::mat4(1.0f));
+	shader.SetUniform(worldUniform, transform.GetWorld());
 	shader.SetUniform(viewUniform, camera.GetViewMatrix());
 	shader.SetUniform(projectionUniform, GetCurrentProjectionMatrix());
 

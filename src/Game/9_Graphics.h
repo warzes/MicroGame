@@ -8,7 +8,7 @@
 #pragma region Graphics3D
 namespace g3d
 {
-	class Camera
+	class FreeCamera
 	{
 	public:
 		void MoveForward(float deltaTime, float speedMod = 1.0f);
@@ -119,15 +119,15 @@ namespace g3d
 
 	namespace drawPrimitive
 	{
-		void DrawLine(const Camera& camera, const glm::vec3& startPos, const glm::vec3& endPos);
+		void DrawLine(const FreeCamera& camera, const glm::vec3& startPos, const glm::vec3& endPos);
 
-		void DrawCubeWires(const Camera& camera, const glm::mat4& worldMatrix, const glm::vec4& color = { 1.0f, 0.0f, 0.0f, 1.0f }, bool disableDepthTest = false);
-		void DrawCubeWires(const Camera& camera, const glm::vec3& position, const glm::vec3& size = glm::vec3(1.0f), const glm::vec3& rotationRadian = glm::vec3(0.0f), const glm::vec4& color = { 1.0f, 0.0f, 0.0f, 1.0f }, bool disableDepthTest = false);
-		inline void DrawCubeWires(const Camera& camera, const glm::vec3& position, const glm::vec4& color, bool disableDepthTest = false)
+		void DrawCubeWires(const FreeCamera& camera, const glm::mat4& worldMatrix, const glm::vec4& color = { 1.0f, 0.0f, 0.0f, 1.0f }, bool disableDepthTest = false);
+		void DrawCubeWires(const FreeCamera& camera, const glm::vec3& position, const glm::vec3& size = glm::vec3(1.0f), const glm::vec3& rotationRadian = glm::vec3(0.0f), const glm::vec4& color = { 1.0f, 0.0f, 0.0f, 1.0f }, bool disableDepthTest = false);
+		inline void DrawCubeWires(const FreeCamera& camera, const glm::vec3& position, const glm::vec4& color, bool disableDepthTest = false)
 		{
 			drawPrimitive::DrawCubeWires(camera, position, glm::vec3(1.0f), glm::vec3(0.0f), color, disableDepthTest);
 		}
-		inline void DrawCubeWires(const Camera& camera, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, bool disableDepthTest = false)
+		inline void DrawCubeWires(const FreeCamera& camera, const glm::vec3& position, const glm::vec3& size, const glm::vec4& color, bool disableDepthTest = false)
 		{
 			drawPrimitive::DrawCubeWires(camera, position, size, glm::vec3(0.0f), color, disableDepthTest);
 		}
@@ -162,25 +162,3 @@ namespace g2d
 	};
 }
 #pragma endregion
-
-class TransformComponent;
-
-class Light
-{
-public:
-	Light(const glm::vec3& col = glm::vec3(1, 1, 1), float b = 1) : m_color(col), m_brightness(b) {}
-	virtual ~Light() = default;
-
-	void SetColor(const glm::vec3& col) { m_color = col; m_Update = true; }
-	glm::vec3 GetColor() const { return m_color; }
-	void SetBrightness(float b) { m_brightness = b; m_Update = true; }
-	float GetBrightness() const { return m_brightness; }
-
-	virtual void SetShadowEnabled(bool enabled) {}
-	virtual bool IsShadowEnabled() { return false; }
-	virtual void GenerateShadow(TransformComponent* pTransform) {}
-protected:
-	glm::vec3 m_color;
-	float m_brightness;
-	bool m_Update = true;
-};

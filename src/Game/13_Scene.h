@@ -42,10 +42,10 @@ private:
 	glm::vec3 m_up = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::vec3 m_right = glm::vec3(1.0f, 0.0f, 0.0f);
 
-	glm::quat m_rotation = glm::quat(0.0f, 0.0f, 0.0f, 1.0f);
-	glm::quat m_worldRotation = glm::quat(0.0f, 0.0f, 0.0f, 1.0f);
+	glm::quat m_rotation = glm::quat(glm::vec3(0.0f));
+	glm::quat m_worldRotation = glm::quat(glm::vec3(0.0f));
 	
-	glm::mat4 m_worldMatrix;
+	glm::mat4 m_worldMatrix = glm::mat4(1.0f);
 
 	enum TransformChanged {
 		NONE = 0x00,
@@ -53,7 +53,7 @@ private:
 		ROTATION = 0x02,
 		SCALE = 0x04,
 	};
-	uint8_t m_isTransformChanged = TransformChanged::NONE;
+	uint8_t m_isTransformChanged = TransformChanged::TRANSLATION;
 
 	Transform* m_parent = nullptr; // TODO:
 };

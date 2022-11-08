@@ -24,51 +24,55 @@ namespace std
 namespace g3d
 {
 
-	void Camera::MoveForward(float deltaTime, float speedMod)
+	void FreeCamera::MoveForward(float deltaTime, float speedMod)
 	{
 		m_position += m_front * (m_movementSpeed * speedMod * deltaTime);
 	}
 
-	void Camera::MoveBackward(float deltaTime, float speedMod)
+	void FreeCamera::MoveBackward(float deltaTime, float speedMod)
 	{
 		m_position -= m_front * (m_movementSpeed * speedMod * deltaTime);
 	}
 
-	void Camera::MoveRight(float deltaTime, float speedMod)
-	{
-		m_position += m_right * (m_movementSpeed * speedMod * deltaTime);
-	}
-
-	void Camera::MoveLeft(float deltaTime, float speedMod)
+	void FreeCamera::MoveRight(float deltaTime, float speedMod)
 	{
 		m_position -= m_right * (m_movementSpeed * speedMod * deltaTime);
 	}
 
-	void Camera::MoveUp(float deltaTime, float speedMod)
+	void FreeCamera::MoveLeft(float deltaTime, float speedMod)
+	{
+		m_position += m_right * (m_movementSpeed * speedMod * deltaTime);
+	}
+
+	void FreeCamera::MoveUp(float deltaTime, float speedMod)
 	{
 		m_position += m_up * (m_movementSpeed * speedMod * deltaTime);
 	}
 
-	void Camera::MoveDown(float deltaTime, float speedMod)
+	void FreeCamera::MoveDown(float deltaTime, float speedMod)
 	{
 		m_position -= m_up * (m_movementSpeed * speedMod * deltaTime);
 	}
 
-	void Camera::Rotate(float offsetX, float offsetY)
+	void FreeCamera::Rotate(float offsetX, float offsetY)
 	{
-		m_yaw += offsetX * m_sensitivity;
+		m_yaw -= offsetX * m_sensitivity;
 		m_pitch += offsetY * m_sensitivity;
+		SetRotate(m_yaw, m_pitch);
+	}
 
+	void FreeCamera::SetRotate(float yaw, float pitch)
+	{
+		m_yaw = yaw;
+		m_pitch = pitch;
 		if (m_pitch > 89.0f) m_pitch = 89.0f;
 		else if (m_pitch < -89.0f) m_pitch = -89.0f;
-
 		if (m_yaw > 360.0f) m_yaw = 0.0f;
 		else if (m_yaw < -360.0f) m_yaw = 0.0f;
-
 		updateVectors();
 	}
 
-	void Camera::SimpleMove(float deltaTime)
+	void FreeCamera::SimpleMove(float deltaTime)
 	{
 		const float xpos = GetMouseX();
 		const float ypos = GetMouseY();
@@ -109,20 +113,9 @@ namespace g3d
 		Update();
 	}
 
-	void Camera::Update()
+	void FreeCamera::Update()
 	{
 		m_viewMatrix = glm::lookAt(m_position, m_position + m_front, m_up);
-	}
-
-	void Camera::SetRotate(float yaw, float pitch)
-	{
-		m_yaw = yaw;
-		m_pitch = pitch;
-		if (m_pitch > 89.0f) m_pitch = 89.0f;
-		else if (m_pitch < -89.0f) m_pitch = -89.0f;
-		if (m_yaw > 360.0f) m_yaw = 0.0f;
-		else if (m_yaw < -360.0f) m_yaw = 0.0f;
-		updateVectors();
 	}
 
 	//Frustum Camera::ComputeFrustum() const
@@ -143,12 +136,15 @@ namespace g3d
 	//	return frustum;
 	//}
 
-	void Camera::updateVectors()
+	void FreeCamera::updateVectors()
 	{
+		const float radiansYaw = glm::radians(m_yaw);
+		const float radiansPitch = glm::radians(m_pitch);
+
 		const glm::vec3 front = {
-			cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch)),
-			sin(glm::radians(m_pitch)),
-			sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch))
+			cos(radiansYaw) * cos(radiansPitch),
+			sin(radiansPitch),
+			sin(radiansYaw) * cos(radiansPitch)
 		};
 		m_front = glm::normalize(front);
 		m_right = glm::normalize(glm::cross(m_front, m_worldUp));
@@ -390,7 +386,7 @@ namespace g3d
 		}
 	}
 
-	void drawPrimitive::DrawLine(const Camera& camera, const glm::vec3& startPos, const glm::vec3& endPos)
+	void drawPrimitive::DrawLine(const FreeCamera& camera, const glm::vec3& startPos, const glm::vec3& endPos)
 	{
 		static bool isCreate = false;
 		static VertexArrayBuffer vao;
@@ -460,7 +456,7 @@ outColor = vec4(1.0, 1.0, 1.0, 1.0);
 		glEnable(GL_DEPTH_TEST);
 	}
 
-	void drawPrimitive::DrawCubeWires(const Camera& camera, const glm::mat4& worldMatrix, const glm::vec4& color, bool disableDepthTest)
+	void drawPrimitive::DrawCubeWires(const FreeCamera& camera, const glm::mat4& worldMatrix, const glm::vec4& color, bool disableDepthTest)
 	{
 		static bool isCreate = false;
 		static VertexArrayBuffer vao;
@@ -546,7 +542,7 @@ outColor = inColor;
 		if (disableDepthTest) glEnable(GL_DEPTH_TEST);
 	}
 
-	void drawPrimitive::DrawCubeWires(const Camera& camera, const glm::vec3& position, const glm::vec3& size, const glm::vec3& rotationRadian, const glm::vec4& color, bool disableDepthTest)
+	void drawPrimitive::DrawCubeWires(const FreeCamera& camera, const glm::vec3& position, const glm::vec3& size, const glm::vec3& rotationRadian, const glm::vec4& color, bool disableDepthTest)
 	{
 		const glm::mat4 transformX = glm::rotate(glm::mat4(1.0f), rotationRadian.x, glm::vec3(1.0f, 0.0f, 0.0f));
 		const glm::mat4 transformY = glm::rotate(glm::mat4(1.0f), rotationRadian.y, glm::vec3(0.0f, 1.0f, 0.0f));
