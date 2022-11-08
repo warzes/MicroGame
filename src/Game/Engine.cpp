@@ -40,7 +40,7 @@ namespace engine
 		IsExitRequested = true;
 		g3d::ModelFileManager::Destroy();
 		ShaderLoader::Destroy();
-		TextureFileManager::Destroy();
+		TextureLoader::Destroy();
 		RenderSystem::Destroy();
 		DestroyWindowSystem();
 		DestroyLogSystem();

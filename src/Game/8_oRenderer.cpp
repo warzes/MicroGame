@@ -3,8 +3,6 @@
 #include "6_Platform.h"
 #include "8_oRenderer.h"
 
-#include <stb/stb_image.h>
-
 extern glm::vec3 ClearColor;
 extern float perspectiveFOV;
 extern float perspectiveNear;
@@ -12,7 +10,6 @@ extern float perspectiveFar;
 extern glm::mat4 projectionMatrix;
 namespace
 {
-	unsigned currentTexture2D[8] = { 0 };
 	unsigned currentVAO = 0;
 	FrameBuffer* currentFrameBuffer = nullptr;
 }
@@ -93,10 +90,6 @@ void VertexLayout::Decode(VertexAttribute attrib, uint8_t& num, VertexAttributeT
 	asInt = !!(val & (1 << 8));
 }
 //-----------------------------------------------------------------------------
-
-
-
-
 inline GLenum translate(RenderResourceUsage usage)
 {
 	switch (usage)
@@ -106,237 +99,6 @@ inline GLenum translate(RenderResourceUsage usage)
 	case RenderResourceUsage::Stream:  return GL_STREAM_DRAW;
 	}
 	return 0;
-}
-
-
-
-inline GLint translate(TextureWrapping wrap)
-{
-	switch (wrap)
-	{
-	case TextureWrapping::Repeat:         return GL_REPEAT;
-	case TextureWrapping::MirroredRepeat: return GL_MIRRORED_REPEAT;
-	case TextureWrapping::Clamp:          return GL_CLAMP_TO_EDGE;
-	}
-	return 0;
-}
-
-inline GLint translate(TextureMinFilter filter)
-{
-	switch (filter)
-	{
-	case TextureMinFilter::Nearest:              return GL_NEAREST;
-	case TextureMinFilter::Linear:               return GL_LINEAR;
-	case TextureMinFilter::NearestMipmapNearest: return GL_NEAREST_MIPMAP_NEAREST;
-	case TextureMinFilter::NearestMipmapLinear:  return GL_NEAREST_MIPMAP_LINEAR;
-	case TextureMinFilter::LinearMipmapNearest:  return GL_LINEAR_MIPMAP_NEAREST;
-	case TextureMinFilter::LinearMipmapLinear:   return GL_LINEAR_MIPMAP_LINEAR;
-	}
-	return 0;
-}
-
-inline GLint translate(TextureMagFilter filter)
-{
-	switch (filter)
-	{
-	case TextureMagFilter::Nearest: return GL_NEAREST;
-	case TextureMagFilter::Linear:  return GL_LINEAR;
-	}
-	return 0;
-}
-
-inline bool getTextureFormatType(TexelsFormat inFormat, GLenum textureType, GLenum& format, GLint& internalFormat, GLenum& oglType)
-{
-	if (inFormat == TexelsFormat::R_U8)
-	{
-		format = GL_RED;
-		internalFormat = GL_R8;
-		oglType = GL_UNSIGNED_BYTE;
-	}
-	else if (inFormat == TexelsFormat::RG_U8)
-	{
-		format = GL_RG;
-		internalFormat = GL_RG8;
-		oglType = GL_UNSIGNED_BYTE;
-		const GLint swizzleMask[] = { GL_RED, GL_RED, GL_RED, GL_GREEN };
-		glTexParameteriv(textureType, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask); // TODO: могут быть проблемы с браузерами, тогда только грузить stb с указанием нужного формата
-	}
-	else if (inFormat == TexelsFormat::RGB_U8)
-	{
-		format = GL_RGB;
-		internalFormat = GL_RGB8;
-		oglType = GL_UNSIGNED_BYTE;
-	}
-	else if (inFormat == TexelsFormat::RGBA_U8)
-	{
-		format = GL_RGBA;
-		internalFormat = GL_RGBA8;
-		oglType = GL_UNSIGNED_BYTE;
-	}
-	else if (inFormat == TexelsFormat::Depth_U16)
-	{
-		format = GL_DEPTH_COMPONENT;
-		internalFormat = GL_DEPTH_COMPONENT16;
-		oglType = GL_UNSIGNED_SHORT;
-	}
-	else if (inFormat == TexelsFormat::DepthStencil_U16)
-	{
-		format = GL_DEPTH_STENCIL;
-		internalFormat = GL_DEPTH24_STENCIL8;
-		oglType = GL_UNSIGNED_SHORT;
-	}
-	else if (inFormat == TexelsFormat::Depth_U24)
-	{
-		format = GL_DEPTH_COMPONENT;
-		internalFormat = GL_DEPTH_COMPONENT24;
-		oglType = GL_UNSIGNED_INT;
-	}
-	else if (inFormat == TexelsFormat::DepthStencil_U24)
-	{
-		format = GL_DEPTH_STENCIL;
-		internalFormat = GL_DEPTH24_STENCIL8;
-		oglType = GL_UNSIGNED_INT;
-	}
-	else
-	{
-		LogError("unknown texture format");
-		return false;
-	}
-	return true;
-}
-
-bool Texture2D::CreateFromMemories(const Texture2DCreateInfo& createInfo)
-{
-	if (id > 0) Destroy();
-
-	isTransparent = createInfo.isTransparent;
-
-	// save prev pixel store state
-	GLint Alignment = 0;
-	glGetIntegerv(GL_UNPACK_ALIGNMENT, &Alignment);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-	// gen texture res
-	glGenTextures(1, &id);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, id);
-
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, translate(createInfo.wrapS));
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, translate(createInfo.wrapT));
-
-	// set texture filtering parameters
-	TextureMinFilter minFilter = createInfo.minFilter;
-	if (!createInfo.mipmap)
-	{
-		if (createInfo.minFilter == TextureMinFilter::NearestMipmapNearest) minFilter = TextureMinFilter::Nearest;
-		else if (createInfo.minFilter != TextureMinFilter::Nearest) minFilter = TextureMinFilter::Linear;
-	}
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, translate(minFilter));
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, translate(createInfo.magFilter));
-
-	// set texture format
-	GLenum format = GL_RGB;
-	GLint internalFormat = GL_RGB;
-	GLenum oglType = GL_UNSIGNED_BYTE;
-	getTextureFormatType(createInfo.format, GL_TEXTURE_2D, format, internalFormat, oglType);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, createInfo.width, createInfo.height, 0, format, oglType, createInfo.data);
-	if (createInfo.mipmap)
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-	// restore prev state
-	glBindTexture(GL_TEXTURE_2D, currentTexture2D[0]);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, Alignment);
-	return true;
-}
-
-bool Texture2D::CreateFromFiles(const Texture2DLoaderInfo& loaderInfo)
-{
-	if (loaderInfo.fileName == nullptr || loaderInfo.fileName == "") return false;
-
-	Texture2DCreateInfo createInfo(loaderInfo);
-	{
-		if (loaderInfo.verticallyFlip)
-			stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-
-		int width = 0;
-		int height = 0;
-		int nrChannels = 0;
-		TexelsFormat format = TexelsFormat::RGB_U8;
-		uint8_t* data = stbi_load(loaderInfo.fileName, &width, &height, &nrChannels, 0);
-		if (!data || nrChannels < STBI_grey || nrChannels > STBI_rgb_alpha || width == 0 || height == 0)
-		{
-			LogError("Texture loading failed! Filename='" + std::string(loaderInfo.fileName) + "'");
-			return false;
-		}
-		if (nrChannels == STBI_grey) format = TexelsFormat::R_U8;
-		else if (nrChannels == STBI_grey_alpha) format = TexelsFormat::RG_U8;
-		else if (nrChannels == STBI_rgb) format = TexelsFormat::RGB_U8;
-		else if (nrChannels == STBI_rgb_alpha) format = TexelsFormat::RGBA_U8;
-
-		// проверить на прозрачность
-		// TODO: может быть медленно, проверить скорость и поискать другое решение
-		createInfo.isTransparent = false;
-		if (format == TexelsFormat::RGBA_U8)
-		{
-			for (int i = 0; i < width * height * nrChannels; i += 4)
-			{
-				//uint8_t r = data[i];
-				//uint8_t g = data[i + 1];
-				//uint8_t b = data[i + 2];
-				const uint8_t& a = data[i + 3];
-				if (a < 255)
-				{
-					createInfo.isTransparent = true;
-					break;
-				}
-			}
-		}
-
-		createInfo.format = format;
-		createInfo.width = static_cast<uint16_t>(width);
-		createInfo.height = static_cast<uint16_t>(height);
-		createInfo.depth = 1;
-		createInfo.data = data;
-
-		bool isValid = CreateFromMemories(createInfo);
-		stbi_image_free((void*)data);
-		if (!isValid) return false;
-	}
-
-	return true;
-}
-
-void Texture2D::Destroy()
-{
-	if (id > 0)
-	{
-		for (unsigned i = 0; i < 8; i++)
-		{
-			if (currentTexture2D[i] == id)
-				Texture2D::UnBind(i);
-		}
-		glDeleteTextures(1, &id);
-		id = 0;
-	}
-}
-
-void Texture2D::Bind(unsigned slot) const
-{
-	if (currentTexture2D[slot] != id)
-	{
-		currentTexture2D[slot] = id;
-		glActiveTexture(GL_TEXTURE0 + slot);
-		glBindTexture(GL_TEXTURE_2D, id);
-	}
-}
-
-void Texture2D::UnBind(unsigned slot)
-{
-	glActiveTexture(GL_TEXTURE0 + slot);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	currentTexture2D[slot] = 0;
 }
 
 bool VertexBuffer::Create(RenderResourceUsage usage, unsigned vertexCount, unsigned vertexSize, const void* data)
@@ -778,48 +540,4 @@ const glm::mat4& GetCurrentProjectionMatrix()
 		return currentFrameBuffer->GetProjectionMatrix();
 	else
 		return projectionMatrix;
-}
-
-namespace TextureFileManager
-{
-	std::unordered_map<std::string, Texture2D> FileTextures;
-
-	void Destroy()
-	{
-		for (auto it = FileTextures.begin(); it != FileTextures.end(); ++it)
-			it->second.Destroy();
-		FileTextures.clear();
-	}
-
-	Texture2D* LoadTexture2D(const char* name)
-	{
-		Texture2DLoaderInfo textureLoaderInfo = {};
-		textureLoaderInfo.fileName = name;
-		return LoadTexture2D(textureLoaderInfo);
-	}
-
-	Texture2D* LoadTexture2D(const Texture2DLoaderInfo& textureLoaderInfo)
-	{
-		auto it = FileTextures.find(textureLoaderInfo.fileName);
-		if (it != FileTextures.end())
-		{
-			return &it->second;
-		}
-		else
-		{
-			LogPrint("Load texture: " + std::string(textureLoaderInfo.fileName));
-
-			Texture2D texture;
-			if (!texture.CreateFromFiles(textureLoaderInfo) || !texture.IsValid())
-				return nullptr;
-
-			FileTextures[textureLoaderInfo.fileName] = texture;
-			return &FileTextures[textureLoaderInfo.fileName];
-		}
-	}
-
-	bool IsLoad(Texture2D* texture)
-	{
-		return false;
-	}
 }

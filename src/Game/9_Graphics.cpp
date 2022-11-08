@@ -253,7 +253,7 @@ namespace g3d
 				if (materials[i].diffuse_texname.empty()) continue;
 
 				std::string diffuseMap = pathMaterialFiles + materials[i].diffuse_texname;
-				tempMesh[i].material.diffuseTexture = TextureFileManager::LoadTexture2D(diffuseMap.c_str());
+				tempMesh[i].material.diffuseTexture = TextureLoader::LoadTexture2D(diffuseMap.c_str());
 				if (!isFindToTransparent && tempMesh[i].material.diffuseTexture)
 					isFindToTransparent = tempMesh[i].material.diffuseTexture->isTransparent;
 			}

@@ -3,6 +3,13 @@
 #include "0_EngineConfig.h"
 #include "1_BaseHeader.h"
 
+enum class RenderResourceUsage
+{
+	Static,
+	Dynamic,
+	Stream,
+};
+
 //=============================================================================
 // ShaderProgram
 //=============================================================================
@@ -69,6 +76,8 @@ public:
 
 	[[nodiscard]] bool IsValid() const { return m_id > 0; }
 
+	bool operator==(const ShaderProgram&) const = default;
+
 private:
 	enum class ShaderType
 	{
@@ -85,6 +94,124 @@ namespace ShaderLoader
 {
 	void Destroy();
 	ShaderProgram* Load(const char* name);
+
+	bool IsLoad(const ShaderProgram& shaderProgram);
+}
+
+//=============================================================================
+// Texture
+//=============================================================================
+
+enum class TextureMinFilter
+{
+	Nearest,
+	Linear,
+	NearestMipmapNearest,
+	NearestMipmapLinear,
+	LinearMipmapNearest,
+	LinearMipmapLinear,
+};
+
+enum class TextureMagFilter
+{
+	Nearest,
+	Linear,
+};
+
+enum class TextureWrapping
+{
+	Repeat,
+	MirroredRepeat,
+	Clamp,
+};
+
+enum class TexelsFormat
+{
+	None = 0,
+	R_U8,
+	RG_U8,
+	RGB_U8,
+	RGBA_U8,
+	Depth_U16,
+	DepthStencil_U16,
+	Depth_U24,
+	DepthStencil_U24,
+};
+
+struct Texture2DLoaderInfo
+{
+	RenderResourceUsage usage = RenderResourceUsage::Static;
+
+	TextureMinFilter minFilter = TextureMinFilter::NearestMipmapNearest;
+	TextureMagFilter magFilter = TextureMagFilter::Nearest;
+	TextureWrapping wrapS = TextureWrapping::Repeat;
+	TextureWrapping wrapT = TextureWrapping::Repeat;
+	TextureWrapping wrapR = TextureWrapping::Repeat;
+
+	const char* fileName = nullptr;
+	bool verticallyFlip = true;
+	bool mipmap = true;
+};
+
+struct Texture2DCreateInfo
+{
+	Texture2DCreateInfo() = default;
+	Texture2DCreateInfo(const Texture2DLoaderInfo& loaderInfo)
+	{
+		usage = loaderInfo.usage;
+		minFilter = loaderInfo.minFilter;
+		magFilter = loaderInfo.magFilter;
+		wrapS = loaderInfo.wrapS;
+		wrapT = loaderInfo.wrapT;
+		wrapR = loaderInfo.wrapR;
+		mipmap = loaderInfo.mipmap;
+	}
+
+	RenderResourceUsage usage = RenderResourceUsage::Static;
+
+	TextureMinFilter minFilter = TextureMinFilter::NearestMipmapNearest;
+	TextureMagFilter magFilter = TextureMagFilter::Nearest;
+	TextureWrapping wrapS = TextureWrapping::Repeat;
+	TextureWrapping wrapT = TextureWrapping::Repeat;
+	TextureWrapping wrapR = TextureWrapping::Repeat;
+
+	TexelsFormat format = TexelsFormat::RGBA_U8;
+	uint16_t width = 1;
+	uint16_t height = 1;
+	uint16_t depth = 1;
+	uint8_t* data = nullptr;
+	unsigned mipMapCount = 1; // TODO: only compressed
+	bool mipmap = true;
+	bool isTransparent = false;
+};
+
+class Texture2D
+{
+public:
+	bool CreateFromMemories(const Texture2DCreateInfo& createInfo);
+	bool CreateFromFiles(const Texture2DLoaderInfo& loaderInfo);
+
+	void Destroy();
+
+	void Bind(unsigned slot = 0) const;
+
+	static void UnBind(unsigned slot = 0);
+
+	bool IsValid() const { return id > 0; }
+
+	bool operator==(const Texture2D&) const = default;
+
+	unsigned id = 0;
+	bool isTransparent = false;
+};
+
+namespace TextureLoader
+{
+	void Destroy();
+	Texture2D* LoadTexture2D(const char* name);
+	Texture2D* LoadTexture2D(const Texture2DLoaderInfo& loaderInfo);
+
+	bool IsLoad(const Texture2D& texture);
 }
 
 //=============================================================================
