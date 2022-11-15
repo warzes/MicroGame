@@ -84,12 +84,6 @@ namespace g3d
 	class Mesh
 	{
 	public:
-		Mesh() = default;
-		Mesh(MeshCreateInfo&& createInfo)
-		{
-			Set(std::move(createInfo));
-		}
-
 		void Set(MeshCreateInfo&& createInfo)
 		{
 			vertices = std::move(createInfo.vertices);

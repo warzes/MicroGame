@@ -67,6 +67,7 @@ void InitTest()
 	{
 		Texture2DLoaderInfo info;
 		info.fileName = "../data/textures/crate.png";
+		info.verticallyFlip = true;
 		material.diffuseTexture = TextureLoader::LoadTexture2D(info);
 	}
 
@@ -81,13 +82,13 @@ void InitTest()
 		std::vector<g3d::MeshCreateInfo> meshCreateInfo;
 		meshCreateInfo.resize(1);
 
-		meshCreateInfo[0].vertices.push_back({ {-2.0f, 2.0f, 0.0f},{0.0f, 0.0f} });
-		meshCreateInfo[0].vertices.push_back({ {2.0f, 2.0f, 0.0f},{1.0f, 0.0f} });
-		meshCreateInfo[0].vertices.push_back({ {0.0f, -2.0f, 0.0f},{0.5f, 1.0f} });
-
-		meshCreateInfo[0].indices.push_back(0);
-		meshCreateInfo[0].indices.push_back(1);
-		meshCreateInfo[0].indices.push_back(2);
+		meshCreateInfo[0].vertices = {
+			{ {-1.0f,  1.0f, 0.0f}, {0.0f, 1.0f} },
+			{ { 1.0f,  1.0f, 0.0f}, {1.0f, 1.0f} },
+			{ { 1.0f, -1.0f, 0.0f}, {1.0f, 0.0f} },
+			{ {-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f} },
+		};
+		meshCreateInfo[0].indices = { 0, 1, 2, 2, 3, 0};
 
 		meshCreateInfo[0].material = material;
 
