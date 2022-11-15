@@ -187,7 +187,7 @@ namespace g3d
 			size_t index_offset = 0;
 			for (size_t faceId = 0; faceId < shapes[shapeId].mesh.num_face_vertices.size(); faceId++)
 			{
-				size_t fv = size_t(shapes[shapeId].mesh.num_face_vertices[faceId]);
+				const size_t fv = static_cast<size_t>(shapes[shapeId].mesh.num_face_vertices[faceId]);
 
 				// per-face material
 				int materialId = shapes[shapeId].mesh.material_ids[faceId];
@@ -197,10 +197,12 @@ namespace g3d
 				for (size_t v = 0; v < fv; v++)
 				{
 					// access to vertex
-					tinyobj::index_t idx = shapes[shapeId].mesh.indices[index_offset + v];
-					tinyobj::real_t vx = attributes.vertices[3 * size_t(idx.vertex_index) + 0];
-					tinyobj::real_t vy = attributes.vertices[3 * size_t(idx.vertex_index) + 1];
-					tinyobj::real_t vz = attributes.vertices[3 * size_t(idx.vertex_index) + 2];
+					const tinyobj::index_t idx = shapes[shapeId].mesh.indices[index_offset + v];
+
+					// vertex position
+					const tinyobj::real_t vx = attributes.vertices[3 * size_t(idx.vertex_index) + 0];
+					const tinyobj::real_t vy = attributes.vertices[3 * size_t(idx.vertex_index) + 1];
+					const tinyobj::real_t vz = attributes.vertices[3 * size_t(idx.vertex_index) + 2];
 
 					// Check if `normal_index` is zero or positive. negative = no normal data
 					if (idx.normal_index >= 0)
@@ -219,10 +221,10 @@ namespace g3d
 						ty = attributes.texcoords[2 * size_t(idx.texcoord_index) + 1];
 					}
 
-					// Optional: vertex colors
-					// tinyobj::real_t red   = attrib.colors[3*size_t(idx.vertex_index)+0];
-					// tinyobj::real_t green = attrib.colors[3*size_t(idx.vertex_index)+1];
-					// tinyobj::real_t blue  = attrib.colors[3*size_t(idx.vertex_index)+2];
+					// vertex colors
+					const tinyobj::real_t r = attributes.colors[3 * size_t(idx.vertex_index) + 0];
+					const tinyobj::real_t g = attributes.colors[3 * size_t(idx.vertex_index) + 1];
+					const tinyobj::real_t b = attributes.colors[3 * size_t(idx.vertex_index) + 2];
 
 					glm::vec3 position{ vx, vy, vz };
 					glm::vec2 texCoord{ tx,ty };
