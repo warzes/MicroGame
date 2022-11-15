@@ -1,5 +1,11 @@
 #pragma once
 
+#if defined(_MSC_VER)
+#	pragma warning(push, 0)
+#	pragma warning(disable : 5045)
+#endif
+
+
 /*
 Left handed
 	Y   Z
@@ -21,3 +27,7 @@ Left handed
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/euler_angles.hpp>
+
+#if defined(_MSC_VER)
+#	pragma warning(pop)
+#endif

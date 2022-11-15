@@ -90,84 +90,7 @@ void VertexLayout::Decode(VertexAttribute attrib, uint8_t& num, VertexAttributeT
 	asInt = !!(val & (1 << 8));
 }
 //-----------------------------------------------------------------------------
-inline GLenum translate(RenderResourceUsage usage)
-{
-	switch (usage)
-	{
-	case RenderResourceUsage::Static:  return GL_STATIC_DRAW;
-	case RenderResourceUsage::Dynamic: return GL_DYNAMIC_DRAW;
-	case RenderResourceUsage::Stream:  return GL_STREAM_DRAW;
-	}
-	return 0;
-}
 
-bool VertexBuffer::Create(RenderResourceUsage usage, unsigned vertexCount, unsigned vertexSize, const void* data)
-{
-	if (m_id > 0) Destroy();
-
-	m_vertexCount = vertexCount;
-	m_vertexSize = vertexSize;
-	m_usage = usage;
-	glGenBuffers(1, &m_id);
-
-	GLint currentVBO = 0;
-	glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &currentVBO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_id);
-	glBufferData(GL_ARRAY_BUFFER, vertexCount * m_vertexSize, data, translate(m_usage));
-
-	glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(currentVBO));
-	return true;
-}
-
-void VertexBuffer::Destroy()
-{
-	GLint currentVBO = 0;
-	glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &currentVBO);
-	if (static_cast<GLuint>(currentVBO) == m_id) glBindBuffer(GL_ARRAY_BUFFER, 0);
-	if (m_id) glDeleteBuffers(1, &m_id);
-	m_id = 0;
-}
-
-void VertexBuffer::Update(unsigned offset, unsigned size, const void* data)
-{
-	glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
-}
-
-void VertexBuffer::Bind() const
-{
-	glBindBuffer(GL_ARRAY_BUFFER, m_id);
-}
-
-bool IndexBuffer::Create(RenderResourceUsage usage, unsigned indexCount, unsigned indexSize, const void* data)
-{
-	if (m_id > 0) Destroy();
-
-	m_indexCount = indexCount;
-	m_indexSize = indexSize;
-	m_usage = usage;
-	glGenBuffers(1, &m_id);
-
-	GLint currentIBO = 0;
-	glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &currentIBO);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * indexSize, data, translate(m_usage));
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLuint>(currentIBO));
-	return true;
-}
-
-void IndexBuffer::Destroy()
-{
-	glDeleteBuffers(1, &m_id);
-	m_id = 0;
-}
-
-void IndexBuffer::Bind() const
-{
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id);
-}
 
 inline GLenum translate(PrimitiveDraw p)
 {
@@ -483,11 +406,12 @@ bool FrameBuffer::Create(int width, int height)
 
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
 
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	if (!checkFramebuffer())
 	{
 		LogError("Framebuffer is not complete!");
 		return false;
 	}
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	currentFrameBuffer = nullptr;
 	const float aspect = (float)width / (float)height;
@@ -532,6 +456,30 @@ void FrameBuffer::BindTextureBuffer()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_texColorBuffer);
 	Texture2D::UnBind(); // TODO:
+}
+
+bool FrameBuffer::checkFramebuffer()
+{
+	const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (status == GL_FRAMEBUFFER_COMPLETE)
+		return true;
+
+	std::string strStatus = "";
+	switch (status)
+	{
+	case GL_FRAMEBUFFER_UNDEFINED: strStatus = "GL_FRAMEBUFFER_UNDEFINED"; break;
+	case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: strStatus = "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT"; break;
+	case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: strStatus = "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"; break;
+	case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER: strStatus = "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER"; break;
+	case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER: strStatus = "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER"; break;
+	case GL_FRAMEBUFFER_UNSUPPORTED: strStatus = "GL_FRAMEBUFFER_UNSUPPORTED"; break;
+	case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: strStatus = "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE"; break;
+	case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS: strStatus = "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS"; break;
+	default: strStatus = "UNKNOWN"; break;
+	}
+	LogError("OpenGL Error = " + strStatus);
+
+	return false;
 }
 
 const glm::mat4& GetCurrentProjectionMatrix()

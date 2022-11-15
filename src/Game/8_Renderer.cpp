@@ -18,8 +18,11 @@ extern "C"
 	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 #endif // _WIN32
+//=============================================================================
+// OpenGL Core
+//=============================================================================
 //-----------------------------------------------------------------------------
-void glCheckError(const char* file, int line)
+void glCheckError(const char* func, const char* file, int line)
 {
 	GLenum errorCode;
 	while ((errorCode = glGetError()) != GL_NO_ERROR)
@@ -27,21 +30,22 @@ void glCheckError(const char* file, int line)
 		std::string error;
 		switch (errorCode)
 		{
-		case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
-		case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
-		case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
-		case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; break;
-		case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; break;
-		case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
-		case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
+		case GL_INVALID_ENUM:                  error = "GL_INVALID_ENUM"; break;
+		case GL_INVALID_VALUE:                 error = "GL_INVALID_VALUE"; break;
+		case GL_INVALID_OPERATION:             error = "GL_INVALID_OPERATION"; break;
+		case GL_STACK_OVERFLOW:                error = "GL_STACK_OVERFLOW"; break;
+		case GL_STACK_UNDERFLOW:               error = "GL_STACK_UNDERFLOW"; break;
+		case GL_OUT_OF_MEMORY:                 error = "GL_OUT_OF_MEMORY"; break;
+		case GL_INVALID_FRAMEBUFFER_OPERATION: error = "GL_INVALID_FRAMEBUFFER_OPERATION"; break;
+		default:                               error = "UNKNOWN"; break;
 		}
-		LogError(error + " | " + std::string(file) + " (" + std::to_string(line) + ")");
+		LogError("OpenGL Error(" + error + ") in func: " + std::string(func) + " - " + std::string(file) + " (" + std::to_string(line) + ")");
 	}
 }
-#define GL_CHECK(_func)                               \
-				{                                     \
-					_func;                            \
-					glCheckError(__FILE__, __LINE__); \
+#define GL_CHECK(_func)                                       \
+				{                                             \
+					_func;                                    \
+					glCheckError(#_func, __FILE__, __LINE__); \
 				}
 //-----------------------------------------------------------------------------
 #if defined(_DEBUG)
@@ -101,8 +105,6 @@ void openglDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 }
 #endif
 //-----------------------------------------------------------------------------
-
-
 glm::vec3 ClearColor; // TODO: в пространство имен
 float perspectiveFOV = 0.0f;
 float perspectiveNear = 0.01f;
@@ -110,15 +112,19 @@ float perspectiveFar = 1000.0f;
 glm::mat4 projectionMatrix;
 namespace
 {
-	unsigned currentTexture2D[8] = { 0 };
-
 	int RenderWidth = 0;
 	int RenderHeight = 0;
 }
-
 //=============================================================================
-// OpenGL Core
+// Current Render State
 //=============================================================================
+#if USE_OPENGLCACHESTATE
+namespace currentRenderState
+{
+	unsigned shaderProgram = 0;
+	unsigned texture2D[MAXTEXTURE] = { 0 };
+}
+#endif
 //-----------------------------------------------------------------------------
 const char* glslTypeName(GLuint type)
 {
@@ -187,12 +193,66 @@ const char* glslTypeName(GLuint type)
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
-// Current Render State
+// Type translation
 //=============================================================================
-namespace currentRenderState
+//-----------------------------------------------------------------------------
+inline constexpr GLenum translate(RenderResourceUsage usage)
 {
-	unsigned shaderProgram = 0;
+	switch (usage)
+	{
+	case RenderResourceUsage::Static:  return GL_STATIC_DRAW;
+	case RenderResourceUsage::Dynamic: return GL_DYNAMIC_DRAW;
+	case RenderResourceUsage::Stream:  return GL_STREAM_DRAW;
+	}
+	return 0;
 }
+//-----------------------------------------------------------------------------
+inline constexpr GLenum translate(ShaderType type)
+{
+	switch (type)
+	{
+	case ShaderType::Vertex:    return GL_VERTEX_SHADER;
+	case ShaderType::Geometry:  return GL_GEOMETRY_SHADER;
+	case ShaderType::Fragment:  return GL_FRAGMENT_SHADER;
+	}
+	return 0;
+}
+//-----------------------------------------------------------------------------
+inline constexpr GLint translate(TextureWrapping wrap)
+{
+	switch (wrap)
+	{
+	case TextureWrapping::Repeat:         return GL_REPEAT;
+	case TextureWrapping::MirroredRepeat: return GL_MIRRORED_REPEAT;
+	case TextureWrapping::Clamp:          return GL_CLAMP_TO_EDGE;
+	}
+	return 0;
+}
+//-----------------------------------------------------------------------------
+inline constexpr GLint translate(TextureMinFilter filter)
+{
+	switch (filter)
+	{
+	case TextureMinFilter::Nearest:              return GL_NEAREST;
+	case TextureMinFilter::Linear:               return GL_LINEAR;
+	case TextureMinFilter::NearestMipmapNearest: return GL_NEAREST_MIPMAP_NEAREST;
+	case TextureMinFilter::NearestMipmapLinear:  return GL_NEAREST_MIPMAP_LINEAR;
+	case TextureMinFilter::LinearMipmapNearest:  return GL_LINEAR_MIPMAP_NEAREST;
+	case TextureMinFilter::LinearMipmapLinear:   return GL_LINEAR_MIPMAP_LINEAR;
+	}
+	return 0;
+}
+//-----------------------------------------------------------------------------
+inline constexpr GLint translate(TextureMagFilter filter)
+{
+	switch (filter)
+	{
+	case TextureMagFilter::Nearest: return GL_NEAREST;
+	case TextureMagFilter::Linear:  return GL_LINEAR;
+	}
+	return 0;
+}
+//-----------------------------------------------------------------------------
 //=============================================================================
 // ShaderProgram
 //=============================================================================
@@ -275,7 +335,9 @@ void ShaderProgram::Destroy()
 {
 	if (m_id > 0)
 	{
+#if USE_OPENGLCACHESTATE
 		if (currentRenderState::shaderProgram == m_id) UnBind();
+#endif
 		if (!ShaderLoader::IsLoad(*this)) // TODO: не удалять шейдер если он загружен через менеджер, в будущем сделать подсчет ссылок и удалять если нет
 			glDeleteProgram(m_id);
 		m_id = 0;
@@ -284,16 +346,19 @@ void ShaderProgram::Destroy()
 //-----------------------------------------------------------------------------
 void ShaderProgram::Bind()
 {
-	if (currentRenderState::shaderProgram != m_id)
-	{
-		currentRenderState::shaderProgram = m_id;
-		glUseProgram(currentRenderState::shaderProgram);
-	}
+#if USE_OPENGLCACHESTATE
+	if (currentRenderState::shaderProgram == m_id)
+		return;
+	currentRenderState::shaderProgram = m_id;
+#endif
+	glUseProgram(m_id);
 }
 //-----------------------------------------------------------------------------
 void ShaderProgram::UnBind()
 {
+#if USE_OPENGLCACHESTATE
 	currentRenderState::shaderProgram = 0;
+#endif
 	glUseProgram(0);
 }
 //-----------------------------------------------------------------------------
@@ -346,7 +411,6 @@ std::vector<ShaderAttribInfo> ShaderProgram::GetAttribInfo() const
 		attribs.emplace_back(attrib);
 	}
 
-	// TODO: сделать сортировку вектора по location
 	std::sort(attribs.begin(), attribs.end(), [](const ShaderAttribInfo& a, const ShaderAttribInfo& b) {return a.location < b.location; });
 
 	return attribs;
@@ -543,11 +607,7 @@ unsigned ShaderProgram::createShader(ShaderType type, const std::string& shaderS
 {
 	if (shaderString.empty() || shaderString == "") return 0;
 		
-	GLenum glShaderType = 0;
-	if (type == ShaderType::Vertex) glShaderType = GL_VERTEX_SHADER;
-	else if (type == ShaderType::Geometry) glShaderType = GL_GEOMETRY_SHADER;
-	else if (type == ShaderType::Fragment) glShaderType = GL_FRAGMENT_SHADER;
-		
+	const GLenum glShaderType = translate(type);
 	const GLuint shaderId = glCreateShader(glShaderType);
 
 	{
@@ -759,41 +819,6 @@ namespace ShaderLoader
 	}
 } // ShaderManager
 //-----------------------------------------------------------------------------
-inline GLint translate(TextureWrapping wrap)
-{
-	switch (wrap)
-	{
-	case TextureWrapping::Repeat:         return GL_REPEAT;
-	case TextureWrapping::MirroredRepeat: return GL_MIRRORED_REPEAT;
-	case TextureWrapping::Clamp:          return GL_CLAMP_TO_EDGE;
-	}
-	return 0;
-}
-//-----------------------------------------------------------------------------
-inline GLint translate(TextureMinFilter filter)
-{
-	switch (filter)
-	{
-	case TextureMinFilter::Nearest:              return GL_NEAREST;
-	case TextureMinFilter::Linear:               return GL_LINEAR;
-	case TextureMinFilter::NearestMipmapNearest: return GL_NEAREST_MIPMAP_NEAREST;
-	case TextureMinFilter::NearestMipmapLinear:  return GL_NEAREST_MIPMAP_LINEAR;
-	case TextureMinFilter::LinearMipmapNearest:  return GL_LINEAR_MIPMAP_NEAREST;
-	case TextureMinFilter::LinearMipmapLinear:   return GL_LINEAR_MIPMAP_LINEAR;
-	}
-	return 0;
-}
-//-----------------------------------------------------------------------------
-inline GLint translate(TextureMagFilter filter)
-{
-	switch (filter)
-	{
-	case TextureMagFilter::Nearest: return GL_NEAREST;
-	case TextureMagFilter::Linear:  return GL_LINEAR;
-	}
-	return 0;
-}
-//-----------------------------------------------------------------------------
 inline bool getTextureFormatType(TexelsFormat inFormat, GLenum textureType, GLenum& format, GLint& internalFormat, GLenum& oglType)
 {
 	if (inFormat == TexelsFormat::R_U8)
@@ -897,7 +922,9 @@ bool Texture2D::CreateFromMemories(const Texture2DCreateInfo& createInfo)
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 	// restore prev state
-	glBindTexture(GL_TEXTURE_2D, currentTexture2D[0]);
+#if USE_OPENGLCACHESTATE
+	glBindTexture(GL_TEXTURE_2D, currentRenderState::texture2D[0]);
+#endif
 	glPixelStorei(GL_UNPACK_ALIGNMENT, Alignment);
 	return true;
 }
@@ -963,11 +990,13 @@ void Texture2D::Destroy()
 {
 	if (m_id > 0)
 	{
-		for (unsigned i = 0; i < 8; i++)
+#if USE_OPENGLCACHESTATE
+		for (unsigned i = 0; i < MAXTEXTURE; i++)
 		{
-			if (currentTexture2D[i] == m_id)
+			if (currentRenderState::texture2D[i] == m_id)
 				Texture2D::UnBind(i);
 		}
+#endif
 		if (!TextureLoader::IsLoad(*this)) // TODO: не удалять текстуру если она загружена через менеджер, в будущем сделать подсчет ссылок и удалять если нет
 			glDeleteTextures(1, &m_id);
 		m_id = 0;
@@ -976,80 +1005,23 @@ void Texture2D::Destroy()
 //-----------------------------------------------------------------------------
 void Texture2D::Bind(unsigned slot) const
 {
-	if (currentTexture2D[slot] != m_id)
-	{
-		currentTexture2D[slot] = m_id;
-		glActiveTexture(GL_TEXTURE0 + slot);
-		glBindTexture(GL_TEXTURE_2D, m_id);
-	}
+#if USE_OPENGLCACHESTATE
+	if (currentRenderState::texture2D[slot] == m_id)
+		return;
+
+	currentRenderState::texture2D[slot] = m_id;
+#endif
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_2D, m_id);
 }
 //-----------------------------------------------------------------------------
 void Texture2D::UnBind(unsigned slot)
 {
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	currentTexture2D[slot] = 0;
-}
-//-----------------------------------------------------------------------------
-bool CubeMap::CreateFromFiles(const Texture2DLoaderInfo& loaderInfo)
-{
-	std::string assetFile = loaderInfo.fileName;
-
-	//Get the filenames
-	size_t dotPos = assetFile.find_last_of('.');
-	std::string filestringBegin = assetFile.substr(0, dotPos);
-	std::string filestringEnd = assetFile.substr(dotPos);
-	std::vector<std::string> textureFaces;
-	textureFaces.push_back(filestringBegin + "PX" + filestringEnd); // TODO: устанавливать в loaderInfo
-	textureFaces.push_back(filestringBegin + "NX" + filestringEnd); // TODO: устанавливать в loaderInfo
-	textureFaces.push_back(filestringBegin + "PY" + filestringEnd); // TODO: устанавливать в loaderInfo
-	textureFaces.push_back(filestringBegin + "NY" + filestringEnd); // TODO: устанавливать в loaderInfo
-	textureFaces.push_back(filestringBegin + "PZ" + filestringEnd); // TODO: устанавливать в loaderInfo
-	textureFaces.push_back(filestringBegin + "NZ" + filestringEnd); // TODO: устанавливать в loaderInfo
-
-	GLuint texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
-
-	int width, height;
-	for (GLuint i = 0; i < textureFaces.size(); i++)
-	{
-		if (loaderInfo.verticallyFlip)
-			stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-
-		int width = 0;
-		int height = 0;
-		int nrChannels = 0;
-		TexelsFormat format = TexelsFormat::RGB_U8;
-		uint8_t* pixelData = stbi_load(loaderInfo.fileName, &width, &height, &nrChannels, 0);
-		if (!pixelData || nrChannels < STBI_grey || nrChannels > STBI_rgb_alpha || width == 0 || height == 0)
-		{
-			LogError("Texture loading failed! Filename='" + std::string(loaderInfo.fileName) + "'");
-			return false;
-		}
-		if (nrChannels == STBI_grey) format = TexelsFormat::R_U8;
-		else if (nrChannels == STBI_grey_alpha) format = TexelsFormat::RG_U8;
-		else if (nrChannels == STBI_rgb) format = TexelsFormat::RGB_U8;
-		else if (nrChannels == STBI_rgb_alpha) format = TexelsFormat::RGBA_U8;
-
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-			0, /*m_UseSrgb ? GL_SRGB :*/ GL_RGB, width, height,
-			0, GL_RGB, GL_UNSIGNED_BYTE, pixelData);
-
-		stbi_image_free((void*)pixelData);
-	}
-
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-
-	int NumMipMaps = 1 + (int)floor(log10((float)std::max(width, height)) / log10(2.0));
-
-	return true;
+#if USE_OPENGLCACHESTATE
+	currentRenderState::texture2D[slot] = 0;
+#endif
 }
 //-----------------------------------------------------------------------------
 namespace TextureLoader
@@ -1099,6 +1071,81 @@ namespace TextureLoader
 		}
 		return false;
 	}
+}
+//-----------------------------------------------------------------------------
+bool VertexBuffer::Create(RenderResourceUsage usage, unsigned vertexCount, unsigned vertexSize, const void* data)
+{
+	if (m_id > 0) Destroy();
+
+	m_vertexCount = vertexCount;
+	m_vertexSize = vertexSize;
+	m_usage = usage;
+
+#if USE_OPENGL_DSA
+	GL_CHECK(glCreateBuffers(1, &m_id));
+	GL_CHECK(glNamedBufferData(m_id, static_cast<GLsizeiptr>(vertexCount * m_vertexSize), data, translate(m_usage)));
+#else
+	// Backup the currently bound OpenGL array buffer
+	GLint openGLArrayBufferBackup = 0;
+	GL_CHECK(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &openGLArrayBufferBackup));
+
+	GL_CHECK(glGenBuffers(1, &m_id));
+	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, m_id));
+	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptrARB>(vertexCount * m_vertexSize), data, translate(m_usage)));
+
+	// Be polite and restore the previous bound OpenGL array buffer
+	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(openGLArrayBufferBackup)));
+#endif
+	return true;
+}
+//-----------------------------------------------------------------------------
+void VertexBuffer::Destroy()
+{
+	GLint openGLArrayBufferBackup = 0;
+	glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &openGLArrayBufferBackup);
+	if (static_cast<unsigned>(openGLArrayBufferBackup) == m_id) glBindBuffer(GL_ARRAY_BUFFER, 0);
+	if (m_id) glDeleteBuffers(1, &m_id);
+	m_id = 0;
+}
+//-----------------------------------------------------------------------------
+void VertexBuffer::Update(unsigned offset, unsigned size, const void* data)
+{
+	glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+}
+//-----------------------------------------------------------------------------
+void VertexBuffer::Bind() const
+{
+	glBindBuffer(GL_ARRAY_BUFFER, m_id);
+}
+//-----------------------------------------------------------------------------
+bool IndexBuffer::Create(RenderResourceUsage usage, unsigned indexCount, unsigned indexSize, const void* data)
+{
+	if (m_id > 0) Destroy();
+
+	m_indexCount = indexCount;
+	m_indexSize = indexSize;
+	m_usage = usage;
+	glGenBuffers(1, &m_id);
+
+	GLint currentIBO = 0;
+	glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &currentIBO);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * indexSize, data, translate(m_usage));
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLuint>(currentIBO));
+	return true;
+}
+//-----------------------------------------------------------------------------
+void IndexBuffer::Destroy()
+{
+	glDeleteBuffers(1, &m_id);
+	m_id = 0;
+}
+//-----------------------------------------------------------------------------
+void IndexBuffer::Bind() const
+{
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_id);
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
@@ -1168,6 +1215,7 @@ void RenderSystem::BeginFrame()
 		RenderWidth = GetFrameBufferWidth();
 		RenderHeight = GetFrameBufferHeight();
 		glViewport(0, 0, RenderWidth, RenderHeight);
+		glScissor(0, 0, RenderWidth, RenderHeight);
 		const float FOVY = glm::atan(glm::tan(glm::radians(perspectiveFOV) / 2.0f) / GetFrameBufferAspectRatio()) * 2.0f;
 		projectionMatrix = glm::perspective(FOVY, GetFrameBufferAspectRatio(), perspectiveNear, perspectiveFar);
 	}

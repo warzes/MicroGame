@@ -3,6 +3,10 @@
 #include "0_EngineConfig.h"
 #include "1_BaseHeader.h"
 
+//=============================================================================
+// RenderCore
+//=============================================================================
+
 enum class RenderResourceUsage
 {
 	Static,
@@ -38,6 +42,13 @@ struct ShaderAttribInfo
 struct ShaderUniformInfo
 {
 	std::string GetText() const { return ""; }
+};
+
+enum class ShaderType
+{
+	Vertex,
+	Geometry,
+	Fragment
 };
 
 // TODO: юниформы хранящие свой тип данных (и статус изменения)
@@ -79,12 +90,6 @@ public:
 	bool operator==(const ShaderProgram&) const = default;
 
 private:
-	enum class ShaderType
-	{
-		Vertex,
-		Geometry,
-		Fragment
-	};
 	unsigned createShader(ShaderType type, const std::string& source) const;
 
 	unsigned m_id = 0;
@@ -212,31 +217,6 @@ private:
 	unsigned m_height = 0;
 };
 
-// TODO: доделать
-class CubeMap
-{
-public:
-	bool CreateFromFiles(const Texture2DLoaderInfo& loaderInfo);
-
-	void Destroy();
-
-	void Bind(unsigned slot = 0) const;
-
-	static void UnBind(unsigned slot = 0);
-
-	int GetNumMipMaps() { return m_numMipMaps; }
-
-	bool IsValid() const { return m_id > 0; }
-
-	bool operator==(const CubeMap&) const = default;
-
-private:
-	unsigned m_id = 0;
-	unsigned m_width = 0;
-	unsigned m_height = 0;
-	int m_numMipMaps = 0;
-};
-
 namespace TextureLoader
 {
 	void Destroy();
@@ -245,6 +225,56 @@ namespace TextureLoader
 
 	bool IsLoad(const Texture2D& texture);
 }
+
+//=============================================================================
+// VertexBuffer
+//=============================================================================
+
+class VertexBuffer
+{
+public:
+	bool Create(RenderResourceUsage usage, unsigned vertexCount, unsigned vertexSize, const void* data);
+	void Destroy();
+
+	void Update(unsigned offset, unsigned size, const void* data);
+
+	void Bind() const;
+
+	unsigned GetVertexCount() const { return m_vertexCount; }
+
+	bool IsValid() const { return m_id > 0; }
+
+private:
+	RenderResourceUsage m_usage = RenderResourceUsage::Static;
+	unsigned m_id = 0;
+	unsigned m_vertexCount = 0;
+	unsigned m_vertexSize = 0;
+};
+
+//=============================================================================
+// IndexBuffer
+//=============================================================================
+
+class IndexBuffer
+{
+public:
+	bool Create(RenderResourceUsage usage, unsigned indexCount, unsigned indexSize, const void* data);
+	void Destroy();
+
+	void Bind() const;
+
+	unsigned GetIndexCount() const { return m_indexCount; }
+	unsigned GetIndexSize() const { return m_indexSize; }
+
+	bool IsValid() const { return m_id > 0; }
+
+private:
+	RenderResourceUsage m_usage = RenderResourceUsage::Static;
+	unsigned m_id = 0;
+	unsigned m_indexCount = 0;
+	unsigned m_indexSize = 0;
+};
+
 
 //=============================================================================
 // Render System

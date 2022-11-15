@@ -140,50 +140,6 @@ private:
 	uint16_t m_attributes[static_cast<size_t>(VertexAttribute::Count)] = { 0 };
 };
 
-
-class VertexBuffer
-{
-public:
-	bool Create(RenderResourceUsage usage, unsigned vertexCount, unsigned vertexSize, const void* data);
-	void Destroy();
-
-	void Update(unsigned offset, unsigned size, const void* data);
-
-	void Bind() const;
-
-	unsigned GetVertexCount() const { return m_vertexCount; }
-
-	bool IsValid() const { return m_id > 0; }
-
-private:
-	RenderResourceUsage m_usage = RenderResourceUsage::Static;
-	unsigned m_id = 0;
-	unsigned m_vertexCount = 0;
-	unsigned m_vertexSize = 0;
-};
-
-class IndexBuffer
-{
-public:
-	bool Create(RenderResourceUsage usage, unsigned indexCount, unsigned indexSize, const void* data);
-	void Destroy();
-
-	void Bind() const;
-
-	unsigned GetIndexCount() const { return m_indexCount; }
-	unsigned GetIndexSize() const { return m_indexSize; }
-
-	bool IsValid() const { return m_id > 0; }
-
-private:
-	RenderResourceUsage m_usage = RenderResourceUsage::Static;
-	unsigned m_id = 0;
-	unsigned m_indexCount = 0;
-	unsigned m_indexSize = 0;
-};
-
-
-
 enum class PrimitiveDraw
 {
 	Lines,
@@ -257,6 +213,8 @@ public:
 	const glm::mat4& GetProjectionMatrix() { return m_projectionMatrix; }
 
 private:
+	bool checkFramebuffer();
+
 	unsigned m_id = 0;
 	unsigned m_texColorBuffer = 0;
 	unsigned m_rbo = 0;
