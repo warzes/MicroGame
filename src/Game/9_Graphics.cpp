@@ -153,6 +153,8 @@ namespace g3d
 
 	bool Model::Create(const char* fileName, const char* pathMaterialFiles)
 	{
+		Destroy();
+
 		tinyobj::ObjReaderConfig readerConfig;
 		readerConfig.mtl_search_path = pathMaterialFiles; // Path to material files
 
@@ -279,16 +281,21 @@ namespace g3d
 					tempMesh2.push_back(tempMesh[i]);
 			}
 
-			return Create(std::move(tempMesh2));
+			m_subMeshes = std::move(tempMesh2);
 		}
 		else
-			return Create(std::move(tempMesh));
+			m_subMeshes = std::move(tempMesh);
+
+		return createBuffer();
 	}
 
-	bool g3d::Model::Create(std::vector<Mesh>&& meshes)
+	bool g3d::Model::Create(std::vector<MeshCreateInfo>&& meshes)
 	{
 		Destroy();
-		m_subMeshes = std::move(meshes);
+		m_subMeshes.resize(meshes.size());
+		for (int i = 0; i < meshes.size(); i++)
+			m_subMeshes[i].Set(std::move(meshes[i]));
+
 		return createBuffer();
 	}
 
@@ -323,9 +330,17 @@ namespace g3d
 			{
 				const Texture2D* diffuseTexture = m_subMeshes[i].material.diffuseTexture;
 				if (diffuseTexture && diffuseTexture->IsValid())
-					diffuseTexture->Bind();
+					diffuseTexture->Bind(0);
 				m_subMeshes[i].vao.Draw(PrimitiveDraw::Triangles, instanceCount);
 			}
+		}
+	}
+
+	void Model::SetMaterial(const Material& material)
+	{
+		for (int i = 0; i < m_subMeshes.size(); i++)
+		{
+			m_subMeshes[i].material = material;
 		}
 	}
 
@@ -346,7 +361,7 @@ namespace g3d
 				return false;
 			}
 
-			if (!m_subMeshes[i].vao.Create(&m_subMeshes[i].vertexBuffer, &m_subMeshes[i].indexBuffer, GetVertexAttributes<Vertex_Pos3_TexCoord>()))
+			if (!m_subMeshes[i].vao.Create<Vertex_Pos3_TexCoord>(&m_subMeshes[i].vertexBuffer, &m_subMeshes[i].indexBuffer))
 			{
 				LogError("VAO create failed!");
 				Destroy();

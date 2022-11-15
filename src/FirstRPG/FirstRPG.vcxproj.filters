@@ -15,7 +15,6 @@
     <ClCompile Include="..\3rdparty\glad\gl.c">
       <Filter>MicroEngine\3rdparty</Filter>
     </ClCompile>
-    <ClCompile Include="immo.cpp" />
     <ClCompile Include="EngineImpl.cpp">
       <Filter>MicroEngine</Filter>
     </ClCompile>

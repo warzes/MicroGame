@@ -53,7 +53,7 @@ namespace g3d
 		glm::vec3 m_worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 		// euler Angles
-		float m_yaw = -90.0f;
+		float m_yaw = 90.0f;
 		float m_pitch = 0.0f;
 
 		// camera options
@@ -74,9 +74,29 @@ namespace g3d
 		float shininess = 1.0f;
 	};
 
+	struct MeshCreateInfo
+	{
+		std::vector<Vertex_Pos3_TexCoord> vertices;
+		std::vector<uint32_t> indices;
+		Material material;
+	};
+
 	class Mesh
 	{
 	public:
+		Mesh() = default;
+		Mesh(MeshCreateInfo&& createInfo)
+		{
+			Set(std::move(createInfo));
+		}
+
+		void Set(MeshCreateInfo&& createInfo)
+		{
+			vertices = std::move(createInfo.vertices);
+			indices = std::move(createInfo.indices);
+			material = std::move(createInfo.material);
+		}
+
 		std::vector<Vertex_Pos3_TexCoord> vertices;
 		std::vector<uint32_t> indices;
 
@@ -91,7 +111,7 @@ namespace g3d
 	{
 	public:
 		bool Create(const char* fileName, const char* pathMaterialFiles = "./");
-		bool Create(std::vector<Mesh>&& m_meshes); // TODO: правильно?
+		bool Create(std::vector<MeshCreateInfo>&& meshes);
 		void Destroy();
 
 		void SetInstancedBuffer(VertexBuffer* instanceBuffer, const std::vector<VertexAttributeRaw>& attribs);
@@ -105,6 +125,8 @@ namespace g3d
 		}
 		//const std::vector<Vertex_Pos3_TexCoord>& GetVertices() const { return m_vertices; }
 		//const std::vector<uint32_t>& GetIndices() const { return m_indices; }
+
+		void SetMaterial(const Material& material);
 
 	private:
 		bool createBuffer();

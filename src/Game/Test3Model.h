@@ -39,13 +39,15 @@ void main()
 )";
 
 ShaderProgram shader;
-Texture2D texture2d;
 UniformLocation worldUniform;
 UniformLocation viewUniform;
 UniformLocation projectionUniform;
 g3d::Model model;
+g3d::Model customModel;
+g3d::Material material;
 g3d::FreeCamera camera;
 Transform transform;
+Transform transform2;
 
 void InitTest()
 {
@@ -65,18 +67,38 @@ void InitTest()
 	{
 		Texture2DLoaderInfo info;
 		info.fileName = "../data/textures/crate.png";
-		texture2d.CreateFromFiles(info);
+		material.diffuseTexture = TextureLoader::LoadTexture2D(info);
 	}
 
 	// Load geometry
 	{
 		model.Create("../data/models/crate.obj");
+		model.SetMaterial(material);
+	}
+
+	// create custom model
+	{
+		std::vector<g3d::MeshCreateInfo> meshCreateInfo;
+		meshCreateInfo.resize(1);
+
+		meshCreateInfo[0].vertices.push_back({ {-2.0f, 2.0f, 0.0f},{0.0f, 0.0f} });
+		meshCreateInfo[0].vertices.push_back({ {2.0f, 2.0f, 0.0f},{1.0f, 0.0f} });
+		meshCreateInfo[0].vertices.push_back({ {0.0f, -2.0f, 0.0f},{0.5f, 1.0f} });
+
+		meshCreateInfo[0].indices.push_back(0);
+		meshCreateInfo[0].indices.push_back(1);
+		meshCreateInfo[0].indices.push_back(2);
+
+		meshCreateInfo[0].material = material;
+
+		customModel.Create(std::move(meshCreateInfo));
+
+		transform2.Translate({ 1.0f, 0.0f, 0.0f });
 	}
 }
 
 void CloseTest()
 {
-	texture2d.Destroy();
 	shader.Destroy();
 }
 
@@ -85,11 +107,17 @@ void FrameTest(float deltaTime)
 	camera.SimpleMove(deltaTime);
 	camera.Update();
 
-	texture2d.Bind(0);
+	std::string ss =  std::to_string(camera.GetPosition().x) + "|" + std::to_string(camera.GetPosition().y) + "|" + std::to_string(camera.GetPosition().z);
+	puts(ss.c_str());
+
 	shader.Bind();
-	shader.SetUniform(worldUniform, transform.GetWorld());
+
 	shader.SetUniform(viewUniform, camera.GetViewMatrix());
 	shader.SetUniform(projectionUniform, GetCurrentProjectionMatrix());
 
+	shader.SetUniform(worldUniform, transform.GetWorld());
 	model.Draw();
+
+	shader.SetUniform(worldUniform, transform2.GetWorld());
+	customModel.Draw();
 }
