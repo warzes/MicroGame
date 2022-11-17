@@ -463,10 +463,10 @@ end
 			//-- instead, just return the triangle's normal
 			if (n.x == 0 && n.y == 0 && n.z == 0)
 			{
-				return vectorMagnitude(n), itx_x, itx_y, itx_z, tri_n_x, tri_n_y, tri_n_z
+				//return vectorMagnitude(n), itx_x, itx_y, itx_z, tri_n_x, tri_n_y, tri_n_z
 			}
 
-			return vectorMagnitude(n), itx_x, itx_y, itx_z, n_x, n_y, n_z
+			//return vectorMagnitude(n), itx_x, itx_y, itx_z, n_x, n_y, n_z
 		}
 
 		//--itx is outside triangle

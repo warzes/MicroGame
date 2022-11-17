@@ -1,4 +1,8 @@
-﻿https://store.steampowered.com/app/444470/Moor/?l=russian
+﻿https://watabou.itch.io/village-generator - генератор деревни
+
+
+
+https://store.steampowered.com/app/444470/Moor/?l=russian
 https://www.youtube.com/watch?v=-9LNKcxCoFo
 https://www.youtube.com/watch?v=3pNGwTZjyoA
 https://www.youtube.com/watch?v=6yqObNCkiiY
