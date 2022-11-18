@@ -109,11 +109,11 @@ namespace ShaderLoader
 
 enum class ImagePixelFormat
 {
+	FromSource,
 	R_U8,
 	RG_U8,
 	RGB_U8,
 	RGBA_U8
-
 };
 class Image
 {
@@ -124,17 +124,24 @@ public:
 	Image& operator=(Image&&) noexcept;
 
 	// если pixelData = null то создает белый Image
-	bool Create(unsigned width, unsigned height, unsigned channels, const std::vector<uint8_t>& pixelData);
-	bool Load(const char* fileName, bool verticallyFlip = false);
+	bool Create(uint16_t width, uint16_t height, uint8_t channels, const std::vector<uint8_t>& pixelData);
+	bool Load(const char* fileName, ImagePixelFormat desiredFormat = ImagePixelFormat::FromSource, bool verticallyFlip = false);
 	void Destroy();
 
-	bool IsValid() const { return !m_pixels.empty(); }
+	bool IsValid() const { return !m_pixels.empty() && m_width > 0 && m_height > 0 && m_comps > 0 && m_comps <= 4; }
 
-	unsigned GetWidth() const { return m_width; }
-	unsigned GetHeight() const { return m_height; }
-	unsigned GetChannels() const { return m_comps; }
+	uint16_t GetWidth() const { return m_width; }
+	uint16_t GetHeight() const { return m_height; }
+	uint16_t GetChannels() const { return m_comps; }
 	uint8_t* GetData() { return m_pixels.data(); }
 	const uint8_t* GetData() const { return m_pixels.data(); }
+
+	size_t GetSizeData() const { return m_pixels.size(); }
+
+	uint8_t& operator[](size_t idx) { return m_pixels[idx]; }
+	const uint8_t& operator[](size_t idx) const { return m_pixels[idx]; }
+
+	bool IsTransparent() const;
 
 private:
 	// TODO: сделать операторы копирования
@@ -143,9 +150,9 @@ private:
 
 	void moveData(Image&& imageRef);
 
-	unsigned m_width = 0;
-	unsigned m_height = 0;
-	unsigned m_comps = 0;
+	uint16_t m_width = 0;
+	uint16_t m_height = 0;
+	uint8_t m_comps = 0;
 	std::vector<uint8_t> m_pixels;
 };
 

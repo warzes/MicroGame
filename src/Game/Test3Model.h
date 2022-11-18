@@ -67,11 +67,11 @@ void InitTest()
 
 	// Load Texture
 	{
-#if 1
+#if 0
 		material.diffuseTexture = TextureLoader::LoadTexture2D("../data/textures/crate.png");
 #else
 		Image image;
-		image.Load("../data/textures/crate.png", true);
+		image.Load("../data/textures/crate.png",ImagePixelFormat::FromSource, true);
 		//image.Create(64, 64, 3, {}); // создание пустого Image
 		
 		tex.Create(&image);

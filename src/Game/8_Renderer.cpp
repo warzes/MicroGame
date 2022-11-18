@@ -839,8 +839,12 @@ Image& Image::operator=(Image&& imageRef) noexcept
 	return *this;
 }
 //-----------------------------------------------------------------------------
-bool Image::Create(unsigned width, unsigned height, unsigned channels, const std::vector<uint8_t>& pixelData)
+bool Image::Create(uint16_t width, uint16_t height, uint8_t channels, const std::vector<uint8_t>& pixelData)
 {
+	if (width == 0 || height == 0 || channels == 0 || channels > 4)
+		return false;
+	// TODO: возвращать ошибку если width/height слишком большое
+
 	Destroy();
 
 	m_width = width;
@@ -858,42 +862,51 @@ bool Image::Create(unsigned width, unsigned height, unsigned channels, const std
 	return false;
 }
 //-----------------------------------------------------------------------------
-bool Image::Load(const char* fileName, bool verticallyFlip)
+bool Image::Load(const char* fileName, ImagePixelFormat desiredFormat, bool verticallyFlip)
 {
 	Destroy();
+
+	int desiredСhannels = STBI_default;
+	if (desiredFormat == ImagePixelFormat::R_U8) desiredСhannels = STBI_grey;
+	if (desiredFormat == ImagePixelFormat::RG_U8) desiredСhannels = STBI_grey_alpha;
+	if (desiredFormat == ImagePixelFormat::RGB_U8) desiredСhannels = STBI_rgb;
+	if (desiredFormat == ImagePixelFormat::RGBA_U8) desiredСhannels = STBI_rgb_alpha;
+
+	int width = 0;
+	int height = 0;
+	int comps = 0;
+
+	stbi_set_flip_vertically_on_load(verticallyFlip ? 1 : 0);
 #if 1
 	int len = 0;
 	std::vector<char> data = FileSystem::Fileload(fileName, &len);
 	if (data.empty() || len <= 0)
 		return false;
+		
+	 stbi_uc* pixelData = stbi_load_from_memory((const stbi_uc*)data.data(), len, &width, &height, &comps, desiredСhannels);
+#else
+	stbi_uc* pixelData = stbi_load(fileName, &width, &height, &comps, desiredСhannels);
+#endif
 
-	stbi_set_flip_vertically_on_load(verticallyFlip ? 1 : 0);
+	// TODO: проверку что width влезет в m_width (и для остальных). 
+	m_width = width;
+	m_height = height;
+	m_comps = comps;
 
-	stbi_uc* pixelData = nullptr;
-	int n = 0;
-	//if (flags & IMAGE_R) n = 1;
-	//if (flags & IMAGE_RG) n = 2;
-	//if (flags & IMAGE_RGB) n = 3;
-	//if (flags & IMAGE_RGBA) n = 4;
-	//if (flags & IMAGE_FLOAT)
-		//pixelData = (uint8_t*)stbi_loadf_from_memory((const stbi_uc*)data.data(), len, (int*)&m_w, (int*)&m_h, (int*)&m_comps, n);
-	//else
-		pixelData = stbi_load_from_memory((const stbi_uc*)data.data(), len, (int*)&m_width, (int*)&m_height, (int*)&m_comps, n);
-	if (!pixelData)
+	if (!pixelData || m_comps < STBI_grey || m_comps > STBI_rgb_alpha || m_width == 0 || m_height == 0)
 	{
-		LogError("Error loading image (" + std::string(fileName) + ")");
-		stbi_image_free(pixelData);
+		LogError("Image loading failed! Filename='" + std::string(fileName) + "'");
+		stbi_image_free((void*)pixelData);
 		return false;
 	}
-	m_comps = n ? n : m_comps;
+
+	m_comps = desiredСhannels ? desiredСhannels : m_comps;
 
 	const size_t imageDataSize = m_width * m_height * m_comps;
-
 	m_pixels.assign(pixelData, pixelData + imageDataSize);
 
 	stbi_image_free(pixelData);
-#else
-#endif
+
 	return true;
 }
 //-----------------------------------------------------------------------------
@@ -903,16 +916,35 @@ void Image::Destroy()
 	m_width = m_height = m_comps = 0;
 }
 //-----------------------------------------------------------------------------
+bool Image::IsTransparent() const
+{
+	bool isTransparent = false;
+	// TODO: может быть медленно, проверить скорость и поискать другое решение
+	if (m_comps == 4) // TODO: сделать еще и для 2
+	{
+		for (int i = 0; i < GetSizeData(); i += 4)
+		{
+			//uint8_t r = tempImage[i];
+			//uint8_t g = tempImage[i + 1];
+			//uint8_t b = tempImage[i + 2];
+			const uint8_t& a = m_pixels[i + 3];
+			if (a < 255)
+			{
+				isTransparent = true;
+				break;
+			}
+		}
+	}
+
+	return isTransparent;
+}
+//-----------------------------------------------------------------------------
 void Image::moveData(Image&& imageRef)
 {
 	m_width = imageRef.m_width;
 	m_height = imageRef.m_height;
 	m_comps = imageRef.m_comps;
 	m_pixels = std::move(imageRef.m_pixels);
-
-	// ref clear
-	//imageRef.m_pixels = nullptr;
-	imageRef.m_width = imageRef.m_height = imageRef.m_comps = 0;
 }
 //-----------------------------------------------------------------------------
 //=============================================================================
@@ -981,113 +1013,40 @@ inline bool getTextureFormatType(TexelsFormat inFormat, GLenum textureType, GLen
 //-----------------------------------------------------------------------------
 bool Texture2D::Create(const char* fileName, bool verticallyFlip, const Texture2DInfo& textureInfo)
 {
-	if (fileName == nullptr || fileName == "") return false;
-
-	Destroy();
-
-	Texture2DCreateInfo createInfo;
+	Image tempImage;
+	if (!tempImage.Load(fileName, ImagePixelFormat::FromSource, verticallyFlip))
 	{
-		if (verticallyFlip)
-			stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-
-		int width = 0;
-		int height = 0;
-		int nrChannels = 0;
-		TexelsFormat format = TexelsFormat::RGB_U8;
-		stbi_uc* pixelData = stbi_load(fileName, &width, &height, &nrChannels, 0);
-		if (!pixelData || nrChannels < STBI_grey || nrChannels > STBI_rgb_alpha || width == 0 || height == 0)
-		{
-			LogError("Texture loading failed! Filename='" + std::string(fileName) + "'");
-			stbi_image_free((void*)pixelData);
-			return false;
-		}
-		if (nrChannels == STBI_grey) format = TexelsFormat::R_U8;
-		else if (nrChannels == STBI_grey_alpha) format = TexelsFormat::RG_U8;
-		else if (nrChannels == STBI_rgb) format = TexelsFormat::RGB_U8;
-		else if (nrChannels == STBI_rgb_alpha) format = TexelsFormat::RGBA_U8;
-
-		// проверить на прозрачность
-		// TODO: может быть медленно, проверить скорость и поискать другое решение
-		createInfo.isTransparent = false;
-		if (format == TexelsFormat::RGBA_U8)
-		{
-			for (int i = 0; i < width * height * nrChannels; i += 4)
-			{
-				//uint8_t r = pixelData[i];
-				//uint8_t g = pixelData[i + 1];
-				//uint8_t b = pixelData[i + 2];
-				const uint8_t& a = pixelData[i + 3];
-				if (a < 255)
-				{
-					createInfo.isTransparent = true;
-					break;
-				}
-			}
-		}
-
-		createInfo.format = format;
-		createInfo.width = static_cast<uint16_t>(width);
-		createInfo.height = static_cast<uint16_t>(height);
-		createInfo.depth = 1;
-		createInfo.pixelData = pixelData;
-
-		bool isValid = Create(createInfo);
-		stbi_image_free((void*)pixelData);
-		if (!isValid) return false;
+		LogError("Texture loading failed! Filename='" + std::string(fileName) + "'");
+		return false;
 	}
 
-	return true;
+	return Create(&tempImage, textureInfo);
 }
 //-----------------------------------------------------------------------------
 bool Texture2D::Create(Image* image, const Texture2DInfo& textureInfo)
 {
-	if (!image || !image->IsValid()) return false;
+	if (!image || !image->IsValid()) 
+		return false;
+
+	const int nrChannels = image->GetChannels();
 
 	Destroy();
 
 	Texture2DCreateInfo createInfo;
 	{
-		const int width = image->GetWidth();
-		const int height = image->GetHeight();
-		const int nrChannels = image->GetChannels();
-
-		uint8_t* pixelData = image->GetData();
-		if (!pixelData || nrChannels < STBI_grey || nrChannels > STBI_rgb_alpha || width == 0 || height == 0)
-		{
-			LogError("Texture loading failed!");
-			return false;
-		}
-
-		TexelsFormat format = TexelsFormat::RGB_U8;
-		if (nrChannels == STBI_grey) format = TexelsFormat::R_U8;
-		else if (nrChannels == STBI_grey_alpha) format = TexelsFormat::RG_U8;
-		else if (nrChannels == STBI_rgb) format = TexelsFormat::RGB_U8;
-		else if (nrChannels == STBI_rgb_alpha) format = TexelsFormat::RGBA_U8;
-
 		// проверить на прозрачность
-		// TODO: может быть медленно, проверить скорость и поискать другое решение
-		createInfo.isTransparent = false;
-		if (format == TexelsFormat::RGBA_U8)
-		{
-			for (int i = 0; i < width * height * nrChannels; i += 4)
-			{
-				//uint8_t r = pixelData[i];
-				//uint8_t g = pixelData[i + 1];
-				//uint8_t b = pixelData[i + 2];
-				const uint8_t& a = pixelData[i + 3];
-				if (a < 255)
-				{
-					createInfo.isTransparent = true;
-					break;
-				}
-			}
-		}
+		createInfo.isTransparent = image->IsTransparent();
 
-		createInfo.format = format;
-		createInfo.width = static_cast<uint16_t>(width);
-		createInfo.height = static_cast<uint16_t>(height);
+		createInfo.format = TexelsFormat::RGB_U8;
+		if (nrChannels == STBI_grey) createInfo.format = TexelsFormat::R_U8;
+		else if (nrChannels == STBI_grey_alpha) createInfo.format = TexelsFormat::RG_U8;
+		else if (nrChannels == STBI_rgb) createInfo.format = TexelsFormat::RGB_U8;
+		else if (nrChannels == STBI_rgb_alpha) createInfo.format = TexelsFormat::RGBA_U8;
+
+		createInfo.width = static_cast<uint16_t>(image->GetWidth());
+		createInfo.height = static_cast<uint16_t>(image->GetHeight());
 		createInfo.depth = 1;
-		createInfo.pixelData = pixelData;
+		createInfo.pixelData = image->GetData();
 	}
 
 	return Create(createInfo);
