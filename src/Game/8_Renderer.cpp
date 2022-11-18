@@ -819,6 +819,106 @@ namespace ShaderLoader
 	}
 } // ShaderManager
 //-----------------------------------------------------------------------------
+//=============================================================================
+// Image
+//=============================================================================
+//-----------------------------------------------------------------------------
+Image::Image(Image&& imageRef) noexcept
+{
+	moveData(std::move(imageRef));
+}
+//-----------------------------------------------------------------------------
+Image::~Image()
+{
+	Destroy();
+}
+//-----------------------------------------------------------------------------
+Image& Image::operator=(Image&& imageRef) noexcept
+{
+	moveData(std::move(imageRef));
+	return *this;
+}
+//-----------------------------------------------------------------------------
+bool Image::Create(unsigned width, unsigned height, unsigned channels, const std::vector<uint8_t>& pixelData)
+{
+	Destroy();
+
+	m_width = width;
+	m_height = height;
+	m_comps = channels;
+
+	if (pixelData.empty()) // залить белым
+	{
+		const size_t imageDataSize = width * height * channels;
+		m_pixels = std::move(std::vector<uint8_t>(imageDataSize, 255));
+	}
+	else  // скопировать данные
+		m_pixels = pixelData;
+
+	return false;
+}
+//-----------------------------------------------------------------------------
+bool Image::Load(const char* fileName, bool verticallyFlip)
+{
+	Destroy();
+#if 1
+	int len = 0;
+	std::vector<char> data = FileSystem::Fileload(fileName, &len);
+	if (data.empty() || len <= 0)
+		return false;
+
+	stbi_set_flip_vertically_on_load(verticallyFlip ? 1 : 0);
+
+	stbi_uc* pixelData = nullptr;
+	int n = 0;
+	//if (flags & IMAGE_R) n = 1;
+	//if (flags & IMAGE_RG) n = 2;
+	//if (flags & IMAGE_RGB) n = 3;
+	//if (flags & IMAGE_RGBA) n = 4;
+	//if (flags & IMAGE_FLOAT)
+		//pixelData = (uint8_t*)stbi_loadf_from_memory((const stbi_uc*)data.data(), len, (int*)&m_w, (int*)&m_h, (int*)&m_comps, n);
+	//else
+		pixelData = stbi_load_from_memory((const stbi_uc*)data.data(), len, (int*)&m_width, (int*)&m_height, (int*)&m_comps, n);
+	if (!pixelData)
+	{
+		LogError("Error loading image (" + std::string(fileName) + ")");
+		stbi_image_free(pixelData);
+		return false;
+	}
+	m_comps = n ? n : m_comps;
+
+	const size_t imageDataSize = m_width * m_height * m_comps;
+
+	m_pixels.assign(pixelData, pixelData + imageDataSize);
+
+	stbi_image_free(pixelData);
+#else
+#endif
+	return true;
+}
+//-----------------------------------------------------------------------------
+void Image::Destroy()
+{
+	m_pixels.clear();
+	m_width = m_height = m_comps = 0;
+}
+//-----------------------------------------------------------------------------
+void Image::moveData(Image&& imageRef)
+{
+	m_width = imageRef.m_width;
+	m_height = imageRef.m_height;
+	m_comps = imageRef.m_comps;
+	m_pixels = std::move(imageRef.m_pixels);
+
+	// ref clear
+	//imageRef.m_pixels = nullptr;
+	imageRef.m_width = imageRef.m_height = imageRef.m_comps = 0;
+}
+//-----------------------------------------------------------------------------
+//=============================================================================
+// Texture
+//=============================================================================
+//-----------------------------------------------------------------------------
 inline bool getTextureFormatType(TexelsFormat inFormat, GLenum textureType, GLenum& format, GLint& internalFormat, GLenum& oglType)
 {
 	if (inFormat == TexelsFormat::R_U8)
@@ -879,73 +979,26 @@ inline bool getTextureFormatType(TexelsFormat inFormat, GLenum textureType, GLen
 	return true;
 }
 //-----------------------------------------------------------------------------
-bool Texture2D::CreateFromMemories(const Texture2DCreateInfo& createInfo)
+bool Texture2D::Create(const char* fileName, bool verticallyFlip, const Texture2DInfo& textureInfo)
 {
-	if (m_id > 0) Destroy();
+	if (fileName == nullptr || fileName == "") return false;
 
-	isTransparent = createInfo.isTransparent;
-	m_width = createInfo.width;
-	m_height = createInfo.height;
+	Destroy();
 
-	// save prev pixel store state
-	GLint Alignment = 0;
-	glGetIntegerv(GL_UNPACK_ALIGNMENT, &Alignment);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-	// gen texture res
-	glGenTextures(1, &m_id);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_id);
-
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, translate(createInfo.wrapS));
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, translate(createInfo.wrapT));
-
-	// set texture filtering parameters
-	TextureMinFilter minFilter = createInfo.minFilter;
-	if (!createInfo.mipmap)
+	Texture2DCreateInfo createInfo;
 	{
-		if (createInfo.minFilter == TextureMinFilter::NearestMipmapNearest) minFilter = TextureMinFilter::Nearest;
-		else if (createInfo.minFilter != TextureMinFilter::Nearest) minFilter = TextureMinFilter::Linear;
-	}
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, translate(minFilter));
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, translate(createInfo.magFilter));
-
-	// set texture format
-	GLenum format = GL_RGB;
-	GLint internalFormat = GL_RGB;
-	GLenum oglType = GL_UNSIGNED_BYTE;
-	getTextureFormatType(createInfo.format, GL_TEXTURE_2D, format, internalFormat, oglType);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, format, oglType, createInfo.pixelData);
-	if (createInfo.mipmap)
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-	// restore prev state
-#if USE_OPENGLCACHESTATE
-	glBindTexture(GL_TEXTURE_2D, currentRenderState::texture2D[0]);
-#endif
-	glPixelStorei(GL_UNPACK_ALIGNMENT, Alignment);
-	return true;
-}
-//-----------------------------------------------------------------------------
-bool Texture2D::CreateFromFiles(const Texture2DLoaderInfo& loaderInfo)
-{
-	if (loaderInfo.fileName == nullptr || loaderInfo.fileName == "") return false;
-
-	Texture2DCreateInfo createInfo(loaderInfo);
-	{
-		if (loaderInfo.verticallyFlip)
+		if (verticallyFlip)
 			stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
 
 		int width = 0;
 		int height = 0;
 		int nrChannels = 0;
 		TexelsFormat format = TexelsFormat::RGB_U8;
-		uint8_t* pixelData = stbi_load(loaderInfo.fileName, &width, &height, &nrChannels, 0);
+		stbi_uc* pixelData = stbi_load(fileName, &width, &height, &nrChannels, 0);
 		if (!pixelData || nrChannels < STBI_grey || nrChannels > STBI_rgb_alpha || width == 0 || height == 0)
 		{
-			LogError("Texture loading failed! Filename='" + std::string(loaderInfo.fileName) + "'");
+			LogError("Texture loading failed! Filename='" + std::string(fileName) + "'");
+			stbi_image_free((void*)pixelData);
 			return false;
 		}
 		if (nrChannels == STBI_grey) format = TexelsFormat::R_U8;
@@ -978,10 +1031,115 @@ bool Texture2D::CreateFromFiles(const Texture2DLoaderInfo& loaderInfo)
 		createInfo.depth = 1;
 		createInfo.pixelData = pixelData;
 
-		bool isValid = CreateFromMemories(createInfo);
+		bool isValid = Create(createInfo);
 		stbi_image_free((void*)pixelData);
 		if (!isValid) return false;
 	}
+
+	return true;
+}
+//-----------------------------------------------------------------------------
+bool Texture2D::Create(Image* image, const Texture2DInfo& textureInfo)
+{
+	if (!image || !image->IsValid()) return false;
+
+	Destroy();
+
+	Texture2DCreateInfo createInfo;
+	{
+		const int width = image->GetWidth();
+		const int height = image->GetHeight();
+		const int nrChannels = image->GetChannels();
+
+		uint8_t* pixelData = image->GetData();
+		if (!pixelData || nrChannels < STBI_grey || nrChannels > STBI_rgb_alpha || width == 0 || height == 0)
+		{
+			LogError("Texture loading failed!");
+			return false;
+		}
+
+		TexelsFormat format = TexelsFormat::RGB_U8;
+		if (nrChannels == STBI_grey) format = TexelsFormat::R_U8;
+		else if (nrChannels == STBI_grey_alpha) format = TexelsFormat::RG_U8;
+		else if (nrChannels == STBI_rgb) format = TexelsFormat::RGB_U8;
+		else if (nrChannels == STBI_rgb_alpha) format = TexelsFormat::RGBA_U8;
+
+		// проверить на прозрачность
+		// TODO: может быть медленно, проверить скорость и поискать другое решение
+		createInfo.isTransparent = false;
+		if (format == TexelsFormat::RGBA_U8)
+		{
+			for (int i = 0; i < width * height * nrChannels; i += 4)
+			{
+				//uint8_t r = pixelData[i];
+				//uint8_t g = pixelData[i + 1];
+				//uint8_t b = pixelData[i + 2];
+				const uint8_t& a = pixelData[i + 3];
+				if (a < 255)
+				{
+					createInfo.isTransparent = true;
+					break;
+				}
+			}
+		}
+
+		createInfo.format = format;
+		createInfo.width = static_cast<uint16_t>(width);
+		createInfo.height = static_cast<uint16_t>(height);
+		createInfo.depth = 1;
+		createInfo.pixelData = pixelData;
+	}
+
+	return Create(createInfo);
+}
+//-----------------------------------------------------------------------------
+bool Texture2D::Create(const Texture2DCreateInfo& createInfo, const Texture2DInfo& textureInfo)
+{
+	Destroy();
+
+	isTransparent = createInfo.isTransparent;
+	m_width = createInfo.width;
+	m_height = createInfo.height;
+
+	// save prev pixel store state
+	GLint Alignment = 0;
+	glGetIntegerv(GL_UNPACK_ALIGNMENT, &Alignment);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	// gen texture res
+	glGenTextures(1, &m_id);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_id);
+
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, translate(textureInfo.wrapS));
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, translate(textureInfo.wrapT));
+
+	// set texture filtering parameters
+	TextureMinFilter minFilter = textureInfo.minFilter;
+	if (!textureInfo.mipmap)
+	{
+		if (textureInfo.minFilter == TextureMinFilter::NearestMipmapNearest) minFilter = TextureMinFilter::Nearest;
+		else if (textureInfo.minFilter != TextureMinFilter::Nearest) minFilter = TextureMinFilter::Linear;
+	}
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, translate(minFilter));
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, translate(textureInfo.magFilter));
+
+	// set texture format
+	GLenum format = GL_RGB;
+	GLint internalFormat = GL_RGB;
+	GLenum oglType = GL_UNSIGNED_BYTE;
+	getTextureFormatType(createInfo.format, GL_TEXTURE_2D, format, internalFormat, oglType);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, format, oglType, createInfo.pixelData);
+	if (textureInfo.mipmap)
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+	// restore prev state
+#if USE_OPENGLCACHESTATE
+	glBindTexture(GL_TEXTURE_2D, currentRenderState::texture2D[0]);
+#endif
+	glPixelStorei(GL_UNPACK_ALIGNMENT, Alignment);
 
 	return true;
 }
@@ -1035,30 +1193,23 @@ namespace TextureLoader
 		FileTextures.clear();
 	}
 
-	Texture2D* LoadTexture2D(const char* name)
+	Texture2D* LoadTexture2D(const char* fileName, bool verticallyFlip, const Texture2DInfo& textureInfo)
 	{
-		Texture2DLoaderInfo textureLoaderInfo = {};
-		textureLoaderInfo.fileName = name;
-		return LoadTexture2D(textureLoaderInfo);
-	}
-
-	Texture2D* LoadTexture2D(const Texture2DLoaderInfo& textureLoaderInfo)
-	{
-		auto it = FileTextures.find(textureLoaderInfo.fileName);
+		auto it = FileTextures.find(fileName);
 		if (it != FileTextures.end())
 		{
 			return &it->second;
 		}
 		else
 		{
-			LogPrint("Load texture: " + std::string(textureLoaderInfo.fileName));
+			LogPrint("Load texture: " + std::string(fileName));
 
 			Texture2D texture;
-			if (!texture.CreateFromFiles(textureLoaderInfo) || !texture.IsValid())
+			if (!texture.Create(fileName, verticallyFlip, textureInfo) || !texture.IsValid())
 				return nullptr;
 
-			FileTextures[textureLoaderInfo.fileName] = texture;
-			return &FileTextures[textureLoaderInfo.fileName];
+			FileTextures[fileName] = texture;
+			return &FileTextures[fileName];
 		}
 	}
 

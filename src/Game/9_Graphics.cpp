@@ -720,16 +720,18 @@ void main()
 
 			Texture2DCreateInfo createInfo;
 			createInfo.format = TexelsFormat::R_U8;
-			//createInfo.minFilter = TextureMinFilter::Linear;
-			//createInfo.magFilter = TextureMagFilter::Linear;
 			createInfo.width = font_.atlasWidth;
 			createInfo.height = font_.atlasHeight;
 			createInfo.depth = 1;
-			createInfo.pixelData = atlasData;
-			createInfo.mipmap = false;
+			createInfo.pixelData = atlasData;			
 
-			//font_.texture.CreateFromMemories(GL_RGB, GL_RED, GL_UNSIGNED_BYTE, font_.atlasWidth, font_.atlasHeight, atlasData.get());
-			font_.texture.CreateFromMemories(createInfo);
+			Texture2DInfo textureInfo;
+			//textureInfo.minFilter = TextureMinFilter::Linear;
+			//textureInfo.magFilter = TextureMagFilter::Linear;
+			textureInfo.mipmap = false;
+
+			//font_.texture.Create(GL_RGB, GL_RED, GL_UNSIGNED_BYTE, font_.atlasWidth, font_.atlasHeight, atlasData.get());
+			font_.texture.Create(createInfo, textureInfo);
 
 			delete[] atlasData;
 

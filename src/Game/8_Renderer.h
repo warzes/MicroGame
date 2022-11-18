@@ -98,7 +98,7 @@ private:
 namespace ShaderLoader
 {
 	void Destroy();
-	ShaderProgram* Load(const char* name);
+	ShaderProgram* Load(const char* fileName);
 
 	bool IsLoad(const ShaderProgram& shaderProgram);
 }
@@ -106,17 +106,56 @@ namespace ShaderLoader
 //=============================================================================
 // Image
 //=============================================================================
-// TODO: может куда-то еще? например в Platform
+
+enum class ImagePixelFormat
+{
+	R_U8,
+	RG_U8,
+	RGB_U8,
+	RGBA_U8
+
+};
 class Image
 {
 public:
+	Image() = default;
+	Image(Image&&) noexcept;
+	~Image();
+	Image& operator=(Image&&) noexcept;
 
+	// если pixelData = null то создает белый Image
+	bool Create(unsigned width, unsigned height, unsigned channels, const std::vector<uint8_t>& pixelData);
+	bool Load(const char* fileName, bool verticallyFlip = false);
+	void Destroy();
 
-	unsigned w;
-	unsigned h;
-	unsigned comps;
-	uint8_t* pixels;
+	bool IsValid() const { return !m_pixels.empty(); }
+
+	unsigned GetWidth() const { return m_width; }
+	unsigned GetHeight() const { return m_height; }
+	unsigned GetChannels() const { return m_comps; }
+	uint8_t* GetData() { return m_pixels.data(); }
+	const uint8_t* GetData() const { return m_pixels.data(); }
+
+private:
+	// TODO: сделать операторы копирования
+	Image(const Image&) = delete;
+	Image& operator=(const Image&) = delete;
+
+	void moveData(Image&& imageRef);
+
+	unsigned m_width = 0;
+	unsigned m_height = 0;
+	unsigned m_comps = 0;
+	std::vector<uint8_t> m_pixels;
 };
+
+namespace ImageLoader
+{
+	void Destroy();
+	Image* Load(const char* fileName);
+
+	bool IsLoad(const Image& image);
+}
 
 //=============================================================================
 // Texture
@@ -158,7 +197,7 @@ enum class TexelsFormat
 	DepthStencil_U24,
 };
 
-struct Texture2DLoaderInfo
+struct Texture2DInfo
 {
 	RenderResourceUsage usage = RenderResourceUsage::Static;
 
@@ -168,48 +207,27 @@ struct Texture2DLoaderInfo
 	TextureWrapping wrapT = TextureWrapping::Repeat;
 	TextureWrapping wrapR = TextureWrapping::Repeat;
 
-	const char* fileName = nullptr;
-	bool verticallyFlip = true;
 	bool mipmap = true;
 };
 
 struct Texture2DCreateInfo
 {
-	Texture2DCreateInfo() = default;
-	Texture2DCreateInfo(const Texture2DLoaderInfo& loaderInfo)
-	{
-		usage = loaderInfo.usage;
-		minFilter = loaderInfo.minFilter;
-		magFilter = loaderInfo.magFilter;
-		wrapS = loaderInfo.wrapS;
-		wrapT = loaderInfo.wrapT;
-		wrapR = loaderInfo.wrapR;
-		mipmap = loaderInfo.mipmap;
-	}
-
-	RenderResourceUsage usage = RenderResourceUsage::Static;
-
-	TextureMinFilter minFilter = TextureMinFilter::NearestMipmapNearest;
-	TextureMagFilter magFilter = TextureMagFilter::Nearest;
-	TextureWrapping wrapS = TextureWrapping::Repeat;
-	TextureWrapping wrapT = TextureWrapping::Repeat;
-	TextureWrapping wrapR = TextureWrapping::Repeat;
-
 	TexelsFormat format = TexelsFormat::RGBA_U8;
 	uint16_t width = 1;
 	uint16_t height = 1;
 	uint16_t depth = 1;
 	uint8_t* pixelData = nullptr;
 	unsigned mipMapCount = 1; // TODO: only compressed
-	bool mipmap = true;
+
 	bool isTransparent = false;
 };
 
 class Texture2D
 {
 public:
-	bool CreateFromMemories(const Texture2DCreateInfo& createInfo);
-	bool CreateFromFiles(const Texture2DLoaderInfo& loaderInfo);
+	bool Create(const char* fileName, bool verticallyFlip = true, const Texture2DInfo& textureInfo = {});
+	bool Create(Image* image, const Texture2DInfo& textureInfo = {});
+	bool Create(const Texture2DCreateInfo& createInfo, const Texture2DInfo& textureInfo = {});
 
 	void Destroy();
 
@@ -235,8 +253,7 @@ private:
 namespace TextureLoader
 {
 	void Destroy();
-	Texture2D* LoadTexture2D(const char* name);
-	Texture2D* LoadTexture2D(const Texture2DLoaderInfo& loaderInfo);
+	Texture2D* LoadTexture2D(const char* name, bool verticallyFlip = true, const Texture2DInfo& textureInfo = {});
 
 	bool IsLoad(const Texture2D& texture);
 }

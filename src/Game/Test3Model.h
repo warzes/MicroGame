@@ -49,6 +49,8 @@ g3d::FreeCamera camera;
 Transform transform;
 Transform transform2;
 
+Texture2D tex;
+
 void InitTest()
 {
 	SetMouseLock(true);
@@ -65,10 +67,16 @@ void InitTest()
 
 	// Load Texture
 	{
-		Texture2DLoaderInfo info;
-		info.fileName = "../data/textures/crate.png";
-		info.verticallyFlip = true;
-		material.diffuseTexture = TextureLoader::LoadTexture2D(info);
+#if 1
+		material.diffuseTexture = TextureLoader::LoadTexture2D("../data/textures/crate.png");
+#else
+		Image image;
+		image.Load("../data/textures/crate.png", true);
+		//image.Create(64, 64, 3, {}); // создание пустого Image
+		
+		tex.Create(&image);
+		material.diffuseTexture = &tex;
+#endif
 	}
 
 	// Load geometry

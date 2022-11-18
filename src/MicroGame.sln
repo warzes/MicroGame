@@ -10,6 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DOC", "DOC", "{14233A5C-47E
 		idea.md = idea.md
 		refEngine.md = refEngine.md
 		refStyle.md = refStyle.md
+		TODO.md = TODO.md
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FirstRPG", "FirstRPG\FirstRPG.vcxproj", "{64C1D668-DD4A-4C09-8F1D-D74DE20F5189}"

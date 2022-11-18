@@ -22,6 +22,41 @@
 #endif
 //=============================================================================
 
+//=============================================================================
+// I/O func
+//=============================================================================
+
+std::vector<char> FileSystem::Fileload(const char* filename, int* len)
+{
+	FILE* file = nullptr;
+	if (filename[0])
+	{
+		errno_t err;
+		err = fopen_s(&file, filename, "rb");
+		if (err != 0)
+		{
+			LogError("The file '" + std::string(filename) + "'was not opened!!!");
+			return {};
+		}
+	}
+	if (file)
+	{
+		fseek(file, 0L, SEEK_END);
+		size_t size = ftell(file);
+		fseek(file, 0L, SEEK_SET);
+
+		std::vector<char> buffer(size + 1);
+
+		size *= fread(buffer.data(), size, 1, file) == 1;
+		buffer[size] = 0;
+		if (len) *len = (int)size;
+		fclose(file);
+		return buffer;
+	}
+	if (len) *len = 0;
+	return {};
+}
+
 //-------------------------------------------------------------------------
 // Input
 //-------------------------------------------------------------------------

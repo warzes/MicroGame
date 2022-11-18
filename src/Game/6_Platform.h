@@ -3,6 +3,18 @@
 #include "0_EngineConfig.h"
 #include "1_BaseHeader.h"
 
+//=============================================================================
+// I/O func
+//=============================================================================
+namespace FileSystem
+{
+	std::vector<char> Fileload(const char* filename, int* len);
+}
+
+//=============================================================================
+// Windows func
+//=============================================================================
+
 struct WindowCreateInfo
 {
 	const char* Title = "Game";
@@ -27,6 +39,10 @@ void SetWindowSize(int width, int height);
 int GetFrameBufferWidth();
 int GetFrameBufferHeight();
 float GetFrameBufferAspectRatio();
+
+//=============================================================================
+// Input Func
+//=============================================================================
 
 // Keyboard keys (US keyboard layout)
 // NOTE: Use GetKeyPressed() to allow redefining required keys for alternative layouts
