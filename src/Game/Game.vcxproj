@@ -209,6 +209,16 @@
     <ClCompile Include="8_Renderer.cpp" />
     <ClCompile Include="9_Graphics.cpp" />
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="fwk.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">TurnOffAllWarnings</WarningLevel>
+    </ClCompile>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -237,12 +247,16 @@
     <ClInclude Include="DungeonCrawler.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="9_Graphics.h" />
+    <ClInclude Include="fwk.h" />
     <ClInclude Include="LauncherApp.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Test1Triangles.h" />
     <ClInclude Include="Test2TextureQuads.h" />
     <ClInclude Include="Test4ManyModels.h" />
     <ClInclude Include="Test3Model.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="fwk.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
