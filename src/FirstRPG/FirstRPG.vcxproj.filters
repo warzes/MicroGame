@@ -18,6 +18,9 @@
     <ClCompile Include="EngineImpl.cpp">
       <Filter>MicroEngine</Filter>
     </ClCompile>
+    <ClCompile Include="..\3rdparty\GJKImpl.c">
+      <Filter>MicroEngine\3rdparty</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MicroEngine">
