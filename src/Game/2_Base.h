@@ -29,8 +29,6 @@ namespace base
 		return IsAligned(un.addr, _align);
 	}
 
-
-
 	inline constexpr int Min(int a, int b) { return a < b ? a : b; }
 	inline constexpr float Min(float a, float b) { return a < b ? a : b; }
 	//template<typename T> inline constexpr T Min(const T& a, const T& b) { return a < b ? a : b; }
@@ -46,6 +44,11 @@ namespace base
 	inline constexpr float Lerp(float lower, float upper, float gradient)
 	{
 		return lower + (upper - lower) * Max(0.0f, Min(gradient, 1.0f));
+	}
+
+	inline constexpr glm::vec3 Mix(const glm::vec3& a, const glm::vec3& b, float t)
+	{
+		return (a * (1 - t)) + (b * (t));
 	}
 
 	// Implementation from "08/02/2015 Better array 'countof' implementation with C++ 11 (updated)" - https://www.g-truc.net/post-0708.html

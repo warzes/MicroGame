@@ -877,7 +877,7 @@ bool Image::Load(const char* fileName, ImagePixelFormat desiredFormat, bool vert
 	int comps = 0;
 
 	stbi_set_flip_vertically_on_load(verticallyFlip ? 1 : 0);
-#if 1
+#if 0
 	int len = 0;
 	std::vector<char> data = FileSystem::Fileload(fileName, &len);
 	if (data.empty() || len <= 0)
@@ -937,6 +937,23 @@ bool Image::IsTransparent() const
 	}
 
 	return isTransparent;
+}
+//-----------------------------------------------------------------------------
+glm::vec3 Image::Bilinear(const glm::vec2& uv)
+{
+	float w = m_width, h = m_height, u = uv.x, v = uv.y;
+
+	float u1 = (int)u, v1 = (int)v, u2 = std::min(u1 + 1, w - 1), v2 = std::min(v1 + 1, h - 1);
+	float c1 = u - u1, c2 = v - v1;
+	uint8_t* p1 = &m_pixels[m_comps * (int)(u1 + v1 * m_width)];
+	uint8_t* p2 = &m_pixels[m_comps * (int)(u2 + v1 * m_width)];
+	uint8_t* p3 = &m_pixels[m_comps * (int)(u1 + v2 * m_width)];
+	uint8_t* p4 = &m_pixels[m_comps * (int)(u2 + v2 * m_width)];
+	glm::vec3 A = {p1[0], p1[1], p1[2]};
+	glm::vec3 B = {p2[0], p2[1], p2[2]};
+	glm::vec3 C = {p3[0], p3[1], p3[2]};
+	glm::vec3 D = {p4[0], p4[1], p4[2]};
+	return base::Mix(base::Mix(A, B, c1), base::Mix(C, D, c1), c2);
 }
 //-----------------------------------------------------------------------------
 void Image::moveData(Image&& imageRef)
@@ -1278,6 +1295,9 @@ bool RenderSystem::Create(const RenderSystem::CreateInfo& createInfo)
 	LogPrint("    > GL_MAX_FRAGMENT_UNIFORM_COMPONENTS : " + std::to_string(capability));
 	glGetIntegerv(GL_MAX_UNIFORM_LOCATIONS, &capability);
 	LogPrint("    > GL_MAX_UNIFORM_LOCATIONS: " + std::to_string(capability));
+	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &capability);
+	LogPrint("    > GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS: " + std::to_string(capability));
+
 
 #if defined(_DEBUG)
 	if ((glDebugMessageCallback != NULL) && (glDebugMessageControl != NULL))

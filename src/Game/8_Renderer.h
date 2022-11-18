@@ -143,6 +143,9 @@ public:
 
 	bool IsTransparent() const;
 
+	// bilinear interpolation (uv must be in image coords, range [0..w-1,0..h-1])
+	glm::vec3 Bilinear(const glm::vec2& uv);
+
 private:
 	// TODO: сделать операторы копирования
 	Image(const Image&) = delete;

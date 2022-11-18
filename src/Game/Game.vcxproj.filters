@@ -39,9 +39,6 @@
     <ClCompile Include="4_Math.cpp">
       <Filter>MicroEngine\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="fwk.c">
-      <Filter>temp</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MicroEngine">
@@ -58,9 +55,6 @@
     </Filter>
     <Filter Include="Game">
       <UniqueIdentifier>{c98ed44a-8da1-49fb-8216-8ac1dda2c1c6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="temp">
-      <UniqueIdentifier>{85480167-60eb-453f-85f3-78de9bf16be1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -135,13 +129,5 @@
     <ClInclude Include="Test4ManyModels.h">
       <Filter>Test</Filter>
     </ClInclude>
-    <ClInclude Include="fwk.h">
-      <Filter>temp</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="fwk.inl">
-      <Filter>temp</Filter>
-    </None>
   </ItemGroup>
 </Project>

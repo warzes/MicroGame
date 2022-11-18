@@ -159,6 +159,45 @@ namespace math
 	}
 }
 
+namespace collide
+{
+#define GJK_MAX_ITERATIONS 20
+
+	struct gjk_support
+	{
+		int aid, bid;
+		glm::vec3 a;
+		glm::vec3 b;
+	};
+	struct gjk_vertex 
+	{
+		glm::vec3 a;
+		glm::vec3 b;
+		glm::vec3 p;
+		int aid, bid;
+	};
+	struct gjk_simplex 
+	{
+		int max_iter, iter;
+		int hit, cnt;
+		gjk_vertex v[4];
+		float bc[4], D;
+	};
+	struct gjk_result
+	{
+		int hit;
+		glm::vec3 p0;
+		glm::vec3 p1;
+		float distance_squared;
+		int iterations;
+	};
+
+	int gjk(gjk_simplex* s, const gjk_support* sup, glm::vec3* dv);
+	gjk_result gjk_analyze(const gjk_simplex* s);
+	gjk_result gjk_quad(float a_radius, float b_radius);
+
+}
+
 namespace collisions
 {
 	// --finds the closest point to the source point on the given line segment
