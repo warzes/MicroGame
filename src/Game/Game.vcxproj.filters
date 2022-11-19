@@ -114,7 +114,7 @@
       <Filter>MicroEngine\Engine</Filter>
     </ClInclude>
     <ClInclude Include="LauncherApp.h" />
-    <ClInclude Include="Test1Triangles.h">
+    <ClInclude Include="Test001Triangles.h">
       <Filter>Test</Filter>
     </ClInclude>
     <ClInclude Include="8_Renderer.h">
@@ -126,16 +126,19 @@
     <ClInclude Include="..\3rdparty\glmHeader.h">
       <Filter>MicroEngine\3rdparty</Filter>
     </ClInclude>
-    <ClInclude Include="Test2TextureQuads.h">
+    <ClInclude Include="Test002TextureQuads.h">
       <Filter>Test</Filter>
     </ClInclude>
-    <ClInclude Include="Test3Model.h">
+    <ClInclude Include="Test003Model.h">
       <Filter>Test</Filter>
     </ClInclude>
-    <ClInclude Include="Test4ManyModels.h">
+    <ClInclude Include="Test004ManyModels.h">
       <Filter>Test</Filter>
     </ClInclude>
     <ClInclude Include="TestNNew.h">
+      <Filter>Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Test100SimpleCollisions.h">
       <Filter>Test</Filter>
     </ClInclude>
   </ItemGroup>

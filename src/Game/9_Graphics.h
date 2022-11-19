@@ -50,10 +50,22 @@ namespace DebugDraw
 	void DrawLine(const glm::vec3& from, const glm::vec3& to, unsigned rgb);
 	void DrawLineDashed(glm::vec3 from, glm::vec3 to, unsigned rgb);
 
-	void DrawAxis(float units);
-	
+	void DrawAxis(float units);	
 	void DrawGround(float scale);
 	void DrawGrid(float scale);
+
+	void DrawTriangle(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, unsigned rgb);
+
+	void DrawArrow(const glm::vec3& begin, const glm::vec3& end, unsigned rgb);
+	void DrawBounds(const glm::vec3 points[8], unsigned rgb); // TODO: передавать points по ссылке, сейчас оно копируется
+	void DrawBox(const glm::vec3& c, const glm::vec3& extents, unsigned rgb);
+	void DrawPlane(const glm::vec3& p, const glm::vec3& n, float scale, unsigned rgb);
+	void DrawSphere(const glm::vec3& pos, float radius, unsigned rgb);
+	void DrawCapsule(const glm::vec3& from, const glm::vec3& to, float radius, unsigned rgb);
+
+	void DrawDiamond(const glm::vec3& from, const glm::vec3& to, float size, unsigned rgb);
+	void DrawPyramid(const glm::vec3& center, float height, int segments, unsigned rgb);
+	void DrawPrism(const glm::vec3& center, float radius, float height, const glm::vec3& normal, int segments, unsigned rgb);
 
 	void Flush(const Camera& camera);
 }

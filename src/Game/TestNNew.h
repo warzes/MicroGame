@@ -124,19 +124,4 @@ void FrameTest(float deltaTime)
 	shader.SetUniform(projectionUniform, GetCurrentProjectionMatrix());
 	shader.SetUniform(worldUniform, transform.GetWorld());
 	model.Draw();
-
-	// debug draw collisions
-	{
-		// grid
-		DebugDraw::DrawGrid(0);
-
-		//DebugDraw::DrawPoint({ 0.0f, 0.0f, 0.0f }, RED);
-		//DebugDraw::DrawPoint({1.0f, 0.0f, 0.0f }, ORANGE);
-		//DebugDraw::DrawPoint({ -1.0f, 0.0f, 0.0f }, GREEN);
-
-		//DebugDraw::DrawLine({ -2.0f, 1.0f, 0.0f }, { 2.0f, 0.0f, 0.0f }, GREEN);
-		//DebugDraw::DrawLineDashed({ -2.0f, 0.0f, 0.0f }, { 2.0f, 1.0f, 0.0f }, RED);
-
-		DebugDraw::Flush(ncamera);
-	}
 }

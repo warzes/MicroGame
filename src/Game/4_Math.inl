@@ -984,4 +984,39 @@ namespace collide
 		return 1;
 	}
 
+	inline Poly Pyramid(const glm::vec3& from, const glm::vec3& to, float size)
+	{
+		/* calculate axis */
+		vec3 up, right, forward = norm3(sub3(to, from));
+		ortho3(&right, &up, forward);
+
+		/* calculate extend */
+		vec3 xext = scale3(right, size);
+		vec3 yext = scale3(up, size);
+		vec3 nxext = scale3(right, -size);
+		vec3 nyext = scale3(up, -size);
+
+		/* calculate base vertices */
+		Poly p;
+		p.verts = {
+			add3(add3(from, xext), yext), /*a*/
+			add3(add3(from, xext), nyext), /*b*/
+			add3(add3(from, nxext), nyext), /*c*/
+			add3(add3(from, nxext), yext), /*d*/
+			to, /*r*/
+			{} // empty
+		};
+		p.cnt = 5; /*+1 for diamond case*/ // array_resize(p.verts, 5+1); p.cnt = 5;
+
+		return p;
+	}
+
+	inline Poly Diamond(const glm::vec3& from, const glm::vec3& to, float size)
+	{
+		vec3 mid = add3(from, scale3(sub3(to, from), 0.5f));
+		Poly p = Pyramid(mid, to, size);
+		p.verts[5] = from; p.cnt = 6;
+		return p;
+	}
+
 }

@@ -130,7 +130,7 @@ struct Triangle
 struct Poly
 {
 	std::vector<glm::vec3> verts;
-	int cnt; // todo: delete, in verts.size
+	int cnt = 0; // todo: delete, in verts.size
 };
 
 struct Frustum
@@ -239,6 +239,41 @@ namespace tempMath
 	inline vec4  dec4(vec4   a, float  b) { return vec4(a.x - b, a.y - b, a.z - b, a.w - b); }
 	inline vec4  scale4(vec4   a, float  b) { return vec4(a.x * b, a.y * b, a.z * b, a.w * b); }
 	inline vec4  div4(vec4   a, float  b) { return scale4(a, b ? 1 / b : 0.f); }
+
+	inline void  ortho3(vec3* left, vec3* up, vec3 v) 
+	{
+#if 0
+		if ((v.z * v.z) > (0.7f * 0.7f)) {
+			float sqrlen = v.y * v.y + v.z * v.z;
+			float invlen = 1.f / sqrtf(sqrlen);
+			*up = vec3(0, v.z * invlen, -v.y * invlen);
+			*left = vec3(sqrlen * invlen, -v.x * up->z, v.x * up->y);
+		}
+		else {
+			float sqrlen = v.x * v.x + v.y * v.y;
+			float invlen = 1.f / sqrtf(sqrlen);
+			*left = vec3(-v.y * invlen, v.x * invlen, 0);
+			*up = vec3(-v.z * left->y, v.z * left->x, sqrlen * invlen);
+		}
+#else
+		* left = (v.z * v.z) < (v.x * v.x) ? vec3(v.y, -v.x, 0) : vec3(0, -v.z, v.y);
+		*up = cross3(*left, v);
+#endif
+	}
+
+	inline void rotation33(glm::mat3& M, float degrees, float x, float y, float z) 
+	{
+		float radians = degrees * C_PI / 180.0f;
+		float s = sinf(radians), c = cosf(radians), c1 = 1.0f - c;
+		float xy = x * y, yz = y * z, zx = z * x, xs = x * s, ys = y * s, zs = z * s;
+		
+		float m[9];
+		m[0] = c1 * x * x + c; m[1] = c1 * xy - zs; m[2] = c1 * zx + ys;
+		m[3] = c1 * xy + zs; m[4] = c1 * y * y + c; m[5] = c1 * yz - xs;
+		m[6] = c1 * zx - ys; m[7] = c1 * yz + xs; m[8] = c1 * z * z + c;
+
+		M = glm::make_mat3(m);
+	}
 
 	inline void ortho44(glm::mat4& M, float l, float r, float b, float t, float n, float f) 
 	{
@@ -477,8 +512,8 @@ namespace collide
 
 	vec3 SphereClosestPoint(const Sphere& s, vec3 p);
 	Hit* SphereHitAABB(const Sphere& s, const AABB& a);
-	Hit* SphereHitCapsule(const Sphere& s, const Capsule& c);
-	Hit* SphereHitSphere(Sphere a, const Sphere& b);
+	Hit* SphereHitCapsule(Sphere s, const Capsule& c);
+	Hit* SphereHitSphere(const Sphere& a, const Sphere& b);
 	int SphereTestAABB(const Sphere& s, const AABB& a);
 	int SphereTestCapsule(const Sphere& s, const Capsule& c);
 	int SphereTestPoly(const Sphere& s, const Poly& p);
@@ -542,6 +577,9 @@ namespace collide
 	Frustum FrustumBuild(const glm::mat4& projview);
 	int     FrustumTestSphere(const Frustum& f, const Sphere& s);
 	int     FrustumTestAABB(const Frustum& f, const AABB& a);
+
+	Poly Pyramid(const glm::vec3& from, const glm::vec3& to, float size);
+	Poly Diamond(const glm::vec3& from, const glm::vec3& to, float size);
 }
 
 #include "4_Math.inl"

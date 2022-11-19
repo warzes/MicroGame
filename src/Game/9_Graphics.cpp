@@ -215,6 +215,12 @@ namespace DebugDraw
 			DrawLine(glm::vec3(i, 0, -scale), glm::vec3(i, 0, +scale), GRAY); // vert
 		}
 	}
+
+	void DrawConeLowres(const glm::vec3& center, const glm::vec3& top, float radius, unsigned rgb)
+	{
+		glm::vec3 diff3 = tempMath::sub3(top, center);
+		DrawPrism(center, radius ? radius : 1, tempMath::len3(diff3), tempMath::norm3(diff3), 3, rgb);
+	}
 }
 
 void DebugDraw::DrawPoint(const glm::vec3& from, unsigned rgb)
@@ -242,6 +248,14 @@ void DebugDraw::DrawLineDashed(glm::vec3 from, glm::vec3 to, unsigned rgb)
 
 void DebugDraw::DrawAxis(float units)
 {
+	DrawLine(glm::vec3(0, 0, 0), glm::vec3(units, 0, 0), RED);
+	DrawLineDashed(glm::vec3(0, 0, 0), glm::vec3(-units, 0, 0), RED);
+
+	DrawLine(glm::vec3(0, 0, 0), glm::vec3(0, units, 0), GREEN);
+	DrawLineDashed(glm::vec3(0, 0, 0), glm::vec3(0, -units, 0), GREEN);
+
+	DrawLine(glm::vec3(0, 0, 0), glm::vec3(0, 0, units), BLUE);
+	DrawLineDashed(glm::vec3(0, 0, 0), glm::vec3(0, 0, -units), BLUE);
 }
 
 void DebugDraw::DrawGround(float scale)
@@ -264,6 +278,253 @@ void DebugDraw::DrawGrid(float scale)
 {
 	DrawGround(scale);
 	DrawAxis(scale ? scale : 100.0f);
+}
+
+void DebugDraw::DrawTriangle(const glm::vec3& pa, const glm::vec3& pb, const glm::vec3& pc, unsigned rgb)
+{
+	DrawLine(pa, pb, rgb);
+	DrawLine(pa, pc, rgb);
+	DrawLine(pb, pc, rgb);
+}
+
+void DebugDraw::DrawArrow(const glm::vec3& begin, const glm::vec3& end, unsigned rgb)
+{
+	glm::vec3 diff = tempMath::sub3(end, begin);
+	float len = tempMath::len3(diff), stick_len = len * 2 / 3;
+
+	DrawLine(begin, end, rgb);
+	DrawConeLowres(tempMath::add3(begin, tempMath::scale3(tempMath::norm3(diff), stick_len)), end, len / 6, rgb);
+}
+
+void DebugDraw::DrawBounds(const glm::vec3 points[8], unsigned rgb)
+{
+	for (int i = 0; i < 4; ++i) 
+	{
+		DrawLine(points[i], points[(i + 1) & 3], rgb);
+		DrawLine(points[i], points[4 + i], rgb);
+		DrawLine(points[4 + i], points[4 + ((i + 1) & 3)], rgb);
+	}
+}
+
+void DebugDraw::DrawBox(const glm::vec3& c, const glm::vec3& extents, unsigned rgb)
+{
+	glm::vec3 points[8], whd = tempMath::scale3(extents, 0.5f);
+#define DD_BOX_V(v, op1, op2, op3) (v).x = c.x op1 whd.x; (v).y = c.y op2 whd.y; (v).z = c.z op3 whd.z
+	DD_BOX_V(points[0], -, +, +);
+	DD_BOX_V(points[1], -, +, -);
+	DD_BOX_V(points[2], +, +, -);
+	DD_BOX_V(points[3], +, +, +);
+	DD_BOX_V(points[4], -, -, +);
+	DD_BOX_V(points[5], -, -, -);
+	DD_BOX_V(points[6], +, -, -);
+	DD_BOX_V(points[7], +, -, +);
+#undef DD_BOX_V
+	DrawBounds(points, rgb);
+}
+
+void DebugDraw::DrawPlane(const glm::vec3& p, const glm::vec3& n, float scale, unsigned rgb)
+{
+	// if n is too similar to up vector, use right. else use up vector
+	glm::vec3 v1 = tempMath::cross3(n, tempMath::dot3(n, glm::vec3(0, 1, 0)) > 0.8f ? glm::vec3(1, 0, 0) : glm::vec3(0, 1, 0));
+	glm::vec3 v2 = tempMath::cross3(n, v1);
+
+	// draw axis
+	DrawLine(p, tempMath::add3(p, n), rgb);
+	DrawLine(p, tempMath::add3(p, v1), rgb);
+	DrawLine(p, tempMath::add3(p, v2), rgb);
+
+	// get plane coords
+	v1 = tempMath::scale3(v1, scale);
+	v2 = tempMath::scale3(v2, scale);
+	glm::vec3 p1 = tempMath::add3(tempMath::add3(p, v1), v2);
+	glm::vec3 p2 = tempMath::add3(tempMath::sub3(p, v1), v2);
+	glm::vec3 p3 = tempMath::sub3(tempMath::sub3(p, v1), v2);
+	glm::vec3 p4 = tempMath::sub3(tempMath::add3(p, v1), v2);
+
+	// draw plane
+	DrawLine(p1, p2, rgb);
+	DrawLine(p2, p3, rgb);
+	DrawLine(p3, p4, rgb);
+	DrawLine(p4, p1, rgb);
+}
+
+void DebugDraw::DrawSphere(const glm::vec3& center, float radius, unsigned rgb)
+{
+	float lod = 6, yp = -radius, rp = 0, y, r, x, z;
+	for (int j = 1; j <= lod / 2; ++j, yp = y, rp = r) 
+	{
+		y = j * 2.f / (lod / 2) - 1;
+		r = cosf(y * 3.14159f / 2) * radius;
+		y = sinf(y * 3.14159f / 2) * radius;
+
+		float xp = 1, zp = 0;
+		for (int i = 1; i <= lod; ++i, xp = x, zp = z)
+		{
+			x = 3.14159f * 2 * i / lod;
+			z = sinf(x);
+			x = cosf(x);
+
+			glm::vec3 a1 = tempMath::add3(center, glm::vec3(xp * rp, yp, zp * rp));
+			glm::vec3 b1 = tempMath::add3(center, glm::vec3(xp * r, y, zp * r));
+			glm::vec3 c1 = tempMath::add3(center, glm::vec3(x * r, y, z * r));
+
+			DrawLine(a1, b1, rgb);
+			DrawLine(b1, c1, rgb);
+			DrawLine(c1, a1, rgb);
+
+			glm::vec3 a2 = tempMath::add3(center, glm::vec3(xp * rp, yp, zp * rp));
+			glm::vec3 b2 = tempMath::add3(center, glm::vec3(x * r, y, z * r));
+			glm::vec3 c2 = tempMath::add3(center, glm::vec3(x * rp, yp, z * rp));
+
+			DrawLine(a2, b2, rgb);
+			DrawLine(b2, c2, rgb);
+			DrawLine(c2, a2, rgb);
+		}
+	}
+}
+
+void DebugDraw::DrawCapsule(const glm::vec3& from, const glm::vec3& to, float r, unsigned rgb)
+{
+	/* calculate axis */
+	glm::vec3 up, right, forward;
+	forward = tempMath::sub3(to, from);
+	forward = tempMath::norm3(forward);
+	tempMath::ortho3(&right, &up, forward);
+
+	/* calculate first two cone verts (buttom + top) */
+	glm::vec3 lastf, lastt;
+	lastf = tempMath::scale3(up, r);
+	lastt = tempMath::add3(to, lastf);
+	lastf = tempMath::add3(from, lastf);
+
+	/* step along circle outline and draw lines */
+	enum { step_size = 20 };
+	for (int i = step_size; i <= 360; i += step_size)
+	{
+		/* calculate current rotation */
+		glm::vec3 ax = tempMath::scale3(right, sinf(i * TO_RAD));
+		glm::vec3 ay = tempMath::scale3(up, cosf(i * TO_RAD));
+
+		/* calculate current vertices on cone */
+		glm::vec3 tmp = tempMath::add3(ax, ay);
+		glm::vec3 pf = tempMath::scale3(tmp, r);
+		glm::vec3 pt = tempMath::scale3(tmp, r);
+
+		pf = tempMath::add3(pf, from);
+		pt = tempMath::add3(pt, to);
+
+		/* draw cone vertices */
+		DrawLine(lastf, pf, rgb);
+		DrawLine(lastt, pt, rgb);
+		DrawLine(pf, pt, rgb);
+
+		lastf = pf;
+		lastt = pt;
+
+		/* calculate first top sphere vert */
+		glm::vec3 prevt = tempMath::scale3(tmp, r);
+		glm::vec3 prevf = tempMath::add3(prevt, from);
+		prevt = tempMath::add3(prevt, to);
+
+		/* sphere (two half spheres )*/
+		for (int j = 1; j < 180 / step_size; j++) 
+		{
+			/* angles */
+			float ta = j * step_size;
+			float fa = 360 - (j * step_size);
+
+			/* top half-sphere */
+			ax = tempMath::scale3(forward, sinf(ta * TO_RAD));
+			ay = tempMath::scale3(tmp, cosf(ta * TO_RAD));
+
+			glm::vec3 t = tempMath::add3(ax, ay);
+			pf = tempMath::scale3(t, r);
+			pf = tempMath::add3(pf, to);
+			DrawLine(pf, prevt, rgb);
+			prevt = pf;
+
+			/* bottom half-sphere */
+			ax = tempMath::scale3(forward, sinf(fa * TO_RAD));
+			ay = tempMath::scale3(tmp, cosf(fa * TO_RAD));
+
+			t = tempMath::add3(ax, ay);
+			pf = tempMath::scale3(t, r);
+			pf = tempMath::add3(pf, from);
+			DrawLine(pf, prevf, rgb);
+			prevf = pf;
+		}
+	}
+}
+
+void DebugDraw::DrawDiamond(const glm::vec3& from, const glm::vec3& to, float size, unsigned rgb)
+{
+	Poly p = collide::Diamond(from, to, size);
+	glm::vec3* dmd = p.verts.data();
+
+	glm::vec3* a = dmd + 0;
+	glm::vec3* b = dmd + 1;
+	glm::vec3* c = dmd + 2;
+	glm::vec3* d = dmd + 3;
+	glm::vec3* t = dmd + 4;
+	glm::vec3* f = dmd + 5;
+
+	/* draw vertices */
+	DrawLine(*a, *b, rgb);
+	DrawLine(*b, *c, rgb);
+	DrawLine(*c, *d, rgb);
+	DrawLine(*d, *a, rgb);
+
+	/* draw roof */
+	DrawLine(*a, *t, rgb);
+	DrawLine(*b, *t, rgb);
+	DrawLine(*c, *t, rgb);
+	DrawLine(*d, *t, rgb);
+
+	/* draw floor */
+	DrawLine(*a, *f, rgb);
+	DrawLine(*b, *f, rgb);
+	DrawLine(*c, *f, rgb);
+	DrawLine(*d, *f, rgb);
+}
+
+void DebugDraw::DrawPyramid(const glm::vec3& center, float height, int segments, unsigned rgb)
+{
+	DrawPrism(center, 1, height, glm::vec3(0, 1, 0), segments, rgb);
+}
+
+void DebugDraw::DrawPrism(const glm::vec3& center, float radius, float height, const glm::vec3& normal, int segments, unsigned rgb)
+{
+	glm::vec3 left = glm::vec3{ 0 }, up = glm::vec3{ 0 };
+	tempMath::ortho3(&left, &up, normal);
+
+	glm::vec3 point, lastPoint;
+	up = tempMath::scale3(up, radius);
+	left = tempMath::scale3(left, radius);
+	lastPoint = tempMath::add3(center, up);
+	glm::vec3 pivot = tempMath::add3(center, tempMath::scale3(normal, height));
+
+	for (int i = 1; i <= segments; ++i)
+	{
+		const float radians = (C_PI * 2) * i / segments;
+
+		glm::vec3 vs = tempMath::scale3(left, sinf(radians));
+		glm::vec3 vc = tempMath::scale3(up, cosf(radians));
+
+		point = tempMath::add3(center, vs);
+		point = tempMath::add3(point, vc);
+
+		DrawLine(lastPoint, point, rgb);
+		if (height > 0) 
+			DrawLine(point, pivot, rgb);
+		else if (height < 0) 
+		{
+			DrawLine(point, tempMath::add3(point, tempMath::scale3(normal, -height)), rgb);
+		}
+		lastPoint = point;
+	}
+
+	if (height < 0) 
+		DrawPrism(tempMath::add3(center, tempMath::scale3(normal, -height)), radius, 0, normal, segments, rgb);
 }
 
 void DebugDraw::Flush(const Camera& camera)
@@ -320,7 +581,7 @@ void main()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0);
 
 	glEnable(GL_DEPTH_TEST);
-	//glDepthFunc(GL_LEQUAL);
+	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_PROGRAM_POINT_SIZE); // for GL_POINTS
 	glEnable(GL_LINE_SMOOTH); // for GL_LINES (thin)
 	
@@ -338,10 +599,8 @@ void main()
 	}
 
 	//glDisable(GL_DEPTH_TEST);
-	//glDepthFunc(GL_ALWAYS);
 	// Draw Thick Lines
 	{
-		glLineWidth(1);
 		for (auto& it : ThickLines)
 		{
 			shaderProgram.SetUniform(ColorID, rgbf(it.first));
@@ -349,7 +608,6 @@ void main()
 			glBufferData(GL_ARRAY_BUFFER, count * sizeof(glm::vec3), it.second.data(), GL_STATIC_DRAW);
 			glDrawArrays(GL_LINES, 0, count);
 		}
-		glLineWidth(1);
 	}
 	
 	glEnable(GL_DEPTH_TEST);

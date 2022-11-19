@@ -246,10 +246,11 @@
     <ClInclude Include="9_Graphics.h" />
     <ClInclude Include="LauncherApp.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="Test1Triangles.h" />
-    <ClInclude Include="Test2TextureQuads.h" />
-    <ClInclude Include="Test4ManyModels.h" />
-    <ClInclude Include="Test3Model.h" />
+    <ClInclude Include="Test100SimpleCollisions.h" />
+    <ClInclude Include="Test001Triangles.h" />
+    <ClInclude Include="Test002TextureQuads.h" />
+    <ClInclude Include="Test004ManyModels.h" />
+    <ClInclude Include="Test003Model.h" />
     <ClInclude Include="TestNNew.h" />
   </ItemGroup>
   <ItemGroup>

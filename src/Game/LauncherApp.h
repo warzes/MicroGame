@@ -9,22 +9,28 @@
 #	define TEST_3_MODEL 0
 #	define TEST_4_MANYMODEL 0
 
-#	define TEST_N_NEW 1
+#	define TEST_100_SIMPLECOLLISIONS 1
+
+#	define TEST_N_NEW 0
 
 #	if TEST_1_TRIANGLES
-#		include "Test1Triangles.h"
+#		include "Test001Triangles.h"
 #	endif
 
 #	if TEST_2_TEXTUREQUADS
-#		include "Test2TextureQuads.h"
+#		include "Test002TextureQuads.h"
 #	endif
 
 #	if TEST_3_MODEL
-#		include "Test3Model.h"
+#		include "Test003Model.h"
 #	endif
 
 #	if TEST_4_MANYMODEL
-#		include "Test4ManyModels.h"
+#		include "Test004ManyModels.h"
+#	endif
+
+#	if TEST_100_SIMPLECOLLISIONS
+#		include "Test100SimpleCollisions.h"
 #	endif
 
 #	if TEST_N_NEW
