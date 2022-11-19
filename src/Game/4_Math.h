@@ -3,22 +3,10 @@
 #include "0_EngineConfig.h"
 #include "1_BaseHeader.h"
 
-struct Plane
+struct Line
 {
-	Plane() = default;
-	Plane(const glm::vec3& normal, const glm::vec3& det)
-	{
-		n = normal;
-		d = det;
-	}
-	Plane(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c)
-	{
-		d = a;
-		n = glm::normalize(glm::cross(-b + a, c - a));
-	}
-
-	glm::vec3 n = glm::vec3(0, 1, 0);
-	glm::vec3 d = glm::vec3(0, 0, 0);
+	glm::vec3 a = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 b = glm::vec3(0.0f, 0.0f, 0.0f);
 };
 
 struct Sphere
@@ -29,15 +17,415 @@ struct Sphere
 		pos = position;
 		radius = size;
 	}
-	glm::vec3 pos = glm::vec3(0, 0, 0);
+	glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f);
 	float radius = 1.0f;
 };
+
+struct AABB
+{
+	glm::vec3 min = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 max = glm::vec3(0.0f, 0.0f, 0.0f);
+};
+
+struct Plane 
+{ 
+	glm::vec3 p = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 n = glm::vec3(0.0f, 0.0f, 0.0f);
+};
+
+struct Capsule
+{
+	glm::vec3 a = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 b = glm::vec3(0.0f, 0.0f, 0.0f);
+	float r = 0.0f;
+};
+
+
+struct Ray
+{
+	glm::vec3 p = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 d = glm::vec3(0.0f, 0.0f, 0.0f);
+};
+
+struct Triangle
+{
+	glm::vec3 p0 = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 p1 = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 p2 = glm::vec3(0.0f, 0.0f, 0.0f);
+};
+
+struct Poly
+{
+	std::vector<glm::vec3> verts;
+	int cnt; // todo: delete, in verts.size
+};
+
+struct Frustum
+{
+	union
+	{
+		struct { glm::vec4 l, r, t, b, n, f; }; 
+		glm::vec4 pl[6]; 
+		float v[24];
+	};
+};
+
+struct Hit 
+{
+	union 
+	{
+		// general case
+		float depth;
+		// rays only: penetration (t0) and extraction (t1) points along ray line
+		struct { float t0, t1; };
+		// gjk only
+		struct { int hits; glm::vec3 p0, p1; float distance2; int iterations; };
+	};
+	union
+	{ 
+		glm::vec3 p; 
+		glm::vec3 contact_point; 
+	};
+	union 
+	{ 
+		glm::vec3 n; 
+		glm::vec3 normal; 
+	};
+};
+
+namespace tempMath
+{
+	using namespace glm;
+
+	// потом удалить
+	inline float minf(float a, float b) { return a < b ? a : b; }
+	inline float maxf(float a, float b) { return a > b ? a : b; }
+	inline float absf(float a) { return a < 0.0f ? -a : a; }
+	inline float pmodf(float a, float b) { return (a < 0.0f ? 1.0f : 0.0f) + (float)fmod(a, b); } // positive mod
+	inline float signf(float a) { return (a < 0) ? -1.f : 1.f; }
+	inline float clampf(float v, float a, float b) { return maxf(minf(b, v), a); }
+	inline float mixf(float a, float b, float t) { return a * (1 - t) + b * t; }
+
+	inline vec3 neg3(vec3 a) { return vec3(-a.x, -a.y, -a.z); }
+	inline vec3 add3(vec3 a, vec3 b) { return vec3(a.x + b.x, a.y + b.y, a.z + b.z); }
+	inline vec3 sub3(vec3 a, vec3 b) { return vec3(a.x - b.x, a.y - b.y, a.z - b.z); }
+	inline vec3 mul3(vec3 a, vec3 b) { return vec3(a.x * b.x, a.y * b.y, a.z * b.z); }
+	inline vec3 inc3(vec3 a, float b) { return vec3(a.x + b, a.y + b, a.z + b); }
+	inline vec3 dec3(vec3 a, float b) { return vec3(a.x - b, a.y - b, a.z - b); }
+	inline vec3 scale3(vec3 a, float b) { return vec3(a.x * b, a.y * b, a.z * b); }
+	inline vec3 div3(vec3 a, float b) { return scale3(a, b ? 1 / b : 0.f); }
+
+	inline vec3 cross3(vec3 a, vec3 b) { return vec3(a.y * b.z - b.y * a.z, a.z * b.x - b.z * a.x, a.x * b.y - b.x * a.y); }
+	inline float dot3(vec3 a, vec3 b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+
+	inline float len3sq(vec3 a) { return dot3(a, a); }
+	inline float len3(vec3 a) { return sqrtf(len3sq(a)); }
+	inline vec3 norm3(vec3 a) { return /*dot3(a) == 0 ? a :*/ div3(a, len3(a)); }
+
+	inline vec4  neg4(vec4   a) { return vec4(-a.x, -a.y, -a.z, -a.w); }
+	inline vec4  add4(vec4   a, vec4   b) { return vec4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w); }
+	inline vec4  sub4(vec4   a, vec4   b) { return vec4(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w); }
+	inline vec4  mul4(vec4   a, vec4   b) { return vec4(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w); }
+	inline vec4  inc4(vec4   a, float  b) { return vec4(a.x + b, a.y + b, a.z + b, a.w + b); }
+	inline vec4  dec4(vec4   a, float  b) { return vec4(a.x - b, a.y - b, a.z - b, a.w - b); }
+	inline vec4  scale4(vec4   a, float  b) { return vec4(a.x * b, a.y * b, a.z * b, a.w * b); }
+	inline vec4  div4(vec4   a, float  b) { return scale4(a, b ? 1 / b : 0.f); }
+}
+
+namespace collide
+{
+	using namespace tempMath;
+
+	// gjk wrapper
+
+#define GJK_MAX_ITERATIONS 20
+
+	struct GJKSupport
+	{
+		int aid, bid;
+		vec3 a;
+		vec3 b;
+	};
+	/*inline gjk_support ToGJKSupport(const GJKSupport& gjk)
+	{
+		gjk_support ret = { 0 };
+		ret.aid = gjk.aid;
+		ret.bid = gjk.bid;
+
+		ret.a[0] = gjk.a.x;
+		ret.a[1] = gjk.a.y;
+		ret.a[2] = gjk.a.z;
+
+		ret.b[0] = gjk.b.x;
+		ret.b[1] = gjk.b.y;
+		ret.b[2] = gjk.b.z;
+
+		return ret;
+	}
+	inline GJKSupport ToGJKSupport(const gjk_support& gjk)
+	{
+		GJKSupport ret = { 0 };
+		ret.aid = gjk.aid;
+		ret.bid = gjk.bid;
+
+		ret.a.x = gjk.a[0];
+		ret.a.y = gjk.a[1];
+		ret.a.z = gjk.a[2];
+
+		ret.b.x = gjk.b[0];
+		ret.b.y = gjk.b[1];
+		ret.b.z = gjk.b[2];
+
+		return ret;
+	}*/
+
+	struct GJKVertex 
+	{
+		vec3 a;
+		vec3 b;
+		vec3 p;
+		int aid, bid;
+	};
+	struct GJKSimplex
+	{
+		int max_iter, iter;
+		int hit, cnt;
+		GJKVertex v[4];
+		float bc[4], D;
+	};
+	//inline gjk_simplex ToGJKSimplex(const GJKSimplex& gjk)
+	//{
+	//	gjk_simplex ret;
+
+	//	ret.max_iter = gjk.max_iter;
+	//	ret.iter = gjk.iter;
+	//	ret.hit = gjk.hit;
+	//	ret.cnt = gjk.cnt;
+
+	//	for (int i = 0; i < 4; i++)
+	//	{
+	//		ret.v[i].a[0] = gjk.v[i].a.x;
+	//		ret.v[i].a[1] = gjk.v[i].a.y;
+	//		ret.v[i].a[2] = gjk.v[i].a.z;
+
+	//		ret.v[i].b[0] = gjk.v[i].b.x;
+	//		ret.v[i].b[1] = gjk.v[i].b.y;
+	//		ret.v[i].b[2] = gjk.v[i].b.z;
+
+	//		ret.v[i].p[0] = gjk.v[i].p.x;
+	//		ret.v[i].p[1] = gjk.v[i].p.y;
+	//		ret.v[i].p[2] = gjk.v[i].p.z;
+
+	//		ret.v[i].aid = gjk.v[i].aid;
+	//		ret.v[i].bid = gjk.v[i].bid;
+
+	//		ret.bc[i] = gjk.bc[i];
+	//	}
+
+	//	ret.D = gjk.D;
+
+	//	return ret;
+	//}
+	//inline GJKSimplex ToGJKSimplex(const gjk_simplex& gjk)
+	//{
+	//	GJKSimplex ret;
+
+	//	ret.max_iter = gjk.max_iter;
+	//	ret.iter = gjk.iter;
+	//	ret.hit = gjk.hit;
+	//	ret.cnt = gjk.cnt;
+
+	//	for (int i = 0; i < 4; i++)
+	//	{
+	//		ret.v[i].a.x = gjk.v[i].a[0];
+	//		ret.v[i].a.y = gjk.v[i].a[1];
+	//		ret.v[i].a.z = gjk.v[i].a[2];
+
+	//		ret.v[i].b.x = gjk.v[i].b[0];
+	//		ret.v[i].b.y = gjk.v[i].b[1];
+	//		ret.v[i].b.z = gjk.v[i].b[2];
+
+	//		ret.v[i].p.x = gjk.v[i].p[0];
+	//		ret.v[i].p.y = gjk.v[i].p[1];
+	//		ret.v[i].p.z = gjk.v[i].p[2];
+
+	//		ret.v[i].aid = gjk.v[i].aid;
+	//		ret.v[i].bid = gjk.v[i].bid;
+
+	//		ret.bc[i] = gjk.bc[i];
+	//	}
+
+	//	ret.D = gjk.D;
+
+	//	return ret;
+	//}
+
+	struct GJKResult 
+	{
+		int hit;
+		vec3 p0;
+		vec3 p1;
+		float distance_squared;
+		int iterations;
+	};
+	//inline gjk_result ToGJKResult(const GJKResult& gjk)
+	//{
+	//	gjk_result ret;
+	//	ret.hit = gjk.hit;
+
+	//	ret.p0[0] = gjk.p0.x;
+	//	ret.p0[1] = gjk.p0.y;
+	//	ret.p0[2] = gjk.p0.z;
+
+	//	ret.p1[0] = gjk.p1.x;
+	//	ret.p1[1] = gjk.p1.y;
+	//	ret.p1[2] = gjk.p1.z;
+
+	//	ret.distance_squared = gjk.distance_squared;
+	//	ret.iterations = gjk.iterations;
+
+	//	return ret;
+	//}
+	//inline GJKResult ToGJKResult(const gjk_result& gjk)
+	//{
+	//	GJKResult ret;
+	//	ret.hit = gjk.hit;
+
+	//	ret.p0.x = gjk.p0[0];
+	//	ret.p0.y = gjk.p0[1];
+	//	ret.p0.z = gjk.p0[2];
+
+	//	ret.p1.x = gjk.p1[0];
+	//	ret.p1.y = gjk.p1[1];
+	//	ret.p1.z = gjk.p1[2];
+
+	//	ret.distance_squared = gjk.distance_squared;
+	//	ret.iterations = gjk.iterations;
+
+	//	return ret;
+	//}
+
+	int GJK(GJKSimplex* s, const GJKSupport* sup, vec3* dv);
+	GJKResult GJKAnalyze(const GJKSimplex* s);
+	GJKResult GJKQuad(float a_radius, float b_radius);
+
+	/* line/segment */
+
+	float LineDistance2Point(const Line& l, const glm::vec3& p);
+	glm::vec3 LineClosestPoint(const Line& l, const glm::vec3& p);
+
+	/* ray */
+
+	float RayTestPlane(const Ray& r, const glm::vec4& p4);
+	float RayTestTriangle(const Ray& r, const Triangle& t);
+	int RayTestSphere(float* t0, float* t1, const Ray& r, const Sphere& s);
+	int RayTestAABB(float* t0, float* t1, const Ray& r, const AABB& a);
+	Hit* RayHitPlane(const Ray& r, const Plane& p);
+	Hit* RayHitTriangle(const Ray& r, const Triangle& t);
+	Hit* RayHitSphere(const Ray& r, const Sphere& s);
+	Hit* RayHitAABB(const Ray& r, const AABB& a);
+	
+	/* sphere */
+
+	vec3 SphereClosestPoint(const Sphere& s, vec3 p);
+	Hit* SphereHitAABB(const Sphere& s, const AABB& a);
+	Hit* SphereHitCapsule(const Sphere& s, const Capsule& c);
+	Hit* SphereHitSphere(Sphere a, const Sphere& b);
+	int SphereTestAABB(const Sphere& s, const AABB& a);
+	int SphereTestCapsule(const Sphere& s, const Capsule& c);
+	int SphereTestPoly(const Sphere& s, const Poly& p);
+	int SphereTestSphere(const Sphere& a, const Sphere& b);
+
+	/* aabb */
+
+	vec3 AABBClosestPoint(const AABB& a, vec3 p);
+	float AABBDistance2Point(const AABB& a, vec3 p);
+	int  AABBContainsPoint(const AABB& a, vec3 p);
+	Hit* AABBHitAABB(const AABB& a, const AABB& b);
+	Hit* AABBHitCapsule(const AABB& a, const Capsule& c);
+	Hit* AABBHitSphere(const AABB& a, const Sphere& s);
+	int AABBTestAABB(const AABB& a, const AABB& b);
+	int AABBTestCapsule(const AABB& a, const Capsule& c);
+	int AABBTestPoly(const AABB& a, const Poly& p);
+	int AABBTestSphere(const AABB& a, const Sphere& s);
+
+	/* capsule */
+
+	float CapsuleDistance2Point(const Capsule& c, vec3 p);
+	vec3 CapsuleClosestPoint(const Capsule& c, vec3 p);
+	Hit* CapsuleHitAABB(const Capsule& c, const AABB& a);
+	Hit* CapsuleHitCapsule(const Capsule& a, const Capsule& b);
+	Hit* CapsuleHitSphere(const Capsule& c, const Sphere& s);
+	int CapsuleTestAABB(const Capsule& c, const AABB& a);
+	int CapsuleTestCapsule(const Capsule& a, const Capsule& b);
+	int CapsuleTestPoly(const Capsule& c, const Poly& p);
+	int CapsuleTestSphere(const Capsule& c, const Sphere& s);
+
+	/* poly: query */
+
+	int PolyTestSphere(const Poly& p, const Sphere& s);
+	int PolyTestAABB(const Poly& p, const AABB& a);
+	int PolyTestCapsule(const Poly& p, const Capsule& c);
+	int PolyTestPoly(const Poly& a, const Poly& b);
+
+	/* poly: query transformed */
+
+	int PolyTestSphereTransform(const Poly& p, vec3 pos3, const glm::mat3& rot33, const Sphere& s);
+	int PolyTestAABBTransform(const Poly& p, vec3 apos3, const glm::mat3& arot33, const AABB& a);
+	int PolyTestCapsuleTransform(const Poly& p, vec3 pos3, const glm::mat3& rot33, const Capsule& c);
+	int PolyTestPolyTransform(const Poly& a, vec3 apos3, const glm::mat3& arot33, const Poly& b, vec3 bpos3, const glm::mat3& brot33);
+
+	/* poly: gjk result */
+
+	int PolyHitSphere(GJKResult* res, const Poly& p, const Sphere& s);
+	int PolyHitAABB(GJKResult* res, const Poly& p, const AABB& a);
+	int PolyHitCapsule(GJKResult* res, const Poly& p, const Capsule& c);
+	int PolyHitPoly(GJKResult* res, const Poly& a, const Poly& b);
+
+	/* poly: gjk result transformed */
+
+	int PolyHitSphereTransform(GJKResult* res, const Poly& p, vec3 pos3, const glm::mat3& rot33, const Sphere& s);
+	int PolyHitAABBTransform(GJKResult* res, const Poly& p, vec3 pos3, const glm::mat3& rot33, const AABB& a);
+	int PolyHitCapsuleTransform(GJKResult* res, const Poly& p, vec3 pos3, const glm::mat3& rot33, const Capsule& c);
+	int PolyHitPolyTransform(GJKResult* res, const Poly& a, vec3 at3, const glm::mat3& ar33, const Poly& b, vec3 bt3, const glm::mat3& br33);
+
+	vec4 Plane4(vec3 p, vec3 n);
+
+	Frustum FrustumBuild(const glm::mat4& projview);
+	int     FrustumTestSphere(const Frustum& f, const Sphere& s);
+	int     FrustumTestAABB(const Frustum& f, const AABB& a);
+}
+
+#include "4_Math.inl"
+
+
+//=============================================================================
+// OLD CODE
+//=============================================================================
 
 enum class VolumeCheck
 {
 	OUTSIDE,
 	INTERSECT,
 	CONTAINS
+};
+
+struct Plane2
+{
+	Plane2() = default;
+	Plane2(const glm::vec3& normal, const glm::vec3& det)
+	{
+		n = normal;
+		d = det;
+	}
+	Plane2(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c)
+	{
+		d = a;
+		n = glm::normalize(glm::cross(-b + a, c - a));
+	}
+
+	glm::vec3 n = glm::vec3(0, 1, 0);
+	glm::vec3 d = glm::vec3(0, 0, 0);
 };
 
 struct FrustumCorners
@@ -57,7 +445,7 @@ struct FrustumCorners
 	glm::vec3 fd;
 };
 
-class Frustum
+class OldFrustum
 {
 public:
 	void Update(float aspectRatio);
@@ -82,7 +470,7 @@ private:
 	glm::mat4 m_cullWorld, m_cullInverse;
 
 	//stuff in the culled objects object space
-	std::vector<Plane> m_planes;
+	std::vector<Plane2> m_planes;
 	FrustumCorners m_corners = FrustumCorners();
 	glm::vec3 m_positionObject;
 
@@ -157,11 +545,6 @@ namespace math
 
 		return true;
 	}
-}
-
-namespace collide
-{
-
 }
 
 namespace collisions

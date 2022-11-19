@@ -210,6 +210,7 @@
     <ClCompile Include="13_Scene.cpp" />
     <ClCompile Include="3_Core.cpp" />
     <ClCompile Include="4_Math.cpp" />
+    <ClCompile Include="4_TempGJK.cpp" />
     <ClCompile Include="6_Platform.cpp" />
     <ClCompile Include="8_oRenderer.cpp" />
     <ClCompile Include="8_Renderer.cpp" />
@@ -249,6 +250,9 @@
     <ClInclude Include="Test2TextureQuads.h" />
     <ClInclude Include="Test4ManyModels.h" />
     <ClInclude Include="Test3Model.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="4_Math.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

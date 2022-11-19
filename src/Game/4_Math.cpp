@@ -16,13 +16,13 @@ void FrustumCorners::Transform(glm::mat4 space)
 }
 
 //create transforms to prevent transforming every triangle into world space
-void Frustum::SetCullTransform(glm::mat4 objectWorld)
+void OldFrustum::SetCullTransform(glm::mat4 objectWorld)
 {
 	m_cullWorld = objectWorld;
 	m_cullInverse = glm::inverse(objectWorld);
 }
 
-void Frustum::Set(const glm::vec3& position, const glm::vec3& forward, const glm::vec3& up, const glm::vec3& right, float nearPlane, float farPlane, float FOV)
+void OldFrustum::Set(const glm::vec3& position, const glm::vec3& forward, const glm::vec3& up, const glm::vec3& right, float nearPlane, float farPlane, float FOV)
 {
 	m_position = position;
 	m_forward = forward;
@@ -33,7 +33,7 @@ void Frustum::Set(const glm::vec3& position, const glm::vec3& forward, const glm
 	m_FOV = FOV;
 }
 
-void Frustum::Update(float aspectRatio)
+void OldFrustum::Update(float aspectRatio)
 {
 	//calculate generalized relative width and aspect ratio
 	float normHalfWidth = tan(glm::radians(m_FOV));
@@ -66,15 +66,15 @@ void Frustum::Update(float aspectRatio)
 	//construct planes
 	m_planes.clear();
 	//winding in an outside perspective so the cross product creates normals pointing inward
-	m_planes.push_back(Plane(m_corners.na, m_corners.nb, m_corners.nc));//Near
-	m_planes.push_back(Plane(m_corners.fb, m_corners.fa, m_corners.fd));//Far 
-	m_planes.push_back(Plane(m_corners.fa, m_corners.na, m_corners.fc));//Left
-	m_planes.push_back(Plane(m_corners.nb, m_corners.fb, m_corners.nd));//Right
-	m_planes.push_back(Plane(m_corners.fa, m_corners.fb, m_corners.na));//Top
-	m_planes.push_back(Plane(m_corners.nc, m_corners.nd, m_corners.fc));//Bottom
+	m_planes.push_back(Plane2(m_corners.na, m_corners.nb, m_corners.nc));//Near
+	m_planes.push_back(Plane2(m_corners.fb, m_corners.fa, m_corners.fd));//Far 
+	m_planes.push_back(Plane2(m_corners.fa, m_corners.na, m_corners.fc));//Left
+	m_planes.push_back(Plane2(m_corners.nb, m_corners.fb, m_corners.nd));//Right
+	m_planes.push_back(Plane2(m_corners.fa, m_corners.fb, m_corners.na));//Top
+	m_planes.push_back(Plane2(m_corners.nc, m_corners.nd, m_corners.fc));//Bottom
 }
 
-VolumeCheck Frustum::ContainsPoint(const glm::vec3& point) const
+VolumeCheck OldFrustum::ContainsPoint(const glm::vec3& point) const
 {
 	for (auto plane : m_planes)
 	{
@@ -82,7 +82,7 @@ VolumeCheck Frustum::ContainsPoint(const glm::vec3& point) const
 	}
 	return VolumeCheck::CONTAINS;
 }
-VolumeCheck Frustum::ContainsSphere(const Sphere& sphere) const
+VolumeCheck OldFrustum::ContainsSphere(const Sphere& sphere) const
 {
 	VolumeCheck ret = VolumeCheck::CONTAINS;
 	for (auto plane : m_planes)
@@ -96,7 +96,7 @@ VolumeCheck Frustum::ContainsSphere(const Sphere& sphere) const
 //this method will treat triangles as intersecting even though they may be outside
 //but it is faster then performing a proper intersection test with every plane
 //and it does not reject triangles that are inside but with all corners outside
-VolumeCheck Frustum::ContainsTriangle(glm::vec3& a, glm::vec3& b, glm::vec3& c)
+VolumeCheck OldFrustum::ContainsTriangle(glm::vec3& a, glm::vec3& b, glm::vec3& c)
 {
 	VolumeCheck ret = VolumeCheck::CONTAINS;
 	for (auto plane : m_planes)
@@ -113,7 +113,7 @@ VolumeCheck Frustum::ContainsTriangle(glm::vec3& a, glm::vec3& b, glm::vec3& c)
 	return ret;
 }
 //same as above but with a volume generated above the triangle
-VolumeCheck Frustum::ContainsTriVolume(glm::vec3& a, glm::vec3& b, glm::vec3& c, float height)
+VolumeCheck OldFrustum::ContainsTriVolume(glm::vec3& a, glm::vec3& b, glm::vec3& c, float height)
 {
 	VolumeCheck ret = VolumeCheck::CONTAINS;
 	for (auto plane : m_planes)

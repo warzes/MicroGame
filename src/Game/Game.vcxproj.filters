@@ -42,6 +42,9 @@
     <ClCompile Include="..\3rdparty\GJKImpl.c">
       <Filter>MicroEngine\3rdparty</Filter>
     </ClCompile>
+    <ClCompile Include="4_TempGJK.cpp">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MicroEngine">
@@ -132,5 +135,10 @@
     <ClInclude Include="Test4ManyModels.h">
       <Filter>Test</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="4_Math.inl">
+      <Filter>MicroEngine\Engine</Filter>
+    </None>
   </ItemGroup>
 </Project>

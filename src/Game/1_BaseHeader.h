@@ -14,7 +14,9 @@
 
 #include <glad/gl.h>
 
-#include "glmHeader.h"
+#include <glmHeader.h>
+
+//#include <GJK/gjk.h>
 
 #if defined(_MSC_VER)
 #	pragma warning(pop)
