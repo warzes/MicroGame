@@ -198,7 +198,7 @@ void Camera::Enable()
 namespace DebugDraw
 {
 	std::map<unsigned, std::vector<glm::vec3>> Points;
-	std::map<unsigned, std::vector<glm::vec3>> ThickLines;
+	std::map<unsigned, std::vector<glm::vec3>> Lines;
 
 	void drawGround_(float scale)
 	{ // 10x10
@@ -221,6 +221,48 @@ namespace DebugDraw
 		glm::vec3 diff3 = tempMath::sub3(top, center);
 		DrawPrism(center, radius ? radius : 1, tempMath::len3(diff3), tempMath::norm3(diff3), 3, rgb);
 	}
+
+	void DrawCircleWithOrientation(const glm::vec3& center, glm::vec3 dir, float radius, unsigned rgb)
+	{
+		// we'll skip 3 segments out of 32. 1.5 per half circle.
+		int segments = 32, skip = 3, drawn_segments = segments - skip;
+
+		//  dir = norm3(dir);
+		glm::vec3 right = tempMath::cross3(dir, glm::vec3(0, 1, 0));
+		glm::vec3 up = tempMath::cross3(dir, right);
+		right = tempMath::cross3(dir, up);
+
+		glm::vec3 point, lastPoint;
+		dir = tempMath::scale3(dir, radius);
+		right = tempMath::scale3(right, radius);
+		//lastPoint = tempMath::add3(center, dir);
+
+		{
+			const float radians = (C_PI * 2) * (0 + skip / 2.f) / segments;
+			glm::vec3 vs = tempMath::scale3(right, sinf(radians));
+			glm::vec3 vc = tempMath::scale3(dir, cosf(radians));
+			lastPoint = tempMath::add3(center, vs);
+			lastPoint = tempMath::add3(lastPoint, vc);
+		}
+
+		DrawLine(lastPoint, tempMath::add3(center, tempMath::scale3(dir, radius * 1.25)), rgb);
+
+		for (int i = 0; i <= drawn_segments; ++i) 
+		{
+			const float radians = (C_PI * 2) * (i + skip / 2.f) / segments;
+
+			glm::vec3 vs = tempMath::scale3(right, sinf(radians));
+			glm::vec3 vc = tempMath::scale3(dir, cosf(radians));
+
+			point = tempMath::add3(center, vs);
+			point = tempMath::add3(point, vc);
+
+			DrawLine(lastPoint, point, rgb);
+			lastPoint = point;
+		}
+
+		DrawLine(lastPoint, tempMath::add3(center, tempMath::scale3(dir, radius * 1.25)), rgb);
+	}
 }
 
 void DebugDraw::DrawPoint(const glm::vec3& from, unsigned rgb)
@@ -230,8 +272,8 @@ void DebugDraw::DrawPoint(const glm::vec3& from, unsigned rgb)
 
 void DebugDraw::DrawLine(const glm::vec3& from, const glm::vec3& to, unsigned rgb)
 {
-	ThickLines[rgb].push_back(from);
-	ThickLines[rgb].push_back(to);
+	Lines[rgb].push_back(from);
+	Lines[rgb].push_back(to);
 }
 
 void DebugDraw::DrawLineDashed(glm::vec3 from, glm::vec3 to, unsigned rgb)
@@ -320,6 +362,29 @@ void DebugDraw::DrawBox(const glm::vec3& c, const glm::vec3& extents, unsigned r
 	DD_BOX_V(points[7], +, -, +);
 #undef DD_BOX_V
 	DrawBounds(points, rgb);
+}
+
+void DebugDraw::DrawCube(const glm::vec3& center, float radius, unsigned rgb)
+{
+	// draw_prism(center, 1, -1, vec3(0,1,0), 4);
+	float half = radius * 0.5f;
+	glm::vec3 l = glm::vec3(center.x - half, center.y + half, center.z - half); // left-top-far
+	glm::vec3 r = glm::vec3(center.x + half, center.y - half, center.z + half); // right-bottom-near
+
+	DrawLine(l, glm::vec3(r.x, l.y, l.z), rgb);
+	DrawLine(glm::vec3(r.x, l.y, l.z), glm::vec3(r.x, l.y, r.z), rgb);
+	DrawLine(glm::vec3(r.x, l.y, r.z), glm::vec3(l.x, l.y, r.z), rgb);
+	DrawLine(glm::vec3(l.x, l.y, r.z), l, rgb);
+	DrawLine(l, glm::vec3(l.x, r.y, l.z), rgb);
+
+	DrawLine(r, glm::vec3(l.x, r.y, r.z), rgb);
+	DrawLine(glm::vec3(l.x, r.y, r.z), glm::vec3(l.x, r.y, l.z), rgb);
+	DrawLine(glm::vec3(l.x, r.y, l.z), glm::vec3(r.x, r.y, l.z), rgb);
+	DrawLine(glm::vec3(r.x, r.y, l.z), r, rgb);
+	DrawLine(r, glm::vec3(r.x, l.y, r.z), rgb);
+
+	DrawLine(glm::vec3(l.x, l.y, r.z), glm::vec3(l.x, r.y, r.z), rgb);
+	DrawLine(glm::vec3(r.x, l.y, l.z), glm::vec3(r.x, r.y, l.z), rgb);
 }
 
 void DebugDraw::DrawPlane(const glm::vec3& p, const glm::vec3& n, float scale, unsigned rgb)
@@ -527,8 +592,118 @@ void DebugDraw::DrawPrism(const glm::vec3& center, float radius, float height, c
 		DrawPrism(tempMath::add3(center, tempMath::scale3(normal, -height)), radius, 0, normal, segments, rgb);
 }
 
+void DebugDraw::DrawSquare(const glm::vec3& pos, float radius, unsigned rgb)
+{
+	DrawPrism(pos, radius, 0, glm::vec3(0, 1, 0), 4, rgb);
+}
+
+void DebugDraw::DrawCylinder(const glm::vec3& center, float height, int segments, unsigned rgb)
+{
+	DrawPrism(center, 1, -height, glm::vec3(0, 1, 0), segments, rgb);
+}
+
+void DebugDraw::DrawPentagon(const glm::vec3& pos, float radius, unsigned rgb)
+{
+	DrawPrism(pos, radius, 0, glm::vec3(0, 1, 0), 5, rgb);
+}
+
+void DebugDraw::DrawHexagon(const glm::vec3& pos, float radius, unsigned rgb)
+{
+	DrawPrism(pos, radius, 0, glm::vec3(0, 1, 0), 6, rgb);
+}
+
+void DebugDraw::DrawCone(const glm::vec3& center, const glm::vec3& top, float radius, unsigned rgb)
+{
+	glm::vec3 diff3 = tempMath::sub3(top, center);
+	DrawPrism(center, radius ? radius : 1, tempMath::len3(diff3), tempMath::norm3(diff3), 24, rgb);
+}
+
+void DebugDraw::DrawCircle(const glm::vec3& pos, const glm::vec3& n, float radius, unsigned rgb)
+{
+	DrawPrism(pos, radius, 0, n, 32, rgb);
+}
+
+void DebugDraw::DrawAABB(const glm::vec3& minbb, const glm::vec3& maxbb, unsigned rgb)
+{
+	glm::vec3 points[8], bb[2] = { minbb, maxbb };
+	for (int i = 0; i < 8; ++i) 
+	{
+		points[i].x = bb[(i ^ (i >> 1)) & 1].x;
+		points[i].y = bb[(i >> 1) & 1].y;
+		points[i].z = bb[(i >> 2) & 1].z;
+	}
+	DrawBounds/*_corners*/(points, rgb);
+}
+
+void DebugDraw::DrawPosition(const glm::vec3& pos, float radius)
+{
+	DrawPositionDir(pos, glm::vec3(0, 0, 0), radius);
+}
+
+void DebugDraw::DrawPositionDir(const glm::vec3& position, const glm::vec3& direction, float radius)
+{
+	// idea from http://www.cs.caltech.edu/~keenan/m3drv.pdf and flotilla game UI
+
+	glm::vec3 ground = glm::vec3(position.x, 0, position.z);
+	unsigned clr = position.y < 0 ? PINK/*ORANGE*/ : CYAN;
+
+	DrawPoint(ground, clr);
+	DrawPoint(position, clr);
+	(position.y < 0 ? DrawLineDashed(ground, position, clr) : DrawLine(ground, position, clr));
+
+	glm::vec3 n = tempMath::norm3(direction), up = glm::vec3(0, 1, 0);
+	for (int i = 0; i < 10 && i <= fabs(position.y); ++i)
+	{
+		if (i < 2 && tempMath::len3(direction))
+			DrawCircleWithOrientation(ground, n, radius, clr);
+		else
+			DrawCircle(ground, up, radius, clr);
+		radius *= 0.9f;
+	}
+}
+
+void DebugDraw::DrawNormal(const glm::vec3& pos, const glm::vec3& n)
+{
+	DrawLine(pos, tempMath::add3(pos, tempMath::norm3(n)), YELLOW);
+}
+
+void DebugDraw::DrawBone(const glm::vec3& center, const glm::vec3& end, unsigned rgb)
+{
+	glm::vec3 diff3 = tempMath::sub3(end, center);
+	float len = tempMath::len3(diff3), len10 = len / 10;
+	DrawPrism(center, len10, 0, glm::vec3(1, 0, 0), 24, rgb);
+	DrawPrism(center, len10, 0, glm::vec3(0, 1, 0), 24, rgb);
+	DrawPrism(center, len10, 0, glm::vec3(0, 0, 1), 24, rgb);
+	DrawLine(end, tempMath::add3(center, glm::vec3(0, +len10, 0)), rgb);
+	DrawLine(end, tempMath::add3(center, glm::vec3(0, -len10, 0)), rgb);
+}
+
+void DebugDraw::DrawBoid(const glm::vec3& position, glm::vec3 dir)
+{
+	dir = tempMath::norm3(dir);
+
+	// if n is too similar to up vector, use right. else use up vector
+	glm::vec3 v1 = tempMath::cross3(dir, tempMath::dot3(dir, glm::vec3(0, 1, 0)) > 0.8f ? glm::vec3(1, 0, 0) : glm::vec3(0, 1, 0));
+	glm::vec3 v2 = tempMath::cross3(dir, v1);
+	v1 = tempMath::cross3(dir, v2);
+
+	uint32_t clr = position.y < 0 ? ORANGE : CYAN;
+
+	glm::vec3 front = tempMath::add3(position, tempMath::scale3(dir, 1));
+	glm::vec3 back = tempMath::add3(position, tempMath::scale3(dir, -0.25f));
+	glm::vec3 right = tempMath::add3(back, tempMath::scale3(v1, 0.5f));
+	glm::vec3 left = tempMath::add3(back, tempMath::scale3(v1, -0.5f));
+	DrawLine(front, left, clr);
+	DrawLine(left, position, clr);
+	DrawLine(position, right, clr);
+	DrawLine(right, front, clr);
+}
+
 void DebugDraw::Flush(const Camera& camera)
 {
+	if (Points.empty() && Lines.empty())
+		return;
+
 	static bool isCreate = false;
 	static ShaderProgram shaderProgram;
 	static UniformLocation MatrixID;
@@ -599,9 +774,9 @@ void main()
 	}
 
 	//glDisable(GL_DEPTH_TEST);
-	// Draw Thick Lines
+	// Draw Lines
 	{
-		for (auto& it : ThickLines)
+		for (auto& it : Lines)
 		{
 			shaderProgram.SetUniform(ColorID, rgbf(it.first));
 			const size_t count = it.second.size();
@@ -617,7 +792,7 @@ void main()
 	glBindVertexArray(0);
 
 	Points.clear();
-	ThickLines.clear();
+	Lines.clear();
 }
 
 namespace std

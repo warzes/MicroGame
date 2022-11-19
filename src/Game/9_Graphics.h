@@ -59,6 +59,7 @@ namespace DebugDraw
 	void DrawArrow(const glm::vec3& begin, const glm::vec3& end, unsigned rgb);
 	void DrawBounds(const glm::vec3 points[8], unsigned rgb); // TODO: передавать points по ссылке, сейчас оно копируется
 	void DrawBox(const glm::vec3& c, const glm::vec3& extents, unsigned rgb);
+	void DrawCube(const glm::vec3& center, float radius, unsigned rgb);
 	void DrawPlane(const glm::vec3& p, const glm::vec3& n, float scale, unsigned rgb);
 	void DrawSphere(const glm::vec3& pos, float radius, unsigned rgb);
 	void DrawCapsule(const glm::vec3& from, const glm::vec3& to, float radius, unsigned rgb);
@@ -66,6 +67,19 @@ namespace DebugDraw
 	void DrawDiamond(const glm::vec3& from, const glm::vec3& to, float size, unsigned rgb);
 	void DrawPyramid(const glm::vec3& center, float height, int segments, unsigned rgb);
 	void DrawPrism(const glm::vec3& center, float radius, float height, const glm::vec3& normal, int segments, unsigned rgb);
+	void DrawSquare(const glm::vec3& pos, float radius, unsigned rgb);
+	void DrawCylinder(const glm::vec3& center, float height, int segments, unsigned rgb);
+	void DrawPentagon(const glm::vec3& pos, float radius, unsigned rgb);
+	void DrawHexagon(const glm::vec3& pos, float radius, unsigned rgb);
+	void DrawCone(const glm::vec3& center, const glm::vec3& top, float radius, unsigned rgb);
+	void DrawCircle(const glm::vec3& pos, const glm::vec3& n, float radius, unsigned rgb);
+	void DrawAABB(const glm::vec3& minbb, const glm::vec3& maxbb, unsigned rgb);
+
+	void DrawPosition(const glm::vec3& pos, float radius);
+	void DrawPositionDir(const glm::vec3& pos, const glm::vec3& dir, float radius);
+	void DrawNormal(const glm::vec3& pos, const glm::vec3& n);
+	void DrawBone(const glm::vec3& center, const glm::vec3& end, unsigned rgb);
+	void DrawBoid(const glm::vec3& pos, glm::vec3 dir);
 
 	void Flush(const Camera& camera);
 }

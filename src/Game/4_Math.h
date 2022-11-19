@@ -3,13 +3,6 @@
 #include "0_EngineConfig.h"
 #include "1_BaseHeader.h"
 
-//#if defined(_MSC_VER) && (_MSC_VER <= 1700)
-//#define FINITE _finite
-//#else
-//#define FINITE isfinite
-//#endif
-
-
 // colors
 
 inline unsigned rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
