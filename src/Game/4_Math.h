@@ -3,6 +3,79 @@
 #include "0_EngineConfig.h"
 #include "1_BaseHeader.h"
 
+//#if defined(_MSC_VER) && (_MSC_VER <= 1700)
+//#define FINITE _finite
+//#else
+//#define FINITE isfinite
+//#endif
+
+
+// colors
+
+inline unsigned rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{
+	return (unsigned)a << 24 | r << 16 | g << 8 | b;
+}
+
+inline unsigned bgra(uint8_t b, uint8_t g, uint8_t r, uint8_t a)
+{
+	return rgba(r, g, b, a);
+}
+
+inline unsigned rgbaf(float r, float g, float b, float a)
+{
+	return rgba(r * 255, g * 255, b * 255, a * 255);
+}
+
+inline unsigned bgraf(float b, float g, float r, float a)
+{
+	return rgba(r * 255, g * 255, b * 255, a * 255);
+}
+
+inline float    alpha(unsigned rgba)
+{
+	return (rgba >> 24) / 255.f;
+}
+
+
+#define RGBX(rgb,x)   ( ((rgb)&0xFFFFFF) | (((unsigned)(x))<<24) )
+#define RGB3(r,g,b)   ( ((r)<<16) | ((g)<<8) | (b) )
+#define RGB4(r,g,b,a) RGBX(RGB3(r,g,b),a)
+
+#define BLACK   RGBX(0x000000,255)
+#define WHITE   RGBX(0xFFF1E8,255)
+
+#if 0
+#define RED     RGBX(0xFF004D,255)
+#define GREEN   RGBX(0x00B543,255)
+#define BLUE    RGBX(0x065AB5,255)
+#define ORANGE  RGBX(0xFF6C24,255)
+#define CYAN    RGBX(0x29ADFF,255)
+#define PURPLE  RGBX(0x7E2553,255)
+#define YELLOW  RGBX(0xFFEC27,255)
+#define GRAY    RGBX(0x725158,255)
+#else
+// in this colour scheme, all components make 255+192 (~) to keep
+// tone balance. red, purple and yellow tweak a little bit to
+// fit better with gray colours.
+#define RED     RGB3(   255,48,48 )
+#define GREEN   RGB3(  144,255,48 )
+#define CYAN    RGB3(   0,192,255 )
+#define ORANGE  RGB3(  255,144,48 )
+#define PURPLE  RGB3( 178,128,255 )
+#define YELLOW  RGB3(   255,224,0 )
+#define GRAY    RGB3( 149,149,149 )
+#define PINK    RGB3(  255,48,144 )
+#define AQUA    RGB3(  48,255,144 )
+
+#define BLUE    RGBX(0x065AB5,255)
+#endif
+
+inline glm::vec3 rgbf(unsigned rgb)
+{
+	return { ((rgb >> 16) & 255) / 255.f,((rgb >> 8) & 255) / 255.f,((rgb >> 0) & 255) / 255.f };
+}
+
 struct Line
 {
 	glm::vec3 a = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -98,6 +171,15 @@ namespace tempMath
 	using namespace glm;
 
 	// потом удалить
+
+#define C_EPSILON  (1e-6)
+#define C_PI       (3.141592654f) // (3.14159265358979323846f)
+#define TO_RAD     (C_PI/180.f)
+#define TO_DEG     (180.f/C_PI)
+
+	inline float deg(float radians) { return radians / C_PI * 180.0f; }
+	inline float rad(float degrees) { return degrees * C_PI / 180.0f; }
+
 	inline float minf(float a, float b) { return a < b ? a : b; }
 	inline float maxf(float a, float b) { return a > b ? a : b; }
 	inline float absf(float a) { return a < 0.0f ? -a : a; }
@@ -105,6 +187,33 @@ namespace tempMath
 	inline float signf(float a) { return (a < 0) ? -1.f : 1.f; }
 	inline float clampf(float v, float a, float b) { return maxf(minf(b, v), a); }
 	inline float mixf(float a, float b, float t) { return a * (1 - t) + b * t; }
+
+	inline vec2  ptr2(const float* a) { return vec2(a[0], a[1]); }
+	//
+	inline vec2  neg2(vec2   a) { return vec2(-a.x, -a.y); }
+	inline vec2  add2(vec2   a, vec2   b) { return vec2(a.x + b.x, a.y + b.y); }
+	inline vec2  sub2(vec2   a, vec2   b) { return vec2(a.x - b.x, a.y - b.y); }
+	inline vec2  mul2(vec2   a, vec2   b) { return vec2(a.x * b.x, a.y * b.y); }
+	inline vec2  inc2(vec2   a, float  b) { return vec2(a.x + b, a.y + b); }
+	inline vec2  dec2(vec2   a, float  b) { return vec2(a.x - b, a.y - b); }
+	inline vec2  scale2(vec2   a, float  b) { return vec2(a.x * b, a.y * b); }
+	inline vec2  div2(vec2   a, float  b) { return scale2(a, b ? 1 / b : 0.f); }
+	inline vec2  pmod2(vec2   a, float  b) { return vec2(pmodf(a.x, b), pmodf(a.y, b)); }
+	inline vec2  min2(vec2   a, vec2   b) { return vec2(minf(a.x, b.x), minf(a.y, b.y)); }
+	inline vec2  max2(vec2   a, vec2   b) { return vec2(maxf(a.x, b.x), maxf(a.y, b.y)); }
+	inline vec2  abs2(vec2   a) { return vec2(absf(a.x), absf(a.y)); }
+	inline vec2  floor2(vec2   a) { return vec2(floorf(a.x), floorf(a.y)); }
+	inline vec2  fract2(vec2   a) { return sub2(a, floor2(a)); }
+	inline vec2  ceil2(vec2   a) { return vec2(ceilf(a.x), ceilf(a.y)); }
+	inline float dot2(vec2   a, vec2   b) { return a.x * b.x + a.y * b.y; }
+	inline vec2  refl2(vec2   a, vec2   b) { return sub2(a, scale2(b, 2 * dot2(a, b))); }
+	inline float cross2(vec2   a, vec2   b) { return a.x * b.y - a.y * b.x; } // pseudo cross product
+	inline float len2sq(vec2   a) { return a.x * a.x + a.y * a.y; }
+	inline float len2(vec2   a) { return sqrtf(len2sq(a)); }
+	inline vec2  norm2(vec2   a) { return /*dot(2) == 0 ? a :*/ div2(a, len2(a)); }
+	//inline int   finite2(vec2   a) { return FINITE(a.x) && FINITE(a.y); }
+	inline vec2  mix2(vec2 a, vec2 b, float t) { return add2(scale2((a), 1 - (t)), scale2((b), t)); }
+	inline vec2  clamp2(vec2 v, float a, float b) { return vec2(maxf(minf(b, v.x), a), maxf(minf(b, v.y), a)); }
 
 	inline vec3 neg3(vec3 a) { return vec3(-a.x, -a.y, -a.z); }
 	inline vec3 add3(vec3 a, vec3 b) { return vec3(a.x + b.x, a.y + b.y, a.z + b.z); }
@@ -130,6 +239,45 @@ namespace tempMath
 	inline vec4  dec4(vec4   a, float  b) { return vec4(a.x - b, a.y - b, a.z - b, a.w - b); }
 	inline vec4  scale4(vec4   a, float  b) { return vec4(a.x * b, a.y * b, a.z * b, a.w * b); }
 	inline vec4  div4(vec4   a, float  b) { return scale4(a, b ? 1 / b : 0.f); }
+
+	inline void ortho44(glm::mat4& M, float l, float r, float b, float t, float n, float f) 
+	{
+		float m[16];
+		m[0] = 2 / (r - l);      m[1] = 0;            m[2] = 0;            m[3] = 0;
+		m[4] = 0;            m[5] = 2 / (t - b);      m[6] = 0;            m[7] = 0;
+		m[8] = 0;            m[9] = 0;            m[10] = -2 / (f - n);     m[11] = 0;
+		m[12] = -(r + l) / (r - l); m[13] = -(t + b) / (t - b); m[14] = -(f + n) / (f - n); m[15] = 1;
+
+		M = glm::make_mat4(m);
+	}
+	inline void frustum44(glm::mat4& M, float l, float r, float b, float t, float n, float f)
+	{
+		float m[16];
+		m[0] = 2 * n / (r - l);   m[1] = 0;           m[2] = 0;               m[3] = 0;
+		m[4] = 0;           m[5] = 2 * n / (t - b);   m[6] = 0;               m[7] = 0;
+		m[8] = (r + l) / (r - l); m[9] = (t + b) / (t - b); m[10] = -(f + n) / (f - n);    m[11] = -1;
+		m[12] = 0;           m[13] = 0;           m[14] = -2 * (f * n) / (f - n);  m[15] = 0;
+
+		M = glm::make_mat4(m);
+	}
+	inline void perspective44(glm::mat4& m, float fovy_degrees, float aspect, float nearp, float farp)
+	{
+		float y = tanf(fovy_degrees * C_PI / 360) * nearp, x = y * aspect;
+		frustum44(m, -x, x, -y, y, nearp, farp);
+	}
+	inline void lookat44(glm::mat4& M, vec3 eye, vec3 center, vec3 up)
+	{
+		vec3 f = norm3(sub3(center, eye));
+		vec3 r = norm3(cross3(f, up));
+		vec3 u = cross3(r, f);
+		float m[16];
+		m[0] = r.x;           m[1] = u.x;           m[2] = -f.x;         m[3] = 0;
+		m[4] = r.y;           m[5] = u.y;           m[6] = -f.y;         m[7] = 0;
+		m[8] = r.z;           m[9] = u.z;           m[10] = -f.z;         m[11] = 0;
+		m[12] = -dot3(r, eye); m[13] = -dot3(u, eye); m[14] = -dot3(f, eye); m[15] = 1;
+
+		M = glm::make_mat4(m);
+	}
 }
 
 namespace collide

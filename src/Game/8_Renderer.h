@@ -336,5 +336,7 @@ namespace RenderSystem
 	bool Create(const CreateInfo& createInfo);
 	void Destroy();
 
+	void SetFrameColor(const glm::vec3 clearColor);
+
 	void BeginFrame();
 }

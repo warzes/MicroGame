@@ -7,11 +7,6 @@ namespace collide
 	static inline int hit_index = -1;
 #define HitNext() &hits[ (++hit_index) & 15 ]
 
-#define C_EPSILON  (1e-6)
-#define C_PI       (3.141592654f) // (3.14159265358979323846f)
-#define TO_RAD     (C_PI/180.f)
-#define TO_DEG     (180.f/C_PI)
-
 	inline float lineClosestLine_(float* t1, float* t2, vec3* c1, vec3* c2, Line l, Line m) {
 		vec3 r, d1, d2;
 		d1 = sub3(l.b, l.a); /* direction vector segment s1 */

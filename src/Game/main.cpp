@@ -154,7 +154,7 @@ ShaderProgram shader4;
 UniformVariable viewUniform;
 UniformVariable projUniform;
 
-g3d::Camera camera;
+g3d::FreeCamera camera;
 
 g3d::Model modelearth;
 g3d::Model modelmoon;

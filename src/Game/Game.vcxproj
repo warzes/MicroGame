@@ -250,6 +250,7 @@
     <ClInclude Include="Test2TextureQuads.h" />
     <ClInclude Include="Test4ManyModels.h" />
     <ClInclude Include="Test3Model.h" />
+    <ClInclude Include="TestNNew.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="4_Math.inl" />

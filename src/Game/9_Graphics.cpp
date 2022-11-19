@@ -1,11 +1,366 @@
 #include "stdafx.h"
 #include "3_Core.h"
+#include "4_Math.h"
 #include "6_Platform.h"
 #include "8_Renderer.h"
 #include "9_Graphics.h"
 
 #include <stb/stb_truetype.h>
 #include <tiny_obj_loader.h>
+
+static Camera* last_camera = nullptr;
+
+Camera::Camera()
+{
+	Camera* old = last_camera;
+
+	m_speed = 1;
+	m_position = glm::vec3(0, 0, 0);
+	m_last_look = m_last_move = glm::vec3(0, 0, 0);
+	m_up = glm::vec3(0, 1, 0);
+
+	// @todo: remove this hack
+	static bool smoothing = true;// if (smoothing < 0) smoothing = flag("--with-camera-smooth");
+	if (smoothing) 
+	{
+		for (int i = 0; i < 1000; ++i)
+		{
+			Move(0, 0, 0);
+			Fps(0, 0);
+		}
+		smoothing = false;
+	}
+
+	// update proj & view
+	LookAt(glm::vec3(0, 0, 1));
+
+	last_camera = old;
+}
+
+Camera* Camera::GetActive()
+{
+	static Camera defaults;
+	if (!last_camera)
+	{
+		defaults.m_view = glm::mat4(1.0f);
+		defaults.m_proj = glm::mat4(1.0f);
+		last_camera = &defaults;
+	}
+	return last_camera;
+}
+
+void Camera::Teleport(float px, float py, float pz)
+{
+	m_position = glm::vec3(px, py, pz);
+	Fps(0, 0);
+}
+
+void Camera::Move(float incx, float incy, float incz)
+{
+	// enable camera smoothing
+	static bool smoothing = true; //if (smoothing < 0) smoothing = flag("--with-camera-smooth");
+	if (smoothing) 
+	{
+		float move_friction = 0.99f;
+		m_last_move = tempMath::scale3(m_last_move, move_friction);
+		float move_filtering = 0.975f;
+		incx = m_last_move.x = incx * (1 - move_filtering) + m_last_move.x * move_filtering;
+		incy = m_last_move.y = incy * (1 - move_filtering) + m_last_move.y * move_filtering;
+		incz = m_last_move.z = incz * (1 - move_filtering) + m_last_move.z * move_filtering;
+		smoothing = false;
+	}
+
+	glm::vec3 dir = tempMath::norm3(tempMath::cross3(m_look, m_up));
+	m_position = tempMath::add3(m_position, tempMath::scale3(dir, incx)); // right
+	m_position = tempMath::add3(m_position, tempMath::scale3(m_up, incy)); // up
+	m_position = tempMath::add3(m_position, tempMath::scale3(m_look, incz)); // front
+
+	Fps(0, 0);
+}
+
+void Camera::Fps(float yaw, float pitch)
+{
+	last_camera = this;
+
+	// enable camera smoothing
+	static bool smoothing = true; //if (smoothing < 0) smoothing = flag("--with-camera-smooth");
+	if (smoothing) 
+	{
+		float look_friction = 0.999f;
+		m_last_look.x *= look_friction;
+		m_last_look.y *= look_friction;
+		float look_filtering = 0.05f;
+		yaw = m_last_look.y = yaw * look_filtering + m_last_look.y * (1 - look_filtering);
+		pitch = m_last_look.x = pitch * look_filtering + m_last_look.x * (1 - look_filtering);
+		smoothing = false;
+	}
+
+	m_yaw += yaw;
+	m_yaw = fmod(m_yaw, 360);
+	m_pitch += pitch;
+	m_pitch = m_pitch > 89 ? 89 : m_pitch < -89 ? -89 : m_pitch;
+
+	const float deg2rad = 0.0174532f, y = m_yaw * deg2rad, p = m_pitch * deg2rad;
+	m_look = tempMath::norm3(glm::vec3(cos(y) * cos(p), sin(p), sin(y) * cos(p)));
+
+	m_view = glm::lookAt(m_position, tempMath::add3(m_position, m_look), m_up);
+
+	//tempMath::lookat44(m_view, m_position, tempMath::add3(m_position, m_look), m_up); // eye,center,up
+	tempMath::perspective44(m_proj, 45, GetFrameBufferWidth() / ((float)GetFrameBufferHeight() + !GetFrameBufferHeight()), 0.01f, 1000.f);
+
+#if 0 // isometric/dimetric
+#define orthogonal(proj, fov, aspect, znear, zfar) \
+    ortho44((proj), -(fov) * (aspect), (fov) * (aspect), -(fov), (fov), (znear), (zfar))
+
+	float DIMETRIC = 30.000f;
+	float ISOMETRIC = 35.264f;
+	float aspect = window_width() / ((float)window_height() + !!window_height());
+	orthogonal(cam->proj, 45, aspect, -1000, 1000); // why -1000?
+	// cam->yaw = 45;
+	cam->pitch = -ISOMETRIC;
+#endif
+}
+
+#define concat(a,b)      conc4t(a,b)
+#define conc4t(a,b)      a##b
+
+#define macro(name)      concat(name, __LINE__)
+//#define defer(begin,end) for(int macro(i) = ((begin), 0); !macro(i); macro(i) = ((end), 1))
+//#define scope(end)       defer((void)0, end)
+//#define benchmark        for(double macro(t) = -time_ss(); macro(t) < 0; printf("%.2fs (" FILELINE ")\n", macro(t)+=time_ss()))
+#define do_once          static int macro(once) = 0; for(;!macro(once);macro(once)=1)
+
+
+void Camera::Orbit(float yaw, float pitch, float inc_distance)
+{
+	last_camera = this;
+
+	glm::vec2 inc_mouse = glm::vec2(yaw, pitch);
+
+	// @todo: worth moving all these members into camera_t ?
+	static glm::vec2 _mouse = { 0,0 };
+	static glm::vec2 _polarity = { +1,-1 };
+	static glm::vec2 _sensitivity = { 2,2 };
+	static float _friction = 0.75; //99;
+	static float _distance; do_once _distance = tempMath::len3(m_position);
+
+	// update dummy state
+	Fps(0, 0);
+
+	// add smooth input
+	_mouse = tempMath::mix2(_mouse, tempMath::add2(_mouse, tempMath::mul2(tempMath::mul2(inc_mouse, _sensitivity), _polarity)), _friction);
+	_distance = tempMath::mixf(_distance, _distance + inc_distance, _friction);
+
+	// look: update angles
+	glm::vec2 offset = tempMath::sub2(_mouse, tempMath::ptr2(&m_last_move.x));
+	if (1)
+	{ // if _enabled
+		yaw += offset.x;
+		pitch += offset.y;
+		// look: limit pitch angle [-89..89]
+		pitch = pitch > 89 ? 89 : pitch < -89 ? -89 : pitch;
+	}
+
+	// compute view matrix
+	float x = tempMath::rad(yaw), y = tempMath::rad(pitch), cx = cosf(x), cy = cosf(y), sx = sinf(x), sy = sinf(y);
+	tempMath::lookat44(m_view, glm::vec3(cx * cy * _distance, sy * _distance, sx * cy * _distance), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+
+	// save for next call
+	m_last_move.x = _mouse.x;
+	m_last_move.y = _mouse.y;
+}
+
+void Camera::LookAt(const glm::vec3& target)
+{
+	// invert expression that cam->look = norm3(vec3(cos(y) * cos(p), sin(p), sin(y) * cos(p)));
+	// look.y = sin p > y = asin(p)
+	// look.x = cos y * cos p; -> cos p = look.x / cos y \ look.x / cos y = look.z / sin y
+	// look.z = sin y * cos p; -> cos p = look.z / sin y /
+	// so, sin y / cos y = look x / look z > tan y = look x / look z > y = atan(look x / look z)
+
+	glm::vec3 look = tempMath::norm3(tempMath::sub3(target, m_position));
+	const float rad2deg = 1 / 0.0174532f;
+	float npitch = asin(look.y) * rad2deg;
+	float nyaw = atan2(look.z, look.x) * rad2deg; // coords swapped. it was (look.x, look.z) before. @todo: testme
+
+	Fps(nyaw - m_yaw, npitch - m_pitch);
+}
+
+void Camera::Enable()
+{
+	// camera_t *other = camera_get_active(); // init default camera in case there is none
+	last_camera = this;
+	// trigger a dummy update -> update matrices
+	Fps(0, 0);
+}
+
+
+namespace DebugDraw
+{
+	std::map<unsigned, std::vector<glm::vec3>> Points;
+	std::map<unsigned, std::vector<glm::vec3>> ThickLines;
+
+	void drawGround_(float scale)
+	{ // 10x10
+		// outer
+		for (float i = -scale, c = 0; c <= 20; c += 20, i += c * (scale / 10))
+		{
+			DrawLine(glm::vec3(-scale, 0, i), glm::vec3(+scale, 0, i), WHITE); // horiz
+			DrawLine(glm::vec3(i, 0, -scale), glm::vec3(i, 0, +scale), WHITE); // vert
+		}
+		// inner		
+		for (float i = -scale + scale / 10, c = 1; c < 20; ++c, i += (scale / 10))
+		{
+			DrawLine(glm::vec3(-scale, 0, i), glm::vec3(+scale, 0, i), GRAY); // horiz
+			DrawLine(glm::vec3(i, 0, -scale), glm::vec3(i, 0, +scale), GRAY); // vert
+		}
+	}
+}
+
+void DebugDraw::DrawPoint(const glm::vec3& from, unsigned rgb)
+{
+	Points[rgb].push_back(from);
+}
+
+void DebugDraw::DrawLine(const glm::vec3& from, const glm::vec3& to, unsigned rgb)
+{
+	ThickLines[rgb].push_back(from);
+	ThickLines[rgb].push_back(to);
+}
+
+void DebugDraw::DrawLineDashed(glm::vec3 from, glm::vec3 to, unsigned rgb)
+{
+	glm::vec3 dist = tempMath::sub3(to, from); 
+	glm::vec3 unit = tempMath::norm3(dist);
+	for (float len = 0, mag = tempMath::len3(dist) / 2; len < mag; ++len)
+	{
+		to = tempMath::add3(from, unit);
+		DrawLine(from, to, rgb);
+		from = tempMath::add3(to, unit);
+	}
+}
+
+void DebugDraw::DrawAxis(float units)
+{
+}
+
+void DebugDraw::DrawGround(float scale)
+{
+	if (scale) 
+	{
+		drawGround_(scale);
+	}
+	else
+	{
+		drawGround_(100);
+		drawGround_(10);
+		drawGround_(1);
+		drawGround_(0.1);
+		drawGround_(0.01);
+	}
+}
+
+void DebugDraw::DrawGrid(float scale)
+{
+	DrawGround(scale);
+	DrawAxis(scale ? scale : 100.0f);
+}
+
+void DebugDraw::Flush(const Camera& camera)
+{
+	static bool isCreate = false;
+	static ShaderProgram shaderProgram;
+	static UniformLocation MatrixID;
+	static UniformLocation ColorID;
+	static GLuint vao, vbo;
+	if (!isCreate)
+	{
+		isCreate = true;
+
+		const char* vertexSource = R"(
+#version 330 core
+layout(location = 0) in vec3 vertexPosition;
+uniform mat4 MVP;
+uniform vec3 u_color;
+out vec3 out_color;
+void main()
+{
+	gl_Position =  MVP * vec4(vertexPosition, 1);
+	out_color = u_color;
+}
+)";
+
+		const char* fragmentSource = R"(
+#version 330 core
+in vec3 out_color;
+out vec4 fragcolor;
+void main()
+{
+	fragcolor = vec4(out_color, 1.0);
+}
+)";
+		shaderProgram.CreateFromMemories(vertexSource, fragmentSource);
+		shaderProgram.Bind();
+		MatrixID = shaderProgram.GetUniformVariable("MVP");
+		ColorID = shaderProgram.GetUniformVariable("u_color");
+
+		glGenVertexArrays(1, &vao);
+		glGenBuffers(1, &vbo);
+	}
+
+	const glm::mat4 MVP = GetCurrentProjectionMatrix() * camera.m_view;
+	shaderProgram.Bind();
+	shaderProgram.SetUniform(MatrixID, MVP);
+
+	// TODO: сделать интерфейс
+	VertexArrayBuffer::UnBind();
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0);
+
+	glEnable(GL_DEPTH_TEST);
+	//glDepthFunc(GL_LEQUAL);
+	glEnable(GL_PROGRAM_POINT_SIZE); // for GL_POINTS
+	glEnable(GL_LINE_SMOOTH); // for GL_LINES (thin)
+	
+	// Draw Points
+	{
+		glPointSize(6);
+		for (auto& it : Points)
+		{
+			shaderProgram.SetUniform(ColorID, rgbf(it.first));
+			const size_t count = it.second.size();
+			glBufferData(GL_ARRAY_BUFFER, count * sizeof(glm::vec3), it.second.data(), GL_STATIC_DRAW);
+			glDrawArrays(GL_POINTS, 0, count);
+		}
+		glPointSize(1);
+	}
+
+	//glDisable(GL_DEPTH_TEST);
+	//glDepthFunc(GL_ALWAYS);
+	// Draw Thick Lines
+	{
+		glLineWidth(1);
+		for (auto& it : ThickLines)
+		{
+			shaderProgram.SetUniform(ColorID, rgbf(it.first));
+			const size_t count = it.second.size();
+			glBufferData(GL_ARRAY_BUFFER, count * sizeof(glm::vec3), it.second.data(), GL_STATIC_DRAW);
+			glDrawArrays(GL_LINES, 0, count);
+		}
+		glLineWidth(1);
+	}
+	
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glDisable(GL_LINE_SMOOTH);
+	glDisable(GL_PROGRAM_POINT_SIZE);
+	glBindVertexArray(0);
+
+	Points.clear();
+	ThickLines.clear();
+}
 
 namespace std
 {
@@ -118,7 +473,7 @@ namespace g3d
 		m_viewMatrix = glm::lookAt(m_position, m_position + m_front, m_up);
 	}
 
-	//Frustum Camera::ComputeFrustum() const
+	//Frustum FreeCamera::ComputeFrustum() const
 	//{
 	//	Frustum frustum;
 

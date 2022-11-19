@@ -6,8 +6,10 @@
 
 #	define TEST_1_TRIANGLES 0
 #	define TEST_2_TEXTUREQUADS 0
-#	define TEST_3_MODEL 1
+#	define TEST_3_MODEL 0
 #	define TEST_4_MANYMODEL 0
+
+#	define TEST_N_NEW 1
 
 #	if TEST_1_TRIANGLES
 #		include "Test1Triangles.h"
@@ -23,6 +25,10 @@
 
 #	if TEST_4_MANYMODEL
 #		include "Test4ManyModels.h"
+#	endif
+
+#	if TEST_N_NEW
+#		include "TestNNew.h"
 #	endif
 
 #endif // USE_TEST

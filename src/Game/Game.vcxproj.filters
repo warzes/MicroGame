@@ -135,6 +135,9 @@
     <ClInclude Include="Test4ManyModels.h">
       <Filter>Test</Filter>
     </ClInclude>
+    <ClInclude Include="TestNNew.h">
+      <Filter>Test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="4_Math.inl">

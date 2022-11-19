@@ -4,6 +4,60 @@
 #include "1_BaseHeader.h"
 #include "8_oRenderer.h"
 
+// New
+
+struct Camera 
+{
+	Camera();
+
+	static Camera* GetActive();
+
+	void Teleport(float px, float py, float pz);
+	void Move(float incx, float incy, float incz);
+	void Fps(float yaw, float pitch);
+	void Orbit(float yaw, float pitch, float inc_distance);
+	void LookAt(const glm::vec3& target);
+	void Enable();
+
+
+	glm::mat4 m_view = glm::mat4(1.0f);
+	glm::mat4 m_proj = glm::mat4(1.0f);
+	glm::vec3 m_position = glm::vec3(0.0f);
+	glm::vec3 m_up = glm::vec3(0.0f);
+	glm::vec3 m_look = glm::vec3(0.0f);
+
+	float m_yaw = 0.0f, m_pitch = 0.0f, m_speed = 0.0f; // mirror_x, mirror_y;
+
+	// used for friction and smoothing
+	glm::vec3 m_last_look = glm::vec3(0.0f);
+	glm::vec3 m_last_move = glm::vec3(0.0f);
+};
+
+namespace DebugDraw
+{
+	// -----------------------------------------------------------------------------
+	// debugdraw framework
+	// Credits: Based on work by @glampert https://github.com/glampert/debug-draw (PD)
+	// [x] grid, axis, frustum, cube, sphere, triangle, square, pentagon, hexagon, circle, normal.
+	// [x] arrow, point, text, capsule, aabb, plane, flotilla-style locator, boid,
+	// [x] line batching
+	// [*] line width and stipple
+	// [*] (proper) gizmo,
+	// [ ] bone (pyramid? two boids?), ring,
+	// [ ] camera, light bulb, light probe,
+
+	void DrawPoint(const glm::vec3& from, unsigned rgb);
+	void DrawLine(const glm::vec3& from, const glm::vec3& to, unsigned rgb);
+	void DrawLineDashed(glm::vec3 from, glm::vec3 to, unsigned rgb);
+
+	void DrawAxis(float units);
+	
+	void DrawGround(float scale);
+	void DrawGrid(float scale);
+
+	void Flush(const Camera& camera);
+}
+
 
 #pragma region Graphics3D
 namespace g3d

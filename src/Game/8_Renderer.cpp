@@ -6,7 +6,7 @@
 
 #include <stb/stb_image.h>
 //-----------------------------------------------------------------------------
-#if defined(_WIN32)
+#if defined(_WIN32) && 0
 extern "C"
 {
 	// NVIDIA: Force usage of NVidia GPU in case there is an integrated graphics unit as well, if we don't do this we risk getting the integrated graphics unit and hence a horrible performance
@@ -1316,11 +1316,14 @@ bool RenderSystem::Create(const RenderSystem::CreateInfo& createInfo)
 	ClearColor = createInfo.ClearColor;
 
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_DEPTH_TEST);
+
 	glClearColor(ClearColor.x, ClearColor.y, ClearColor.z, 1.0f);
 	glClearDepth(1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
 	glViewport(0, 0, GetFrameBufferWidth(), GetFrameBufferHeight());
 
 	perspectiveFOV = createInfo.PerspectiveFOV;
@@ -1338,6 +1341,12 @@ void RenderSystem::Destroy()
 
 }
 //-----------------------------------------------------------------------------
+void RenderSystem::SetFrameColor(const glm::vec3 clearColor)
+{
+	ClearColor = clearColor;
+	glClearColor(ClearColor.x, ClearColor.y, ClearColor.z, 1.0f);
+}
+//-----------------------------------------------------------------------------
 void RenderSystem::BeginFrame()
 {
 	if (RenderWidth != GetFrameBufferWidth() || RenderHeight != GetFrameBufferHeight())
@@ -1350,6 +1359,8 @@ void RenderSystem::BeginFrame()
 		projectionMatrix = glm::perspective(FOVY, GetFrameBufferAspectRatio(), perspectiveNear, perspectiveFar);
 	}
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearDepthf(1);
+	glClearStencil(0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 //-----------------------------------------------------------------------------
