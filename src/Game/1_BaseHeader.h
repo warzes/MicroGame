@@ -18,7 +18,7 @@
 
 #include <glmHeader.h>
 
-//#include <GJK/gjk.h>
+#include <GJK/gjk.h>
 
 #if defined(_MSC_VER)
 #	pragma warning(pop)

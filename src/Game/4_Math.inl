@@ -789,8 +789,34 @@ namespace collide
 		return PolyHitPoly(res, p, poly);
 	}
 
+#define f3dot(a,b) ((a)[0]*(b)[0]+(a)[1]*(b)[1]+(a)[2]*(b)[2])
+#define f3cpy(d,s) (d)[0]=(s)[0],(d)[1]=(s)[1],(d)[2]=(s)[2]
+	static int line_support(float* support, const float* d, const float* a, const float* b)
+	{
+		int i = 0;
+		if (f3dot(a, d) < f3dot(b, d)) {
+			f3cpy(support, b); i = 1;
+		}
+		else f3cpy(support, a);
+		return i;
+	}
+	static int polyhedron_support(float* support, const float* d, const float* verts, int cnt)
+	{
+		int imax = 0;
+		float dmax = f3dot(verts, d);
+		for (int i = 1; i < cnt; ++i) {
+			/* find vertex with max dot product in direction d */
+			float dot = f3dot(&verts[i * 3], d);
+			if (dot < dmax) continue;
+			imax = i, dmax = dot;
+		} f3cpy(support, &verts[imax * 3]);
+		return imax;
+}
+
 	inline int PolyHitCapsule(GJKResult* res, const Poly& poly, const Capsule& capsule)
 	{
+#if 0
+		
 		/* initial guess */
 		GJKSupport s = { 0 };
 		s.a = poly.verts[0];
@@ -810,6 +836,36 @@ namespace collide
 		assert(gsx.iter < gsx.max_iter);
 		*res = GJKAnalyze(&gsx);
 		return res->distance_squared <= capsule.r * capsule.r;
+#else
+		/* initial guess */
+		gjk_support s = { 0 };
+		f3cpy(s.a, glm::value_ptr(poly.verts[0]));
+		f3cpy(s.b, glm::value_ptr(capsule.a));
+
+		/* run gjk algorithm */
+		gjk_simplex gsx = { 0 };
+		while (gjk(&gsx, &s)) {
+			s.aid = polyhedron_support(s.a, s.da, glm::value_ptr(poly.verts[0]), poly.verts.size());
+			s.bid = line_support(s.b, s.db, glm::value_ptr(capsule.a), glm::value_ptr(capsule.b));
+		}
+		/* check distance between closest points */
+		gjk_result res2;
+		gjk_analyze(&res2, &gsx);
+		gjk_quad(&res2, 0, capsule.r);
+
+		res->distance_squared = res2.distance_squared;
+		res->hit = res2.hit;
+		res->iterations = res2.iterations;
+		res->p0.x = res2.p0[0];
+		res->p0.y = res2.p0[1];
+		res->p0.z = res2.p0[2];
+
+		res->p1.x = res2.p1[0];
+		res->p1.y = res2.p1[1];
+		res->p1.z = res2.p1[2];
+
+		return res2.hit;
+#endif
 	}
 
 	inline int PolyHitPoly(GJKResult* res, const Poly& a, const Poly& b)

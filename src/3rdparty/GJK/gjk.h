@@ -1,6 +1,10 @@
 #ifndef GJK_H
 #define GJK_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define GJK_MAX_ITERATIONS 20
 
 struct gjk_support {
@@ -31,5 +35,9 @@ struct gjk_result {
 extern int gjk(struct gjk_simplex *s, struct gjk_support *sup);
 extern void gjk_analyze(struct gjk_result *res, const struct gjk_simplex *s);
 extern void gjk_quad(struct gjk_result *res, float a_radius, float b_radius);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

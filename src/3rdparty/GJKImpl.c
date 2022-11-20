@@ -4,7 +4,16 @@
 #	pragma warning(push, 0)
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #include <GJK/gjk.c>
+
+#ifdef __cplusplus
+}
+#endif
 
 #if defined(_MSC_VER)
 #	pragma warning(pop)

@@ -1,5 +1,16 @@
 #pragma once
 
+избавится от старой версии gjk
+возможно написать враппер для gjk
+еще пример с реализацией игрока - https://github.com/kevinmoran/GJK
+
+https://github.com/kroitor/gjk.c
+
+https://github.com/kevinmoran/Basic-Lighting
+https://github.com/kevinmoran/AnimationPractice
+https://github.com/kevinmoran/3D-Platformer-Project
+https://github.com/kevinmoran/Heightmapped-Terrain
+
 #include "6_Platform.h"
 #include "8_oRenderer.h"
 
@@ -54,9 +65,11 @@ Poly polyModel;
 
 void InitTest()
 {
-	ncamera.Teleport(0, 0, 0);
+	ncamera.Teleport(0, 5, -10);
+	ncamera.LookAt(glm::vec3(0, 0, 0));
+
 	ncamera.Enable();
-	ncamera.m_speed = 3;
+	ncamera.m_speed = 1;
 
 
 	// Load shader
@@ -76,7 +89,7 @@ void InitTest()
 
 	// Load geometry
 	{
-		model.Create("../data/models/crate.obj");
+		model.Create("../data/models/rock.obj");
 		model.SetMaterial(material);
 
 		polyModel = model.GetPoly();
@@ -91,7 +104,10 @@ void CloseTest()
 }
 
 
+// Capsule pos
 
+glm::vec3 wasdec2 = glm::vec3(-4, 0, 0);
+glm::vec3 oldwasdec2 = glm::vec3(-4, 0, 0);
 
 void FrameTest(float deltaTime)
 {
@@ -108,6 +124,8 @@ void FrameTest(float deltaTime)
 			
 	glm::vec3 wasdec = tempMath::scale3(glm::vec3(IsKeyboardKeyDown(KEY_A) - IsKeyboardKeyDown(KEY_D), IsKeyboardKeyDown(KEY_E) - IsKeyboardKeyDown(KEY_C), IsKeyboardKeyDown(KEY_W) - IsKeyboardKeyDown(KEY_S)), ncamera.m_speed * deltaTime);
 
+	wasdec2 += tempMath::scale3(glm::vec3(IsKeyboardKeyDown(KEY_L) - IsKeyboardKeyDown(KEY_J), IsKeyboardKeyDown(KEY_U) - IsKeyboardKeyDown(KEY_O), IsKeyboardKeyDown(KEY_I) - IsKeyboardKeyDown(KEY_K)), ncamera.m_speed * deltaTime);
+
 	ncamera.Move(wasdec.x, wasdec.y, wasdec.z);
 	ncamera.Fps(mouse.x, mouse.y);
 
@@ -121,7 +139,7 @@ void FrameTest(float deltaTime)
 	shader.SetUniform(worldUniform, transform.GetWorld());
 	model.Draw();
 
-	DebugDraw::DrawGrid(0);
+	//DebugDraw::DrawGrid(0);
 
 	static int paused = 0;
 	if (IsKeyboardKeyDown(KEY_SPACE)) paused ^= 1;
@@ -144,21 +162,37 @@ void FrameTest(float deltaTime)
 	// Poly-Capsule (GJK) intersection
 	{
 
-		const float x = 0;
-		const float y = 1.0f * he;
-		const float z = 0;
+		//const float x = 0;
+		//const float y = 1.0f * he;
+		//const float z = 0;
+		float x = wasdec2.x;
+		float y = wasdec2.y;
+		float z = wasdec2.z;
+
 
 		Capsule c = Capsule(glm::vec3(x, y, z), glm::vec3(x, y + 0.5f, z), 0.2f);
 
 		collide::GJKResult gjk;
 		if (collide::PolyHitCapsule(&gjk, polyModel, c))
+		{
 			rgbSel = RED;
-		else rgbSel = GREEN;
+			wasdec2 = oldwasdec2;
+		}			
+		else
+		{
+			oldwasdec2 = wasdec2;
+			rgbSel = GREEN;
+		}
+
+		x = wasdec2.x;
+		y = wasdec2.y;
+		z = wasdec2.z;
+		c = Capsule(glm::vec3(x, y, z), glm::vec3(x, y + 0.5f, z), 0.2f);
 
 		DebugDraw::DrawCapsule(c.a, c.b, c.r, rgbSel);
 
-		DebugDraw::DrawBox(gjk.p0, glm::vec3(0.05f, 0.05f, 0.05f), rgbSel);
-		DebugDraw::DrawBox(gjk.p1, glm::vec3(0.05f, 0.05f, 0.05f), rgbSel);
+		DebugDraw::DrawBox(gjk.p0, glm::vec3(0.05f, 0.05f, 0.05f), WHITE);
+		DebugDraw::DrawBox(gjk.p1, glm::vec3(0.05f, 0.05f, 0.05f), PURPLE);
 		DebugDraw::DrawLine(gjk.p0, gjk.p1, rgbSel);
 
 		DebugDraw::Flush(ncamera);

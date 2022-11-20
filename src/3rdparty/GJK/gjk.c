@@ -35,8 +35,7 @@ inv_sqrt(float n)
     conv.f = conv.f * (1.5f - (n * 0.5f * conv.f * conv.f));
     return conv.f;
 }
-extern int
-gjk(struct gjk_simplex *s, struct gjk_support *sup)
+int gjk(struct gjk_simplex *s, struct gjk_support *sup)
 {
     assert(s);
     assert(sup);
@@ -458,8 +457,7 @@ gjk(struct gjk_simplex *s, struct gjk_support *sup)
     f3cpy(sup->db, d);
     return 1;
 }
-extern void
-gjk_analyze(struct gjk_result *res, const struct gjk_simplex *s)
+void gjk_analyze(struct gjk_result *res, const struct gjk_simplex *s)
 {
     res->iterations = s->iter;
     res->hit = s->hit;
@@ -530,8 +528,7 @@ gjk_analyze(struct gjk_result *res, const struct gjk_simplex *s)
         res->distance_squared = f3dot(d, d);
     } else res->distance_squared = 0;
 }
-extern void
-gjk_quad(struct gjk_result *res, float a_radius, float b_radius)
+void gjk_quad(struct gjk_result *res, float a_radius, float b_radius)
 {
     float radius = a_radius + b_radius;
     float radius_squared = radius * radius;
@@ -560,3 +557,4 @@ gjk_quad(struct gjk_result *res, float a_radius, float b_radius)
         res->hit = 1;
     }
 }
+
