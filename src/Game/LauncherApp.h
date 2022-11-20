@@ -9,9 +9,9 @@
 #	define TEST_3_MODEL 0
 #	define TEST_4_MANYMODEL 0
 
-#	define TEST_100_SIMPLECOLLISIONS 1
+#	define TEST_100_SIMPLECOLLISIONS 0
 
-#	define TEST_N_NEW 0
+#	define TEST_N_NEW 1
 
 #	if TEST_1_TRIANGLES
 #		include "Test001Triangles.h"

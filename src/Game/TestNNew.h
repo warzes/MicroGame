@@ -45,21 +45,18 @@ UniformLocation projectionUniform;
 
 g3d::Model model;
 g3d::Material material;
-g3d::FreeCamera camera;
 Transform transform;
 
 Camera ncamera;
 
+Poly polyModel;
+
+
 void InitTest()
 {
-	//SetMouseLock(true);
-
 	ncamera.Teleport(0, 0, 0);
 	ncamera.Enable();
 	ncamera.m_speed = 3;
-
-	camera.SetPosition(glm::vec3(10, 10, 10));
-
 
 
 	// Load shader
@@ -81,6 +78,8 @@ void InitTest()
 	{
 		model.Create("../data/models/crate.obj");
 		model.SetMaterial(material);
+
+		polyModel = model.GetPoly();
 	}
 
 	RenderSystem::SetFrameColor(glm::vec3(0.15, 0.15, 0.15));
@@ -91,13 +90,11 @@ void CloseTest()
 	shader.Destroy();
 }
 
+
+
+
 void FrameTest(float deltaTime)
 {
-	camera.SimpleMove(deltaTime);
-	camera.Update();
-	//std::string ss = std::to_string(camera.GetPosition().x) + "|" + std::to_string(camera.GetPosition().y) + "|" + std::to_string(camera.GetPosition().z);
-	//puts(ss.c_str());
-
 	bool active = IsMouseButtonDown(0);
 	SetMouseLock(active);
 
@@ -119,9 +116,51 @@ void FrameTest(float deltaTime)
 
 	shader.Bind();
 
-	//shader.SetUniform(viewUniform, camera.GetViewMatrix());
 	shader.SetUniform(viewUniform, ncamera.m_view);
 	shader.SetUniform(projectionUniform, GetCurrentProjectionMatrix());
 	shader.SetUniform(worldUniform, transform.GetWorld());
 	model.Draw();
+
+	DebugDraw::DrawGrid(0);
+
+	static int paused = 0;
+	if (IsKeyboardKeyDown(KEY_SPACE)) paused ^= 1;
+
+	static bool inverts = false;
+	static float he = 0.0;
+	if (inverts)
+		he -= deltaTime * !paused;
+	else
+		he += deltaTime * !paused;
+
+	if (he > 2)
+		inverts = true;
+	if (he < -2)
+		inverts = false;
+
+	unsigned rgbSel;
+	
+
+	// Poly-Capsule (GJK) intersection
+	{
+
+		const float x = 0;
+		const float y = 1.0f * he;
+		const float z = 0;
+
+		Capsule c = Capsule(glm::vec3(x, y, z), glm::vec3(x, y + 0.5f, z), 0.2f);
+
+		collide::GJKResult gjk;
+		if (collide::PolyHitCapsule(&gjk, polyModel, c))
+			rgbSel = RED;
+		else rgbSel = GREEN;
+
+		DebugDraw::DrawCapsule(c.a, c.b, c.r, rgbSel);
+
+		DebugDraw::DrawBox(gjk.p0, glm::vec3(0.05f, 0.05f, 0.05f), rgbSel);
+		DebugDraw::DrawBox(gjk.p1, glm::vec3(0.05f, 0.05f, 0.05f), rgbSel);
+		DebugDraw::DrawLine(gjk.p0, gjk.p1, rgbSel);
+
+		DebugDraw::Flush(ncamera);
+	}
 }

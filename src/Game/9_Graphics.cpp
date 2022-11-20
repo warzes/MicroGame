@@ -199,6 +199,7 @@ namespace DebugDraw
 {
 	std::map<unsigned, std::vector<glm::vec3>> Points;
 	std::map<unsigned, std::vector<glm::vec3>> Lines;
+	// TODO: можно оптимизировать, если хранить цвет в вершине, тогда не нужно использовать мап, можно использовать массив который только растет (а сбрасывается только счетчик). но займет больше памяти. хотя и н сильно
 
 	void drawGround_(float scale)
 	{ // 10x10
@@ -939,6 +940,19 @@ namespace g3d
 		m_up = glm::normalize(glm::cross(m_right, m_front));
 	}
 
+	Poly Mesh::GetPoly() const
+	{
+		Poly poly;
+
+		for (size_t i = 0; i < vertices.size(); i++) // TODO: медленно, надо переделать
+		{
+			poly.verts.push_back(vertices[i].position);
+		}
+		poly.cnt = poly.verts.size();
+
+		return poly;
+	}
+
 	bool Model::Create(const char* fileName, const char* pathMaterialFiles)
 	{
 		Destroy();
@@ -1077,7 +1091,7 @@ namespace g3d
 		return createBuffer();
 	}
 
-	bool g3d::Model::Create(std::vector<MeshCreateInfo>&& meshes)
+	bool Model::Create(std::vector<MeshCreateInfo>&& meshes)
 	{
 		Destroy();
 		m_subMeshes.resize(meshes.size());
@@ -1130,6 +1144,20 @@ namespace g3d
 		{
 			m_subMeshes[i].material = material;
 		}
+	}
+
+	Poly Model::GetPoly() const
+	{
+		Poly poly;
+
+		for (int i = 0; i < m_subMeshes.size(); i++)
+		{
+			Poly subPoly = m_subMeshes[i].GetPoly();
+			poly.verts.assign(subPoly.verts.begin(), subPoly.verts.end());
+			poly.cnt += subPoly.cnt;
+		}
+
+		return poly;
 	}
 
 	bool Model::createBuffer()

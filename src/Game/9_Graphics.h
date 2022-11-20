@@ -84,7 +84,6 @@ namespace DebugDraw
 	void Flush(const Camera& camera);
 }
 
-
 #pragma region Graphics3D
 namespace g3d
 {
@@ -171,6 +170,8 @@ namespace g3d
 			material = std::move(createInfo.material);
 		}
 
+		Poly GetPoly() const;
+
 		std::vector<Vertex_Pos3_TexCoord> vertices;
 		std::vector<uint32_t> indices;
 
@@ -201,6 +202,8 @@ namespace g3d
 		//const std::vector<uint32_t>& GetIndices() const { return m_indices; }
 
 		void SetMaterial(const Material& material);
+
+		Poly GetPoly() const;
 
 	private:
 		bool createBuffer();

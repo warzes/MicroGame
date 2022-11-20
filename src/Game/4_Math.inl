@@ -72,7 +72,7 @@ namespace collide
 		return dot3(d12, d12);
 	}
 
-	inline int PolySupport(vec3* support, vec3 d, Poly p) 
+	inline int PolySupport(vec3* support, const vec3& d, const Poly& p) 
 	{
 		int imax = 0;
 		float dmax = dot3(p.verts[0], d);
@@ -789,27 +789,27 @@ namespace collide
 		return PolyHitPoly(res, p, poly);
 	}
 
-	inline int PolyHitCapsule(GJKResult* res, const Poly& p, const Capsule& c)
+	inline int PolyHitCapsule(GJKResult* res, const Poly& poly, const Capsule& capsule)
 	{
 		/* initial guess */
-		glm::vec3 d = { 0.0f, 0.0f, 0.0f };
 		GJKSupport s = { 0 };
-		s.a = p.verts[0];
-		s.b = c.a;
-		d = sub3(s.b, s.a);
+		s.a = poly.verts[0];
+		s.b = capsule.a;
+		glm::vec3 d = sub3(s.b, s.a);
 
 		/* run gjk algorithm */
 		GJKSimplex gsx = { 0 };
-		while (GJK(&gsx, &s, &d)) {
+		while (GJK(&gsx, &s, &d)) 
+		{
 			vec3 n = scale3(d, -1);
-			s.aid = PolySupport(&s.a, n, p);
-			s.bid = LineSupport(&s.b, d, c.a, c.b);
+			s.aid = PolySupport(&s.a, n, poly);
+			s.bid = LineSupport(&s.b, d, capsule.a, capsule.b);
 			d = sub3(s.b, s.a);
 		}
 		/* check distance between closest points */
 		assert(gsx.iter < gsx.max_iter);
 		*res = GJKAnalyze(&gsx);
-		return res->distance_squared <= c.r * c.r;
+		return res->distance_squared <= capsule.r * capsule.r;
 	}
 
 	inline int PolyHitPoly(GJKResult* res, const Poly& a, const Poly& b)
