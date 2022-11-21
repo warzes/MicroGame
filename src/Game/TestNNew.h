@@ -1,16 +1,5 @@
 #pragma once
 
-избавится от старой версии gjk
-возможно написать враппер для gjk
-еще пример с реализацией игрока - https://github.com/kevinmoran/GJK
-
-https://github.com/kroitor/gjk.c
-
-https://github.com/kevinmoran/Basic-Lighting
-https://github.com/kevinmoran/AnimationPractice
-https://github.com/kevinmoran/3D-Platformer-Project
-https://github.com/kevinmoran/Heightmapped-Terrain
-
 #include "6_Platform.h"
 #include "8_oRenderer.h"
 
