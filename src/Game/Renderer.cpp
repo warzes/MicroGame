@@ -1,8 +1,8 @@
 #include "stdafx.h"
-#include "2_Base.h"
-#include "3_Core.h"
-#include "6_Platform.h"
-#include "8_Renderer.h"
+#include "Base.h"
+#include "Core.h"
+#include "Platform.h"
+#include "Renderer.h"
 
 #include <stb/stb_image.h>
 //-----------------------------------------------------------------------------
@@ -118,7 +118,7 @@ namespace
 //=============================================================================
 // Current Render State
 //=============================================================================
-#if USE_OPENGLCACHESTATE
+#if USE_OPENGL_CACHE_STATE
 namespace currentRenderState
 {
 	unsigned shaderProgram = 0;
@@ -335,7 +335,7 @@ void ShaderProgram::Destroy()
 {
 	if (m_id > 0)
 	{
-#if USE_OPENGLCACHESTATE
+#if USE_OPENGL_CACHE_STATE
 		if (currentRenderState::shaderProgram == m_id) UnBind();
 #endif
 		if (!ShaderLoader::IsLoad(*this)) // TODO: не удалять шейдер если он загружен через менеджер, в будущем сделать подсчет ссылок и удалять если нет
@@ -346,7 +346,7 @@ void ShaderProgram::Destroy()
 //-----------------------------------------------------------------------------
 void ShaderProgram::Bind()
 {
-#if USE_OPENGLCACHESTATE
+#if USE_OPENGL_CACHE_STATE
 	if (currentRenderState::shaderProgram == m_id)
 		return;
 	currentRenderState::shaderProgram = m_id;
@@ -356,7 +356,7 @@ void ShaderProgram::Bind()
 //-----------------------------------------------------------------------------
 void ShaderProgram::UnBind()
 {
-#if USE_OPENGLCACHESTATE
+#if USE_OPENGL_CACHE_STATE
 	currentRenderState::shaderProgram = 0;
 #endif
 	glUseProgram(0);
@@ -384,7 +384,7 @@ std::vector<ShaderAttribInfo> ShaderProgram::GetAttribInfo() const
 		GL_CHECK(glGetProgramiv(m_id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max1));
 	}
 
-	uint32_t maxLength = base::Max(max0, max1);
+	uint32_t maxLength = Max(max0, max1);
 	char* name = (char*)alloca(maxLength + 1);
 
 	std::vector<ShaderAttribInfo> attribs;
@@ -397,7 +397,7 @@ std::vector<ShaderAttribInfo> ShaderProgram::GetAttribInfo() const
 		{
 			GL_CHECK(glGetProgramResourceName(m_id, GL_PROGRAM_INPUT, i, maxLength + 1, &size, name));
 			GLenum typeProp[] = { GL_TYPE };
-			GL_CHECK(glGetProgramResourceiv(m_id, GL_PROGRAM_INPUT, i, base::Countof(typeProp), typeProp, 1, NULL, (GLint*)&type));
+			GL_CHECK(glGetProgramResourceiv(m_id, GL_PROGRAM_INPUT, i, Countof(typeProp), typeProp, 1, NULL, (GLint*)&type));
 		}
 		else
 		{
@@ -444,7 +444,7 @@ std::vector<ShaderUniformInfo> ShaderProgram::GetUniformInfo() const
 		GL_CHECK(glGetProgramiv(m_id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max1));
 	}
 
-	uint32_t maxLength = base::Max(max0, max1);
+	uint32_t maxLength = Max(max0, max1);
 	char* name = (char*)alloca(maxLength + 1);
 
 	GLint m_sampler[16/*CONFIG_MAX_TEXTURE_SAMPLERS*/];
@@ -469,7 +469,7 @@ std::vector<ShaderUniformInfo> ShaderProgram::GetUniformInfo() const
 
 		if (piqSupported)
 		{
-			GL_CHECK(glGetProgramResourceiv(m_id, GL_UNIFORM, i, base::Countof(props), props, base::Countof(props), NULL, (GLint*)&vi
+			GL_CHECK(glGetProgramResourceiv(m_id, GL_UNIFORM, i, Countof(props), props, Countof(props), NULL, (GLint*)&vi
 			));
 			GL_CHECK(glGetProgramResourceName(m_id, GL_UNIFORM, i, maxLength + 1, NULL, name));
 
@@ -483,7 +483,7 @@ std::vector<ShaderUniformInfo> ShaderProgram::GetUniformInfo() const
 			loc = glGetUniformLocation(m_id, name);
 		}
 
-		num = base::Max(num, 1);
+		num = Max(num, 1);
 
 		// array
 		int32_t offset = 0;
@@ -536,7 +536,7 @@ std::vector<ShaderUniformInfo> ShaderProgram::GetUniformInfo() const
 		case GL_IMAGE_CUBE:
 		case GL_INT_IMAGE_CUBE:
 		case GL_UNSIGNED_INT_IMAGE_CUBE:
-			if (m_numSamplers < base::Countof(m_sampler))
+			if (m_numSamplers < Countof(m_sampler))
 			{
 				LogPrint("Sampler #" + std::to_string(m_numSamplers) + " at location " + std::to_string(loc));
 				m_sampler[m_numSamplers] = loc;
@@ -544,7 +544,7 @@ std::vector<ShaderUniformInfo> ShaderProgram::GetUniformInfo() const
 			}
 			else
 			{
-				LogPrint("Too many samplers (max: " + std::to_string(base::Countof(m_sampler)) + ")! Sampler at location " + std::to_string(loc));
+				LogPrint("Too many samplers (max: " + std::to_string(Countof(m_sampler)) + ")! Sampler at location " + std::to_string(loc));
 			}
 			break;
 
@@ -953,7 +953,7 @@ glm::vec3 Image::Bilinear(const glm::vec2& uv)
 	glm::vec3 B = {p2[0], p2[1], p2[2]};
 	glm::vec3 C = {p3[0], p3[1], p3[2]};
 	glm::vec3 D = {p4[0], p4[1], p4[2]};
-	return base::Mix(base::Mix(A, B, c1), base::Mix(C, D, c1), c2);
+	return Mix(Mix(A, B, c1), Mix(C, D, c1), c2);
 }
 //-----------------------------------------------------------------------------
 void Image::moveData(Image&& imageRef)
@@ -1112,7 +1112,7 @@ bool Texture2D::Create(const Texture2DCreateInfo& createInfo, const Texture2DInf
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 	// restore prev state
-#if USE_OPENGLCACHESTATE
+#if USE_OPENGL_CACHE_STATE
 	glBindTexture(GL_TEXTURE_2D, currentRenderState::texture2D[0]);
 #endif
 	glPixelStorei(GL_UNPACK_ALIGNMENT, Alignment);
@@ -1124,7 +1124,7 @@ void Texture2D::Destroy()
 {
 	if (m_id > 0)
 	{
-#if USE_OPENGLCACHESTATE
+#if USE_OPENGL_CACHE_STATE
 		for (unsigned i = 0; i < MAXTEXTURE; i++)
 		{
 			if (currentRenderState::texture2D[i] == m_id)
@@ -1139,7 +1139,7 @@ void Texture2D::Destroy()
 //-----------------------------------------------------------------------------
 void Texture2D::Bind(unsigned slot) const
 {
-#if USE_OPENGLCACHESTATE
+#if USE_OPENGL_CACHE_STATE
 	if (currentRenderState::texture2D[slot] == m_id)
 		return;
 
@@ -1153,7 +1153,7 @@ void Texture2D::UnBind(unsigned slot)
 {
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, 0);
-#if USE_OPENGLCACHESTATE
+#if USE_OPENGL_CACHE_STATE
 	currentRenderState::texture2D[slot] = 0;
 #endif
 }

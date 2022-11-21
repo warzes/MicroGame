@@ -1,8 +1,5 @@
 #pragma once
 
-#include "6_Platform.h"
-#include "8_oRenderer.h"
-
 constexpr Vertex_Pos2_TexCoord vertices[] =
 {
 	{ {-0.9f, -0.9f}, {0.f, 0.f} },

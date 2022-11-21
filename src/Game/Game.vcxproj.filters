@@ -18,31 +18,31 @@
       <Filter>MicroEngine\3rdparty</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="3_Core.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="6_Platform.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="8_oRenderer.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="9_Graphics.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="13_Scene.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="8_Renderer.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="4_Math.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
     <ClCompile Include="..\3rdparty\GJKImpl.c">
       <Filter>MicroEngine\3rdparty</Filter>
     </ClCompile>
-    <ClCompile Include="4_TempGJK.cpp">
+    <ClCompile Include="Core.cpp">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineMath.cpp">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="TempGJK.cpp">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Platform.cpp">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="oRenderer.cpp">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics.cpp">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
       <Filter>MicroEngine\Engine</Filter>
     </ClCompile>
   </ItemGroup>
@@ -68,63 +68,12 @@
       <Filter>MicroEngine</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="1_BaseHeader.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="0_EngineConfig.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="2_Base.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="3_Core.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="4_Math.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="5_Utility.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="6_Platform.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="7_Audio.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="8_oRenderer.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="9_Graphics.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="10_Physics.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="13_Scene.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="14_World.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="11_UI.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="12_Navigation.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
     <ClInclude Include="LauncherApp.h" />
     <ClInclude Include="Test001Triangles.h">
       <Filter>Test</Filter>
     </ClInclude>
-    <ClInclude Include="8_Renderer.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
     <ClInclude Include="DungeonCrawler.h">
       <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="..\3rdparty\glmHeader.h">
-      <Filter>MicroEngine\3rdparty</Filter>
     </ClInclude>
     <ClInclude Include="Test002TextureQuads.h">
       <Filter>Test</Filter>
@@ -141,9 +90,63 @@
     <ClInclude Include="Test100SimpleCollisions.h">
       <Filter>Test</Filter>
     </ClInclude>
+    <ClInclude Include="World.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineConfig.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseHeader.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Base.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Container.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineMath.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Collisions.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Platform.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Audio.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="oRenderer.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Navigation.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="4_Math.inl">
+    <None Include="EngineMath.inl">
       <Filter>MicroEngine\Engine</Filter>
     </None>
   </ItemGroup>

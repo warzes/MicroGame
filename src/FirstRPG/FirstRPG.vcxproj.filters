@@ -32,8 +32,5 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="..\3rdparty\glmHeader.h">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

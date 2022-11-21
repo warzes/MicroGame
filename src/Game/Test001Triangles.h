@@ -3,9 +3,6 @@
 #define USE_TESTCOMMANDBUFFER 1
 #define USE_LOADSHADERFROMMEMORY 1
 
-#include "6_Platform.h"
-#include "8_oRenderer.h"
-
 constexpr Vertex_Pos2_Color vertices[] =
 {
 	{ {-0.6f, -0.4f}, {1.f, 0.f, 0.f} },

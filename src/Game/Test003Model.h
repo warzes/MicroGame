@@ -1,8 +1,5 @@
 #pragma once
 
-#include "6_Platform.h"
-#include "8_oRenderer.h"
-
 constexpr const char* vertex_shader_text = R"(
 #version 330 core
 

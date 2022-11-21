@@ -1,42 +1,6 @@
 #pragma once
 
-#include "0_EngineConfig.h"
-#include "1_BaseHeader.h"
-
-//=============================================================================
-// Hash
-//=============================================================================
-
-/// 32-bit multiply and rotate hash.
-class HashMurmur2A
-{
-public:
-	void Begin(uint32_t _seed = 0)
-	{
-		m_hash = _seed;
-		m_tail = 0;
-		m_count = 0;
-		m_size = 0;
-	}
-
-	void Add(const void* _data, int32_t _len);
-	//void Add(const char* _data);
-	//void Add(const StringView& _data);
-
-	template<typename Ty>
-	void Add(const Ty& _data)
-	{
-		Add(&_data, sizeof(Ty));
-	}
-
-	uint32_t End();
-
-//private:
-	uint32_t m_hash;
-	uint32_t m_tail;
-	uint32_t m_count;
-	uint32_t m_size;
-};
+#include "BaseHeader.h"
 
 //=============================================================================
 // Times

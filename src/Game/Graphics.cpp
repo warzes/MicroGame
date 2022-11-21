@@ -1,9 +1,9 @@
 #include "stdafx.h"
-#include "3_Core.h"
-#include "4_Math.h"
-#include "6_Platform.h"
-#include "8_Renderer.h"
-#include "9_Graphics.h"
+#include "Core.h"
+#include "EngineMath.h"
+#include "Platform.h"
+#include "Renderer.h"
+#include "Graphics.h"
 
 #include <stb/stb_truetype.h>
 #include <tiny_obj_loader.h>

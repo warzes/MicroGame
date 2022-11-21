@@ -1,6 +1,3 @@
-#pragma once
-
-
 namespace collide
 {
 	static inline Hit hits[16] = { 0 };

@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "2_Base.h"
-#include "3_Core.h"
-#include "6_Platform.h"
+#include "Base.h"
+#include "Core.h"
+#include "Platform.h"
 //=============================================================================
 #if defined(_MSC_VER)
 #	pragma warning(disable : 5045)
@@ -294,8 +294,8 @@ void errorCallback(int error, const char* description) noexcept
 
 void windowSizeCallback(GLFWwindow* /*window*/, int width, int height) noexcept
 {
-	FrameBufferWidth = base::Max(width, 1);
-	FrameBufferHeight = base::Max(height, 1);
+	FrameBufferWidth = Max(width, 1);
+	FrameBufferHeight = Max(height, 1);
 
 	if (FrameBufferHeight < 1) FrameBufferHeight = 1;
 	FrameBufferAspectRatio = static_cast<float>(FrameBufferWidth) / static_cast<float>(FrameBufferHeight);

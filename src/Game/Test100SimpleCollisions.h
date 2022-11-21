@@ -1,8 +1,5 @@
 #pragma once
 
-#include "6_Platform.h"
-#include "8_oRenderer.h"
-
 Camera ncamera;
 
 void InitTest()

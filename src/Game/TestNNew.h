@@ -1,8 +1,5 @@
 #pragma once
 
-#include "6_Platform.h"
-#include "8_oRenderer.h"
-
 constexpr const char* vertex_shader_text = R"(
 #version 330 core
 
@@ -130,35 +127,14 @@ void FrameTest(float deltaTime)
 
 	//DebugDraw::DrawGrid(0);
 
-	static int paused = 0;
-	if (IsKeyboardKeyDown(KEY_SPACE)) paused ^= 1;
-
-	static bool inverts = false;
-	static float he = 0.0;
-	if (inverts)
-		he -= deltaTime * !paused;
-	else
-		he += deltaTime * !paused;
-
-	if (he > 2)
-		inverts = true;
-	if (he < -2)
-		inverts = false;
-
 	unsigned rgbSel;
 	
 
 	// Poly-Capsule (GJK) intersection
 	{
-
-		//const float x = 0;
-		//const float y = 1.0f * he;
-		//const float z = 0;
 		float x = wasdec2.x;
 		float y = wasdec2.y;
 		float z = wasdec2.z;
-
-
 		Capsule c = Capsule(glm::vec3(x, y, z), glm::vec3(x, y + 0.5f, z), 0.2f);
 
 		collide::GJKResult gjk;

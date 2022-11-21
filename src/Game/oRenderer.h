@@ -1,8 +1,7 @@
 ﻿#pragma once
 
-#include "0_EngineConfig.h"
-#include "1_BaseHeader.h"
-#include "8_Renderer.h"
+#include "BaseHeader.h"
+#include "Renderer.h"
 
 //=============================================================================
 // TODO:
@@ -79,65 +78,6 @@ class VertexAttributesRaw
 public:
 	// TODO: std::vector<VertexAttributeRaw> arrays
 	// также сделать возможность получения идов с шейдера (при добавлении атрибута можно указать шейдер и имя)
-};
-
-
-
-/*
-EXAMPLE:
-
-VertexLayout layout;
-layout
-	.Begin()
-	.Add(VertexAttribute::Position, 3, VertexAttributeType::Float)
-	.Add(VertexAttribute::Color0,   4, VertexAttributeType::Uint8, true)
-	.End();
-*/
-class VertexLayout
-{
-public:
-	VertexLayout& Begin();
-	void End();
-
-	// Add attribute to VertexLayout.
-	/// @param[in] _attrib Attribute semantics.
-	/// @param[in] _num Number of elements 1, 2, 3 or 4.
-	/// @param[in] _type Element type.
-	/// @param[in] _normalized When using fixed point AttribType (f.e. Uint8)
-	///   value will be normalized for vertex shader usage. When normalized
-	///   is set to true, AttribType::Uint8 value in range 0-255 will be
-	///   in range 0.0-1.0 in vertex shader.
-	/// @param[in] _asInt Packaging rule for vertexPack, vertexUnpack, and
-	///   vertexConvert for AttribType::Uint8 and AttribType::Int16.
-	///   Unpacking code must be implemented inside vertex shader.
-	/// @returns Returns itself.
-	///
-	/// @remarks
-	///   Must be called between begin/end.
-	VertexLayout& Add(VertexAttribute attrib, uint8_t num, VertexAttributeType type, bool normalized = false, bool asInt = false);
-
-	// Skip _num bytes in vertex stream.
-	VertexLayout& Skip(uint8_t _num);
-
-	// Decode attribute.
-	void Decode(VertexAttribute attrib, uint8_t& num, VertexAttributeType& type, bool& normalized, bool& asInt) const;
-
-	// Returns `true` if VertexLayout contains attribute.
-	bool Has(VertexAttribute attrib) const { return UINT16_MAX != m_attributes[static_cast<size_t>(attrib)]; }
-
-	// Returns relative attribute offset from the vertex.
-	uint16_t GetOffset(VertexAttribute attrib) const { return m_offset[static_cast<size_t>(attrib)]; }
-
-	// Returns vertex stride.
-	uint16_t getStride() const { return m_stride; }
-
-	/// Returns size of vertex buffer for number of vertices.
-	uint32_t GetSize(uint32_t num) const { return num * m_stride; }
-private:
-	uint32_t m_hash = 0;
-	uint16_t m_stride = 0;
-	uint16_t m_offset[static_cast<size_t>(VertexAttribute::Count)] = { 0 };
-	uint16_t m_attributes[static_cast<size_t>(VertexAttribute::Count)] = { 0 };
 };
 
 enum class PrimitiveDraw

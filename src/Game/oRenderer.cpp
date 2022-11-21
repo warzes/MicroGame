@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "3_Core.h"
-#include "6_Platform.h"
-#include "8_oRenderer.h"
+#include "Core.h"
+#include "Platform.h"
+#include "oRenderer.h"
 
 extern glm::vec3 ClearColor;
 extern float perspectiveFOV;
@@ -13,84 +13,6 @@ namespace
 	unsigned currentVAO = 0;
 	FrameBuffer* currentFrameBuffer = nullptr;
 }
-
-//=============================================================================
-// Vertex Attributes
-//=============================================================================
-
-constexpr const uint8_t s_attribTypeSizeD3D1x[static_cast<size_t>(VertexAttributeType::Count)][4] =
-{
-	{  1,  2,  4,  4 }, // Uint8
-	{  4,  4,  4,  4 }, // Uint10
-	{  2,  4,  8,  8 }, // Int16
-	{  2,  4,  8,  8 }, // Half
-	{  4,  8, 12, 16 }, // Float
-};
-
-constexpr const uint8_t s_attribTypeSizeGl[static_cast<size_t>(VertexAttributeType::Count)][4] =
-{
-	{  1,  2,  4,  4 }, // Uint8
-	{  4,  4,  4,  4 }, // Uint10
-	{  2,  4,  6,  8 }, // Int16
-	{  2,  4,  6,  8 }, // Half
-	{  4,  8, 12, 16 }, // Float
-};
-
-constexpr const uint8_t(*s_attribTypeSize)[static_cast<size_t>(VertexAttributeType::Count)][4] =
-{
-	//&s_attribTypeSizeD3D1x, // Direct3D11/Direct3D12/Vulkan/WebGPU
-	&s_attribTypeSizeGl, // OpenGLES/OpenGL
-};
-//-----------------------------------------------------------------------------
-VertexLayout& VertexLayout::Begin()
-{
-	m_hash = 0;
-	m_stride = 0;
-	memset(m_attributes, 0xff, sizeof(m_attributes));
-	memset(m_offset, 0, sizeof(m_offset));
-	return *this;
-}
-//-----------------------------------------------------------------------------
-void VertexLayout::End()
-{
-	HashMurmur2A murmur;
-	murmur.Begin();
-	murmur.Add(m_attributes, sizeof(m_attributes));
-	murmur.Add(m_offset, sizeof(m_offset));
-	murmur.Add(m_stride);
-	m_hash = murmur.End();
-}
-//-----------------------------------------------------------------------------
-VertexLayout& VertexLayout::Add(VertexAttribute attrib, uint8_t num, VertexAttributeType type, bool normalized, bool asInt)
-{
-	const uint16_t encodedNorm = (normalized & 1) << 7;
-	const uint16_t encodedType = (static_cast<size_t>(type) & 7) << 3;
-	const uint16_t encodedNum = (num - 1) & 3;
-	const uint16_t encodeAsInt = (asInt & (!!"\x1\x1\x1\x0\x0"[static_cast<size_t>(type)])) << 8;
-	m_attributes[static_cast<size_t>(attrib)] = encodedNorm | encodedType | encodedNum | encodeAsInt;
-
-	m_offset[static_cast<size_t>(attrib)] = m_stride;
-	m_stride += (*s_attribTypeSize)[static_cast<size_t>(type)][num - 1];
-
-	return *this;
-}
-//-----------------------------------------------------------------------------
-VertexLayout& VertexLayout::Skip(uint8_t num)
-{
-	m_stride +=num;
-	return *this;
-}
-//-----------------------------------------------------------------------------
-void VertexLayout::Decode(VertexAttribute attrib, uint8_t& num, VertexAttributeType& type, bool& normalized, bool& asInt) const
-{
-	uint16_t val = m_attributes[static_cast<size_t>(attrib)];
-	num = (val & 3) + 1;
-	type = static_cast<VertexAttributeType>((val >> 3) & 7);
-	normalized = !!(val & (1 << 7));
-	asInt = !!(val & (1 << 8));
-}
-//-----------------------------------------------------------------------------
-
 
 inline GLenum translate(PrimitiveDraw p)
 {

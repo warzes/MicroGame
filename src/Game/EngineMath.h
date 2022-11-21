@@ -1,7 +1,6 @@
 #pragma once
 
-#include "0_EngineConfig.h"
-#include "1_BaseHeader.h"
+#include "BaseHeader.h"
 
 // colors
 
@@ -575,7 +574,7 @@ namespace collide
 	Poly Diamond(const glm::vec3& from, const glm::vec3& to, float size);
 }
 
-#include "4_Math.inl"
+#include "EngineMath.inl"
 
 
 //=============================================================================
