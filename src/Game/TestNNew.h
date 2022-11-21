@@ -1,16 +1,5 @@
 #pragma once
 
-избавится от старой версии gjk
-возможно написать враппер для gjk
-еще пример с реализацией игрока - https://github.com/kevinmoran/GJK
-
-https://github.com/kroitor/gjk.c
-
-https://github.com/kevinmoran/Basic-Lighting
-https://github.com/kevinmoran/AnimationPractice
-https://github.com/kevinmoran/3D-Platformer-Project
-https://github.com/kevinmoran/Heightmapped-Terrain
-
 constexpr const char* vertex_shader_text = R"(
 #version 330 core
 
@@ -611,9 +600,13 @@ glm::mat4 box_M[NUM_BOXES];
 glm::vec4 box_colour[NUM_BOXES];
 temp::BBox box_collider[NUM_BOXES];
 #define NUM_SPHERES 3
-mat4 sphere_M[NUM_SPHERES];
-vec4 sphere_colour[NUM_SPHERES];
-Sphere sphere_collider[NUM_SPHERES];
+glm::mat4 sphere_M[NUM_SPHERES];
+glm::vec4 sphere_colour[NUM_SPHERES];
+temp::Sphere sphere_collider[NUM_SPHERES];
+#define NUM_CYLINDERS 3
+glm::mat4 cylinder_M[NUM_CYLINDERS];
+glm::vec4 cylinder_colour[NUM_CYLINDERS];
+temp::Cylinder cylinder_collider[NUM_CYLINDERS];
 
 const glm::vec3 box_pos[NUM_BOXES] = {
            glm::vec3(-6, 0,-6),
@@ -631,11 +624,13 @@ const glm::vec3 box_scale[NUM_BOXES] = {
     glm::vec3(5.0f, 1.0f, 5.0f)
 };
 
-const vec3 sphere_pos[NUM_SPHERES] = {
-            vec3(-6, 3,-6),
-            vec3(-6, 2, 6),
-            vec3(6, 5, -6)
+const glm::vec3 sphere_pos[NUM_SPHERES] = {
+            glm::vec3(-6, 3,-6),
+            glm::vec3(-6, 2, 6),
+            glm::vec3(6, 5, -6)
 };
+
+temp::Capsule player_collider;
 
 // const used to convert degrees into radians
 #define TAU 2.0 * Pi
@@ -644,41 +639,41 @@ const vec3 sphere_pos[NUM_SPHERES] = {
 #define DEG2RAD(a) ((a)*(Pi/180.0))
 #define RAD2DEG(a) ((a)*(180.0/Pi))
 
-// rotate around x axis by an angle in degrees
-inline glm::mat4 rotate_x_deg(const glm::mat4& m, float deg) {
-    // convert to radians
-    float rad = deg * ONE_DEG_IN_RAD;
-    glm::mat4 m_r = glm::mat4(1.0f);
-    m_r.m[5] = cos(rad);
-    m_r.m[9] = -sin(rad);
-    m_r.m[6] = sin(rad);
-    m_r.m[10] = cos(rad);
-    return m_r * m;
-}
-
-// rotate around y axis by an angle in degrees
-inline glm::mat4 rotate_y_deg(const glm::mat4& m, float deg) {
-    // convert to radians
-    float rad = deg * ONE_DEG_IN_RAD;
-    glm::mat4 m_r = glm::mat4(1.0f);
-    m_r.m[0] = cos(rad);
-    m_r.m[8] = sin(rad);
-    m_r.m[2] = -sin(rad);
-    m_r.m[10] = cos(rad);
-    return m_r * m;
-}
-
-// rotate around z axis by an angle in degrees
-inline glm::mat4 rotate_z_deg(const glm::mat4& m, float deg) {
-    // convert to radians
-    float rad = deg * ONE_DEG_IN_RAD;
-    glm::mat4 m_r = glm::mat4(1.0f);
-    m_r.m[0] = cos(rad);
-    m_r.m[4] = -sin(rad);
-    m_r.m[1] = sin(rad);
-    m_r.m[5] = cos(rad);
-    return m_r * m;
-}
+//// rotate around x axis by an angle in degrees
+//inline glm::mat4 rotate_x_deg(const glm::mat4& m, float deg) {
+//    // convert to radians
+//    float rad = deg * ONE_DEG_IN_RAD;
+//    glm::mat4 m_r = glm::mat4(1.0f);
+//    m_r.m[5] = cos(rad);
+//    m_r.m[9] = -sin(rad);
+//    m_r.m[6] = sin(rad);
+//    m_r.m[10] = cos(rad);
+//    return m_r * m;
+//}
+//
+//// rotate around y axis by an angle in degrees
+//inline glm::mat4 rotate_y_deg(const glm::mat4& m, float deg) {
+//    // convert to radians
+//    float rad = deg * ONE_DEG_IN_RAD;
+//    glm::mat4 m_r = glm::mat4(1.0f);
+//    m_r.m[0] = cos(rad);
+//    m_r.m[8] = sin(rad);
+//    m_r.m[2] = -sin(rad);
+//    m_r.m[10] = cos(rad);
+//    return m_r * m;
+//}
+//
+//// rotate around z axis by an angle in degrees
+//inline glm::mat4 rotate_z_deg(const glm::mat4& m, float deg) {
+//    // convert to radians
+//    float rad = deg * ONE_DEG_IN_RAD;
+//    glm::mat4 m_r = glm::mat4(1.0f);
+//    m_r.m[0] = cos(rad);
+//    m_r.m[4] = -sin(rad);
+//    m_r.m[1] = sin(rad);
+//    m_r.m[5] = cos(rad);
+//    return m_r * m;
+//}
 
 void InitTest()
 {
@@ -688,11 +683,15 @@ void InitTest()
 	ncamera.Enable();
 	ncamera.m_speed = 1;
 
-    box_M[0] = glm::translate(glm::rotate((scale(box_scale[0]), 45), box_pos[0]);
+    //box_M[0] = glm::translate(glm::rotate((glm::scale(box_scale[0]), 45), box_pos[0]);
+    box_M[0] = glm::translate(glm::scale(box_scale[0]), box_pos[0]);
     box_M[1] = glm::translate(glm::scale(box_scale[1]), box_pos[1]);
     box_M[2] = glm::translate(glm::scale(box_scale[2]), box_pos[2]);
-    box_M[3] = glm::translate(glm::rotate_x_deg(glm::scale(identity_mat4(), box_scale[3]), 40), box_pos[3]);
-    box_M[4] = glm::translate(glm::rotate_z_deg(glm::scale(identity_mat4(), box_scale[4]), 50), box_pos[4]);
+    //box_M[3] = glm::translate(glm::rotate_x_deg(glm::scale(box_scale[3]), 40), box_pos[3]);
+    //box_M[4] = glm::translate(glm::rotate_z_deg(glm::scale(box_scale[4]), 50), box_pos[4]);
+    box_M[3] = glm::translate(glm::scale(box_scale[3]), box_pos[3]);
+    box_M[4] = glm::translate(glm::scale(box_scale[4]), box_pos[4]);
+
 
     //Set up physics objects
     for (int i = 0; i < NUM_BOXES; i++)
@@ -705,9 +704,9 @@ void InitTest()
         box_colour[i] = glm::vec4(0.8f, 0.1f, 0.1f, 1);
     }
 
-    sphere_M[0] = translate(identity_mat4(), sphere_pos[0]);
-    sphere_M[1] = translate(identity_mat4(), sphere_pos[1]);
-    sphere_M[2] = translate(identity_mat4(), sphere_pos[2]);
+    sphere_M[0] = glm::translate(sphere_pos[0]);
+    sphere_M[1] = glm::translate(sphere_pos[1]);
+    sphere_M[2] = glm::translate(sphere_pos[2]);
 
     //Set up physics objects
     for (int i = 0; i < NUM_SPHERES; i++)
@@ -716,9 +715,45 @@ void InitTest()
         sphere_collider[i].r = 1;
         sphere_collider[i].matRS = sphere_M[i];
         sphere_collider[i].matRS_inverse = inverse(sphere_M[i]);
-        sphere_colour[i] = vec4(0.1f, 0.8f, 0.1f, 1);
+        sphere_colour[i] = glm::vec4(0.1f, 0.8f, 0.1f, 1);
     }
 
+    {
+        const glm::vec3 cylinder_pos[NUM_CYLINDERS] = {
+            glm::vec3(6, 0, 0),
+            glm::vec3(-6, 0, 0),
+            glm::vec3(0, 0,-6)
+        };
+        const float cylinder_r[NUM_CYLINDERS] = {
+            2, 1, 3
+        };
+        const float cylinder_h[NUM_CYLINDERS] = {
+            2, 3, 3
+        };
+
+        cylinder_M[0] = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(cylinder_r[0], cylinder_h[0], cylinder_r[0])), cylinder_pos[0]);
+        cylinder_M[1] = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(cylinder_r[1], cylinder_h[1], cylinder_r[1])), cylinder_pos[1]);
+        cylinder_M[2] = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(cylinder_r[2], cylinder_h[2], cylinder_r[2])), cylinder_pos[2]);
+
+        //Set up physics objects
+        for (int i = 0; i < NUM_CYLINDERS; i++)
+        {
+            cylinder_collider[i].pos = cylinder_pos[i];
+            cylinder_collider[i].r = 1;
+            cylinder_collider[i].y_base = cylinder_pos[i].y;
+            cylinder_collider[i].y_cap = cylinder_pos[i].y + 1;
+            cylinder_collider[i].matRS = cylinder_M[i];
+            cylinder_collider[i].matRS_inverse = glm::inverse(cylinder_M[i]);
+            cylinder_colour[i] = glm::vec4(0.8f, 0.1f, 0.8f, 1);
+        }
+    }
+
+    player_collider.pos = Player::player_pos;
+    player_collider.matRS = Player::player_M;
+    player_collider.matRS_inverse = glm::inverse(Player::player_M);
+    player_collider.r = 1;
+    player_collider.y_base = 1;
+    player_collider.y_cap = 2;
 
 
 
