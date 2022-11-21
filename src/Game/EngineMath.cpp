@@ -1,5 +1,88 @@
 #include "stdafx.h"
 #include "EngineMath.h"
+//-----------------------------------------------------------------------------
+//=============================================================================
+// Algebra
+//=============================================================================
+//-----------------------------------------------------------------------------
+void Transform::SetDefault()
+{
+	m_position = glm::vec3(0.0f, 0.0f, 0.0f);
+	m_worldPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	m_scale = glm::vec3(1.0f, 1.0f, 1.0f);
+	m_worldScale = glm::vec3(1.0f, 1.0f, 1.0f);
+	m_rotation = glm::quat(glm::vec3(0.0f));
+	m_worldRotation = glm::quat(glm::vec3(0.0f));
+
+	m_forward = glm::vec3(0.0f, 0.0f, 1.0f);
+	m_up = glm::vec3(0.0f, 1.0f, 0.0f);
+	m_right = glm::vec3(1.0f, 0.0f, 0.0f);
+
+	m_worldMatrix = glm::mat4(1.0f);
+
+	m_isTransformChanged = TransformChanged::TRANSLATION;
+}
+//-----------------------------------------------------------------------------
+void Transform::Translate(const glm::vec3& position)
+{
+	m_position = position;
+	m_isTransformChanged |= TransformChanged::TRANSLATION;
+}
+//-----------------------------------------------------------------------------
+void Transform::Move(const glm::vec3& position)
+{
+	m_position += position;
+	m_isTransformChanged |= TransformChanged::TRANSLATION;
+}
+//-----------------------------------------------------------------------------
+void Transform::RotateEuler(float x, float y, float z)
+{
+	m_rotation = m_rotation * glm::quat_cast(glm::eulerAngleYXZ(y, x, z));
+	m_isTransformChanged |= TransformChanged::ROTATION;
+}
+//-----------------------------------------------------------------------------
+void Transform::Rotate(const glm::quat& rotation)
+{
+	m_rotation = m_rotation * rotation;
+	m_isTransformChanged |= TransformChanged::ROTATION;
+}
+//-----------------------------------------------------------------------------
+void Transform::Scale(const glm::vec3& scale)
+{
+	m_scale = scale;
+	m_isTransformChanged |= TransformChanged::SCALE;
+}
+//-----------------------------------------------------------------------------
+void Transform::updateTransforms()
+{
+	if (m_isTransformChanged & TransformChanged::NONE) return;
+
+	// Calculate World Matrix
+	m_worldMatrix = glm::translate(m_position) * glm::toMat4(m_rotation) * glm::scale(m_scale);
+
+	if (m_parent)
+		m_worldMatrix *= m_parent->m_worldMatrix; // TODO: делать дерево наследования, сейчас только одна ветвь
+
+	// Get World Transform
+	glm::vec3 pos, scale, skew; glm::vec4 perpective; glm::quat rot;
+	if (glm::decompose(m_worldMatrix, scale, rot, pos, skew, perpective))
+	{
+		m_worldPosition = pos;
+		m_worldScale = scale;
+		m_worldRotation = rot;
+	}
+
+	m_forward = rot * glm::vec3(0.0f, 0.0f, 1.0f);
+	m_right = rot * glm::vec3(1.0f, 0.0f, 0.0f);
+	m_up = glm::cross(m_forward, m_right);
+
+	m_isTransformChanged = TransformChanged::NONE;
+}
+//-----------------------------------------------------------------------------
+
+
+
+
 
 void FrustumCorners::Transform(glm::mat4 space)
 {
@@ -87,7 +170,7 @@ VolumeCheck OldFrustum::ContainsSphere(const Sphere& sphere) const
 	VolumeCheck ret = VolumeCheck::CONTAINS;
 	for (auto plane : m_planes)
 	{
-		float dist = glm::dot(plane.n, sphere.pos - plane.d);
+		float dist = glm::dot(plane.n, sphere.position - plane.d);
 		if (dist < -sphere.radius)return VolumeCheck::OUTSIDE;
 		else if (dist < 0) ret = VolumeCheck::INTERSECT;
 	}

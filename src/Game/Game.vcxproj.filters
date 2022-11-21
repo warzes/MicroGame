@@ -111,7 +111,7 @@
     <ClInclude Include="EngineMath.h">
       <Filter>MicroEngine\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Collisions.h">
+    <ClInclude Include="Collide.h">
       <Filter>MicroEngine\Engine</Filter>
     </ClInclude>
     <ClInclude Include="Utility.h">

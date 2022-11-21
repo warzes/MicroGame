@@ -1,34 +1,120 @@
-#pragma once
+﻿#pragma once
 
 #include "BaseHeader.h"
+#include "Base.h"
 
-// colors
+//=============================================================================
+// Core math
+//=============================================================================
 
-inline unsigned rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+static const float Pi = float(3.141592653589793);
+static const float HalfPi = float(1.57079632679489661923);
+
+inline constexpr float DegToRad(const float a)
+{
+	return 0.01745329251994329547f * a;
+}
+
+//=============================================================================
+// Algebra
+//=============================================================================
+// ==>Vector/Matrix/Quat/Angle/Axis/Transforms
+
+class Transform
+{
+public:
+	void SetDefault();
+	void Update() { updateTransforms(); }
+
+	void Translate(const glm::vec3& position);
+	void Translate(float x, float y, float z) { Translate({ x, y, z }); }
+
+	void Move(const glm::vec3& position);
+	void Move(float x, float y, float z) { Move({ x, y, z }); }
+
+	void RotateEuler(float x, float y, float z);
+	void RotateEuler(const glm::vec3& rotation) { RotateEuler(rotation.x, rotation.y, rotation.z); }
+
+	void Rotate(const glm::quat& rotation);
+	void SetRotation(const glm::quat& rotation) { m_rotation = rotation; m_isTransformChanged |= TransformChanged::ROTATION; }
+
+	void Scale(const glm::vec3& scale);
+	void Scale(float x, float y, float z) { Scale({ x, y, z }); }
+
+	const glm::vec3& GetPosition() const { return m_position; }
+	const glm::vec3& GetWorldPosition() const { return m_worldPosition; }
+	const glm::vec3& GetScale() const { return m_scale; }
+	const glm::vec3& GetWorldScale() const { return m_worldScale; }
+	const glm::quat& GetRotation() const { return m_rotation; }
+	const glm::vec3& GetYawPitchRoll() const { return glm::vec3(glm::yaw(m_rotation), glm::pitch(m_rotation), glm::roll(m_rotation)); };
+	const glm::quat& GetWorldRotation() const { return m_worldRotation; }
+
+	const glm::vec3& GetForward() const { return m_forward; }
+	const glm::vec3& GetUp() const { return m_up; }
+	const glm::vec3& GetRight() const { return m_right; }
+
+	const glm::mat4& GetWorld() { updateTransforms(); return m_worldMatrix; }
+private:
+	void updateTransforms();
+
+	glm::vec3 m_position = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 m_worldPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 m_scale = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::vec3 m_worldScale = glm::vec3(1.0f, 1.0f, 1.0f);
+
+	glm::vec3 m_forward = glm::vec3(0.0f, 0.0f, 1.0f);
+	glm::vec3 m_up = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 m_right = glm::vec3(1.0f, 0.0f, 0.0f);
+
+	glm::quat m_rotation = glm::quat(glm::vec3(0.0f));
+	glm::quat m_worldRotation = glm::quat(glm::vec3(0.0f));
+
+	glm::mat4 m_worldMatrix = glm::mat4(1.0f);
+
+	enum TransformChanged {
+		NONE = 0x00,
+		TRANSLATION = 0x01,
+		ROTATION = 0x02,
+		SCALE = 0x04,
+	};
+	uint8_t m_isTransformChanged = TransformChanged::TRANSLATION;
+
+	Transform* m_parent = nullptr; // TODO:
+};
+
+//=============================================================================
+// Colors
+//=============================================================================
+
+inline constexpr unsigned RGBAToUInt(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
 	return (unsigned)a << 24 | r << 16 | g << 8 | b;
 }
 
-inline unsigned bgra(uint8_t b, uint8_t g, uint8_t r, uint8_t a)
+inline constexpr unsigned RGBAFToUInt(float r, float g, float b, float a)
 {
-	return rgba(r, g, b, a);
+	return RGBAToUInt((uint8_t)r * 255, (uint8_t)g * 255, (uint8_t)b * 255, a * (uint8_t)255);
 }
 
-inline unsigned rgbaf(float r, float g, float b, float a)
+inline constexpr unsigned BGRAToUInt(uint8_t b, uint8_t g, uint8_t r, uint8_t a)
 {
-	return rgba(r * 255, g * 255, b * 255, a * 255);
+	return RGBAToUInt(r, g, b, a);
 }
 
-inline unsigned bgraf(float b, float g, float r, float a)
+inline constexpr unsigned BGRAFToUInt(float b, float g, float r, float a)
 {
-	return rgba(r * 255, g * 255, b * 255, a * 255);
+	return RGBAFToUInt((uint8_t)r * 255, (uint8_t)g * 255, (uint8_t)b * 255, (uint8_t)a * 255);
 }
 
-inline float    alpha(unsigned rgba)
+inline constexpr float GetAlphaFromUInt(unsigned rgba)
 {
 	return (rgba >> 24) / 255.f;
 }
 
+inline constexpr glm::vec3 RGBToVec(unsigned rgb)
+{
+	return { ((rgb >> 16) & 255) / 255.f, ((rgb >> 8) & 255) / 255.f, ((rgb >> 0) & 255) / 255.f };
+}
 
 #define RGBX(rgb,x)   ( ((rgb)&0xFFFFFF) | (((unsigned)(x))<<24) )
 #define RGB3(r,g,b)   ( ((r)<<16) | ((g)<<8) | (b) )
@@ -63,67 +149,305 @@ inline float    alpha(unsigned rgba)
 #define BLUE    RGBX(0x065AB5,255)
 #endif
 
-inline glm::vec3 rgbf(unsigned rgb)
-{
-	return { ((rgb >> 16) & 255) / 255.f,((rgb >> 8) & 255) / 255.f,((rgb >> 0) & 255) / 255.f };
-}
+//=============================================================================
+// Geometry
+//=============================================================================
 
-struct Line
+class Line
 {
-	glm::vec3 a = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 b = glm::vec3(0.0f, 0.0f, 0.0f);
+public:
+	Line() = default;
+	Line(const Line&) = default;
+	Line(const glm::vec3& P0, const glm::vec3& P1)
+	{
+		a = P0;
+		b = P1;
+	}
+
+	Line& operator=(const Line&) = default;
+
+	glm::vec3 a = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 b = { 0.0f, 0.0f, 0.0f };
 };
 
-struct Sphere
+class Triangle
 {
-	Sphere() = default;
-	Sphere(const glm::vec3& position, float size)
+public:
+	Triangle() = default;
+	Triangle(const Triangle&) = default;
+	Triangle(const glm::vec3& P0, const glm::vec3& P1, const glm::vec3& P2)
 	{
-		pos = position;
-		radius = size;
+		verts[0] = P0;
+		verts[1] = P1;
+		verts[2] = P2;
 	}
-	glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	Triangle& operator=(const Triangle&) = default;
+
+	// Compute the area of the triangle.
+	float Area() const
+	{
+		const glm::vec3& p0 = verts[0];
+		const glm::vec3& p1 = verts[1];
+		const glm::vec3& p2 = verts[2];
+
+		return glm::cross((p0 - p1), (p0 - p2)).length() * 0.5f;
+	}
+
+	// Computes a point on the triangle from u and v barycentric coordinates.
+	glm::vec3 PointFromUV(float u, float v) const
+	{
+		return (1.0f - u - v) * verts[0] + u * verts[1] + v * verts[2];
+	}
+
+	glm::vec3 verts[3] =
+	{
+		{ 0.0f, 0.0f, 0.0f },
+		{ 0.0f, 0.0f, 0.0f },
+		{ 0.0f, 0.0f, 0.0f }
+	};
+};
+
+class Sphere
+{
+public:
+	Sphere() = default;
+	Sphere(const Sphere&) = default;
+	Sphere(const glm::vec3& Position, float Radius)
+	{
+		position = Position;
+		radius = Radius;
+	}
+
+	Sphere& operator=(const Sphere&) = default;
+
+	bool IsValid() const { return radius > 0.0f; }
+
+	glm::vec3 position = { 0.0f, 0.0f, 0.0f };
 	float radius = 1.0f;
 };
 
-struct AABB
+class Plane
 {
-	glm::vec3 min = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 max = glm::vec3(0.0f, 0.0f, 0.0f);
+public:
+	Plane() = default;
+	Plane(const Plane&) = default;
+	Plane(const glm::vec3& P, const glm::vec3& N)
+	{
+		p = P;
+		normal = N;
+	}
+
+	Plane& operator=(const Plane&) = default;
+
+	glm::vec3 p = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 normal = { 0.0f, 0.0f, 0.0f };
 };
 
-struct Plane 
-{ 
-	glm::vec3 p = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 n = glm::vec3(0.0f, 0.0f, 0.0f);
+class AABB
+{
+public:
+	AABB() = default;
+	AABB(const AABB&) = default;
+	AABB(const glm::vec3& minimum, const glm::vec3& maximum)
+	{
+		min = minimum;
+		max = maximum;
+	}
+
+	AABB& operator=(const AABB&) = default;
+
+	static AABB GetCenterExtents(const glm::vec3& center, const glm::vec3& extent)
+	{
+		return { center - extent, center + extent };
+	}
+
+	// TODO: проверить
+	static AABB GetBasisExtent(const glm::vec3& center, const glm::mat3& basis, const glm::vec3& extent)
+	{
+		// extended basis vectors
+		const glm::vec3 c0 = basis[0] * extent.x;
+		const glm::vec3 c1 = basis[1] * extent.y;
+		const glm::vec3 c2 = basis[2] * extent.z;
+
+		// find combination of base vectors that produces max. distance for each component = sum of abs()
+		const glm::vec3 w(
+			abs(c0.x) + abs(c1.x) + abs(c2.x),
+			abs(c0.y) + abs(c1.y) + abs(c2.y),
+			abs(c0.z) + abs(c1.z) + abs(c2.z));
+
+		return { center - w, center + w };
+	}
+
+	// TODO: проверить
+	// TODO: не учитывается скалирование
+	static AABB GetPoseExtent(const Transform& pose, const glm::vec3& extent)
+	{
+		return GetBasisExtent(pose.GetPosition(), glm::toMat3(pose.GetRotation()), extent);
+	}
+
+	// gets the transformed bounds of the passed AABB (resulting in a bigger AABB).
+	static AABB GetTransform(const glm::mat3& matrix, const AABB& aabb)
+	{
+		return GetBasisExtent(matrix * aabb.GetCenter(), matrix, aabb.GetExtents());
+	}
+
+	// gets the transformed bounds of the passed AABB (resulting in a bigger AABB).
+	static AABB GetTransform(const Transform& transform, const AABB& aabb)
+	{
+		return GetBasisExtent(aabb.GetCenter(), glm::toMat3(transform.GetRotation()), aabb.GetExtents());
+	}
+
+	// expands the volume to include v
+	void Include(const glm::vec3& v)
+	{
+		min = Min(min, v);
+		max = Max(max, v);
+	}
+
+	// expands the volume to include v
+	void Include(const AABB& aabb)
+	{
+		min = Min(min, aabb.min);
+		max = Max(max, aabb.max);
+	}
+
+	// indicates whether the intersection of this and b is empty or not.
+	bool Intersects(const AABB& aabb) const
+	{
+		return !(aabb.min.x > max.x || min.x > aabb.max.x || aabb.min.y > max.y || min.y > aabb.max.y || aabb.min.z > max.z || min.z > aabb.max.z);
+	}
+
+	// computes the 1D-intersection between two AABBs, on a given axis.
+	bool Intersects1D(const AABB& aabb, uint32_t axis) const
+	{
+		return max[axis] >= aabb.min[axis] && aabb.max[axis] >= min[axis];
+	}
+
+	// indicates if these bounds contain v.
+	bool Contains(const glm::vec3& v) const
+	{
+		return !(v.x < min.x || v.x > max.x || v.y < min.y || v.y > max.y || v.z < min.z || v.z > max.z);
+	}
+
+	// checks a box is inside another box.
+	bool IsInside(const AABB& aabb) const
+	{
+		if (aabb.min.x > min.x)
+			return false;
+		if (aabb.min.y > min.y)
+			return false;
+		if (aabb.min.z > min.z)
+			return false;
+		if (aabb.max.x < max.x)
+			return false;
+		if (aabb.max.y < max.y)
+			return false;
+		if (aabb.max.z < max.z)
+			return false;
+		return true;
+	}
+
+	glm::vec3 GetCenter() const
+	{
+		return (min + max) * 0.5f;
+	}
+
+	// get component of the box's center along a given axis
+	float GetCenter(uint32_t axis) const
+	{
+		return (min[axis] + max[axis]) * 0.5f;
+	}
+
+	// get component of the box's extents along a given axis
+	float GetExtents(uint32_t axis) const
+	{
+		return (max[axis] - min[axis]) * 0.5f;
+	}
+
+	// returns the dimensions (width/height/depth) of this axis aligned box.
+	glm::vec3 GetDimensions() const
+	{
+		return max - min;
+	}
+
+	glm::vec3 GetExtents() const
+	{
+		return GetDimensions() * 0.5f;
+	}
+
+	void Scale(float scale)
+	{
+		*this = GetCenterExtents(GetCenter(), GetExtents() * scale);
+	}
+
+	// fattens the AABB in all 3 dimensions by the given distance.
+	void Fattens(float distance)
+	{
+		min.x -= distance;
+		min.y -= distance;
+		min.z -= distance;
+
+		max.x += distance;
+		max.y += distance;
+		max.z += distance;
+	}
+
+	// Finds the closest point in the box to the point p. If p is contained, this will be p, otherwise it will be the closest point on the surface of the box.
+	glm::vec3 ClosestPoint(const glm::vec3& p) const
+	{
+		return Max(min, Min(max, p));
+	}
+
+	glm::vec3 min = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 max = { 0.0f, 0.0f, 0.0f };
 };
 
-struct Capsule
+class Capsule
 {
-	glm::vec3 a = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 b = glm::vec3(0.0f, 0.0f, 0.0f);
+public:
+	Capsule() = default;
+	Capsule(const Capsule&) = default;
+	Capsule(const glm::vec3& A, const glm::vec3& B, float R)
+	{
+		a = A;
+		b = B;
+		r = R;
+	}
+
+	Capsule& operator=(const Capsule&) = default;
+
+	glm::vec3 a = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 b = { 0.0f, 0.0f, 0.0f };
 	float r = 0.0f;
 };
 
-
-struct Ray
+class Ray
 {
-	glm::vec3 p = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 d = glm::vec3(0.0f, 0.0f, 0.0f);
+public:
+	Ray() = default;
+	Ray(const Ray&) = default;
+	Ray(const glm::vec3& P, const glm::vec3& D)
+	{
+		p = P;
+		d = D;
+	}
+
+	Ray& operator=(const Ray&) = default;
+
+	glm::vec3 p = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 d = { 0.0f, 0.0f, 0.0f };
 };
 
-struct Triangle
+class Poly
 {
-	glm::vec3 p0 = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 p1 = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 p2 = glm::vec3(0.0f, 0.0f, 0.0f);
-};
-
-struct Poly
-{
+public:
 	std::vector<glm::vec3> verts;
 	int cnt = 0; // todo: delete, in verts.size
 };
+
+
+
 
 struct Frustum
 {
@@ -162,7 +486,7 @@ namespace tempMath
 {
 	using namespace glm;
 
-	// ����� �������
+	// потом удалить
 
 #define C_EPSILON  (1e-6)
 #define C_PI       (3.141592654f) // (3.14159265358979323846f)

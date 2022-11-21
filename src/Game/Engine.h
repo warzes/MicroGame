@@ -19,7 +19,7 @@
 #include "Core.h"
 #include "Container.h"
 #include "EngineMath.h"
-#include "Collisions.h"
+#include "Collide.h"
 #include "Utility.h"
 #include "Platform.h"
 #include "Audio.h"

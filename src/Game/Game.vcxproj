@@ -239,7 +239,7 @@
     <ClInclude Include="Core.h" />
     <ClInclude Include="Container.h" />
     <ClInclude Include="EngineMath.h" />
-    <ClInclude Include="Collisions.h" />
+    <ClInclude Include="Collide.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="Platform.h" />
     <ClInclude Include="Audio.h" />

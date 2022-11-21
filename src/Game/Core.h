@@ -6,7 +6,7 @@
 // Times
 //=============================================================================
 
-std::string GetCurrentTime();
+std::string GetCurrentTimeString();
 
 class Time
 {
@@ -16,8 +16,8 @@ public:
 	void Start();
 	void Update();
 	float GetTime();
-	float DeltaTime();
-	float FPS();
+	float GetDeltaTime();
+	float GetFPS();
 
 private:
 	std::chrono::steady_clock::time_point m_begin;

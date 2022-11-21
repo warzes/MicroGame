@@ -103,7 +103,7 @@ void Camera::Fps(float yaw, float pitch)
 	const float deg2rad = 0.0174532f, y = m_yaw * deg2rad, p = m_pitch * deg2rad;
 	m_look = tempMath::norm3(glm::vec3(cos(y) * cos(p), sin(p), sin(y) * cos(p)));
 
-	m_view = glm::lookAt(m_position, tempMath::add3(m_position, m_look), m_up);
+	m_view = glm::lookAt(m_position, m_position + m_look, m_up);
 
 	//tempMath::lookat44(m_view, m_position, tempMath::add3(m_position, m_look), m_up); // eye,center,up
 	tempMath::perspective44(m_proj, 45, GetFrameBufferWidth() / ((float)GetFrameBufferHeight() + !GetFrameBufferHeight()), 0.01f, 1000.f);
@@ -766,7 +766,7 @@ void main()
 		glPointSize(6);
 		for (auto& it : Points)
 		{
-			shaderProgram.SetUniform(ColorID, rgbf(it.first));
+			shaderProgram.SetUniform(ColorID, RGBToVec(it.first));
 			const size_t count = it.second.size();
 			glBufferData(GL_ARRAY_BUFFER, count * sizeof(glm::vec3), it.second.data(), GL_STATIC_DRAW);
 			glDrawArrays(GL_POINTS, 0, count);
@@ -779,7 +779,7 @@ void main()
 	{
 		for (auto& it : Lines)
 		{
-			shaderProgram.SetUniform(ColorID, rgbf(it.first));
+			shaderProgram.SetUniform(ColorID, RGBToVec(it.first));
 			const size_t count = it.second.size();
 			glBufferData(GL_ARRAY_BUFFER, count * sizeof(glm::vec3), it.second.data(), GL_STATIC_DRAW);
 			glDrawArrays(GL_LINES, 0, count);

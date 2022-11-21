@@ -3,7 +3,11 @@
 #include "EngineConfig.h"
 
 #if defined(_MSC_VER)
+#	pragma warning(disable : 4514)
+#	pragma warning(disable : 4820)
 #	pragma warning(push, 0)
+#	pragma warning(disable : 5262)
+#	pragma warning(disable : 5264)
 #endif
 
 //=============================================================================

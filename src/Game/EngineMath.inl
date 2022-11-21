@@ -1,3 +1,5 @@
+#include "Collide.h"
+
 namespace collide
 {
 	static inline Hit hits[16] = { 0 };
@@ -180,14 +182,14 @@ namespace collide
 		vec3 in0, in1, in2;
 
 		/* calculate triangle normal */
-		d10 = sub3(tr.p1, tr.p0);
-		d20 = sub3(tr.p2, tr.p0);
-		d21 = sub3(tr.p2, tr.p1);
-		d02 = sub3(tr.p0, tr.p2);
+		d10 = sub3(tr.verts[1], tr.verts[0]);
+		d20 = sub3(tr.verts[2], tr.verts[0]);
+		d21 = sub3(tr.verts[2], tr.verts[1]);
+		d02 = sub3(tr.verts[0], tr.verts[2]);
 		n = cross3(d10, d20);
 
 		/* check for plane intersection */
-		vec4 p = Plane4(tr.p0, n);
+		vec4 p = Plane4(tr.verts[0], n);
 		t = RayTestPlane(r, p);
 		if (t <= 0.0f) return t;
 
@@ -196,9 +198,9 @@ namespace collide
 		in = add3(in, r.p);
 
 		/* check if point inside triangle in plane */
-		di0 = sub3(in, tr.p0);
-		di1 = sub3(in, tr.p1);
-		di2 = sub3(in, tr.p2);
+		di0 = sub3(in, tr.verts[0]);
+		di1 = sub3(in, tr.verts[1]);
+		di2 = sub3(in, tr.verts[2]);
 
 		in0 = cross3(d10, di0);
 		in1 = cross3(d21, di1);
@@ -217,7 +219,7 @@ namespace collide
 	{
 		vec3 a;
 		float tc, td, d2, r2;
-		a = sub3(s.pos, r.p);
+		a = sub3(s.position, r.p);
 		tc = dot3(r.d, a);
 		if (tc < 0) return 0;
 
@@ -261,13 +263,13 @@ namespace collide
 
 	inline Hit* RayHitPlane(const Ray& r, const Plane& p)
 	{
-		vec4 pf = Plane4(p.p, p.n);
+		vec4 pf = Plane4(p.p, p.normal);
 		float t = RayTestPlane(r, pf);
 		if (t <= 0.0f) return 0;
 		Hit* o = HitNext();
 		o->p = add3(r.p, scale3(r.d, t));
 		o->t0 = o->t1 = t;
-		o->n = scale3(p.n, -1.0f);
+		o->n = scale3(p.normal, -1.0f);
 		return o;
 	}
 
@@ -279,7 +281,7 @@ namespace collide
 		Hit* o = HitNext();
 		o->t0 = o->t1 = t;
 		o->p = add3(r.p, scale3(r.d, t));
-		o->n = norm3(cross3(sub3(tr.p1, tr.p0), sub3(tr.p2, tr.p0)));
+		o->n = norm3(cross3(sub3(tr.verts[1], tr.verts[0]), sub3(tr.verts[2], tr.verts[0])));
 		return o;
 	}
 
@@ -289,7 +291,7 @@ namespace collide
 		if (!RayTestSphere(&o->t0, &o->t1, r, s))
 			return 0;
 		o->p = add3(r.p, scale3(r.d, minf(o->t0, o->t1)));
-		o->n = norm3(sub3(o->p, s.pos));
+		o->n = norm3(sub3(o->p, s.position));
 		return o;
 	}
 
@@ -322,22 +324,22 @@ namespace collide
 
 	inline glm::vec3 SphereClosestPoint(const Sphere& s, vec3 p)
 	{
-		vec3 d = norm3(sub3(p, s.pos));
-		return add3(s.pos, scale3(d, s.radius));
+		vec3 d = norm3(sub3(p, s.position));
+		return add3(s.position, scale3(d, s.radius));
 	}
 
 	inline Hit* SphereHitAABB(const Sphere& s, const AABB& a)
 	{
 		/* find closest aabb point to sphere center point */
-		vec3 ap = AABBClosestPoint(a, s.pos);
-		vec3 d = sub3(s.pos, ap);
+		vec3 ap = AABBClosestPoint(a, s.position);
+		vec3 d = sub3(s.position, ap);
 		float d2 = dot3(d, d);
 		if (d2 > s.radius * s.radius) return 0;
 
 		Hit* m = HitNext();
 		/* calculate distance vector between sphere and aabb center points */
 		vec3 ac = add3(a.min, scale3(sub3(a.max, a.min), 0.5f));
-		d = sub3(ac, s.pos);
+		d = sub3(ac, s.position);
 
 		/* normalize distance vector */
 		float l2 = dot3(d, d);
@@ -347,7 +349,7 @@ namespace collide
 
 		m->normal = d;
 		m->contact_point = scale3(m->normal, s.radius);
-		m->contact_point = add3(s.pos, m->contact_point);
+		m->contact_point = add3(s.position, m->contact_point);
 
 		/* calculate penetration depth */
 		vec3 sp = SphereClosestPoint(s, ap);
@@ -373,7 +375,7 @@ namespace collide
 		/* calculate penetration depth */
 		m->depth = d2 - s.radius * s.radius;
 		m->depth = m->depth != 0.0f ? sqrtf(m->depth) : 0.0f;
-		m->contact_point = add3(s.pos, scale3(m->normal, s.radius));
+		m->contact_point = add3(s.position, scale3(m->normal, s.radius));
 		return m;
 #else
 		// aproximation of I would expect this function to return instead
@@ -384,14 +386,14 @@ namespace collide
 		Hit* h = RayHitSphere(r, s);
 		if (!h) return 0;
 		s.radius -= c.r;
-		h->contact_point = add3(s.pos, scale3(norm3(sub3(h->contact_point, s.pos)), s.radius));
+		h->contact_point = add3(s.position, scale3(norm3(sub3(h->contact_point, s.position)), s.radius));
 		return h;
 #endif
 	}
 
 	inline Hit* SphereHitSphere(const Sphere& a, const Sphere& b)
 	{
-		vec3 d = sub3(b.pos, a.pos);
+		vec3 d = sub3(b.position, a.position);
 		float r = a.radius + b.radius;
 		float d2 = dot3(d, d);
 		if (d2 > r * r) return 0;
@@ -402,7 +404,7 @@ namespace collide
 		m->normal = scale3(d, linv);
 		m->depth = r - l;
 		d = scale3(m->normal, b.radius);
-		m->contact_point = sub3(b.pos, d);
+		m->contact_point = sub3(b.position, d);
 		return m;
 	}
 
@@ -423,7 +425,7 @@ namespace collide
 
 	inline int SphereTestSphere(const Sphere& a, const Sphere& b)
 	{
-		vec3 d = sub3(b.pos, a.pos);
+		vec3 d = sub3(b.position, a.position);
 		float r = a.radius + b.radius;
 		if (dot3(d, d) > r * r)
 			return 0;
@@ -532,14 +534,14 @@ namespace collide
 	{
 		/* find closest aabb point to sphere center point */
 		Hit* m = HitNext();
-		m->contact_point = AABBClosestPoint(a, s.pos);
-		vec3 d = sub3(s.pos, m->contact_point);
+		m->contact_point = AABBClosestPoint(a, s.position);
+		vec3 d = sub3(s.position, m->contact_point);
 		float d2 = dot3(d, d);
 		if (d2 > s.radius * s.radius) return 0;
 
 		/* calculate distance vector between aabb and sphere center points */
 		vec3 ac = add3(a.min, scale3(sub3(a.max, a.min), 0.5f));
-		d = sub3(s.pos, ac);
+		d = sub3(s.position, ac);
 
 		/* normalize distance vector */
 		float l2 = dot3(d, d);
@@ -575,7 +577,7 @@ namespace collide
 	inline int AABBTestSphere(const AABB& a, const Sphere& s)
 	{
 		/* compute squared distance between sphere center and aabb */
-		float d2 = AABBDistance2Point(a, s.pos);
+		float d2 = AABBDistance2Point(a, s.position);
 		/* intersection if distance is smaller/equal sphere radius*/
 		return d2 <= s.radius * s.radius;
 	}
@@ -651,8 +653,8 @@ namespace collide
 	{
 		/* find closest capsule point to sphere center point */
 		Hit* m = HitNext();
-		m->contact_point = CapsuleClosestPoint(c, s.pos);
-		m->normal = sub3(s.pos, m->contact_point);
+		m->contact_point = CapsuleClosestPoint(c, s.position);
+		m->normal = sub3(s.position, m->contact_point);
 		float d2 = dot3(m->normal, m->normal);
 		if (d2 > s.radius * s.radius) return 0;
 
@@ -694,7 +696,7 @@ namespace collide
 	inline int CapsuleTestSphere(const Capsule& c, const Sphere& s)
 	{
 		/* squared distance bwetween sphere center and capsule line segment */
-		float d2 = LineDistance2Point(Line(c.a, c.b), s.pos);
+		float d2 = LineDistance2Point(Line(c.a, c.b), s.position);
 		float r = s.radius + c.r;
 		return d2 <= r * r;
 	}
@@ -753,7 +755,7 @@ namespace collide
 		glm::vec3 d = { 0.0f, 0.0f, 0.0f };
 		GJKSupport gs = { 0 };
 		gs.a = p.verts[0];
-		gs.b = s.pos;
+		gs.b = s.position;
 		d = sub3(gs.b, gs.a);
 
 		/* run gjk algorithm */
@@ -842,7 +844,7 @@ namespace collide
 		/* run gjk algorithm */
 		gjk_simplex gsx = { 0 };
 		while (gjk(&gsx, &s)) {
-			s.aid = polyhedron_support(s.a, s.da, glm::value_ptr(poly.verts[0]), poly.verts.size());
+			s.aid = polyhedron_support(s.a, s.da, glm::value_ptr(poly.verts[0]), poly.cnt);
 			s.bid = line_support(s.b, s.db, glm::value_ptr(capsule.a), glm::value_ptr(capsule.b));
 		}
 		/* check distance between closest points */
@@ -893,7 +895,7 @@ namespace collide
 		glm::vec3 d = { 0.0f, 0.0f, 0.0f };
 		GJKSupport gs = { 0 };
 		gs.a = p.verts[0];
-		gs.b = s.pos;
+		gs.b = s.position;
 		transformS(&gs.a, glm::value_ptr(rot33), pos3);
 		d = sub3(gs.b, gs.a);
 
@@ -1022,7 +1024,7 @@ namespace collide
 	{
 		for (int i = 0; i < 6; i++)
 		{
-			if ((dot3({ f.pl[i].x, f.pl[i].y, f.pl[i].z }, s.pos) + f.pl[i].w + s.radius) < 0) return 0;
+			if ((dot3({ f.pl[i].x, f.pl[i].y, f.pl[i].z }, s.position) + f.pl[i].w + s.radius) < 0) return 0;
 		}
 		return 1;
 	}

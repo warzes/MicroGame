@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Base.h"
 #include "Core.h"
-
+//-----------------------------------------------------------------------------
 #if defined(_WIN32) && defined(_DEBUG)
 extern "C" __declspec(dllimport) void __stdcall OutputDebugStringA(const char*);
 #endif
@@ -10,7 +10,7 @@ extern "C" __declspec(dllimport) void __stdcall OutputDebugStringA(const char*);
 // Times
 //=============================================================================
 //-----------------------------------------------------------------------------
-std::string GetCurrentTime()
+std::string GetCurrentTimeString()
 {
 	const std::time_t rawtime = time(nullptr);
 	char rawstr[26] = { 0 };
@@ -44,12 +44,12 @@ float Time::GetTime()
 	return ((float)(std::chrono::duration_cast<std::chrono::nanoseconds>(end - m_begin).count())) * 1e-9f;
 }
 //-----------------------------------------------------------------------------
-float Time::DeltaTime()
+float Time::GetDeltaTime()
 {
 	return m_deltaTime;
 }
 //-----------------------------------------------------------------------------
-float Time::FPS()
+float Time::GetFPS()
 {
 	return (1.f / m_deltaTime);
 }
@@ -58,11 +58,14 @@ float Time::FPS()
 // Logging
 //=============================================================================
 //-----------------------------------------------------------------------------
-constexpr auto LogSeperator = "********************************************************************************************************";
+namespace
+{
+	constexpr auto LogSeperator = "********************************************************************************************************";
 #if defined(_WIN32) || defined(__linux__)
-FILE* logFile = nullptr;
+	FILE* logFile = nullptr;
 #endif
-
+}
+//-----------------------------------------------------------------------------
 void logPrint(const char* simplePrefix, const char* clrPrefix, const char* str)
 {
 #if defined(__ANDROID__)
@@ -94,7 +97,7 @@ void logPrint(const char* simplePrefix, const char* clrPrefix, const char* str)
 	}
 #endif
 }
-
+//-----------------------------------------------------------------------------
 bool CreateLogSystem(const LogCreateInfo& createInfo)
 {
 #if defined(_WIN32)
@@ -109,18 +112,18 @@ bool CreateLogSystem(const LogCreateInfo& createInfo)
 	}
 #endif
 	LogPrint(LogSeperator);
-	LogPrint(GetCurrentTime() + " Log Started.");
+	LogPrint(GetCurrentTimeString() + " Log Started.");
 	LogPrint(LogSeperator);
 	LogPrint("");
 
 	return true;
 }
-
+//-----------------------------------------------------------------------------
 void DestroyLogSystem()
 {
 	LogPrint("");
 	LogPrint(LogSeperator);
-	LogPrint(std::string(GetCurrentTime()) + " Log Ended.");
+	LogPrint(std::string(GetCurrentTimeString()) + " Log Ended.");
 	LogPrint(LogSeperator);
 
 #if defined(_WIN32) || defined(__linux__)
@@ -131,18 +134,19 @@ void DestroyLogSystem()
 	}
 #endif
 }
-
+//-----------------------------------------------------------------------------
 void LogPrint(const char* str)
 {
 	logPrint(nullptr, nullptr, str);
 }
-
+//-----------------------------------------------------------------------------
 void LogWarning(const char* str)
 {
 	logPrint("[ WARNING ] : ", "[ \033[33mWARNING\033[0m ] : ", str);
 }
-
+//-----------------------------------------------------------------------------
 void LogError(const char* str)
 {
 	logPrint("[ ERROR   ] : ", "[ \033[31mERROR\033[0m   ] : ", str);
 }
+//-----------------------------------------------------------------------------
