@@ -29,6 +29,11 @@ namespace engine
 		if (!RenderSystem::Create(createInfo.Render))
 			return false;
 
+#if USE_PHYSX5
+		if (!PhysicsSystem::Create())
+			return false;
+#endif
+
 		startTime = std::chrono::high_resolution_clock::now();
 
 		IsExitRequested = false;
@@ -41,6 +46,10 @@ namespace engine
 		g3d::ModelFileManager::Destroy();
 		ShaderLoader::Destroy();
 		TextureLoader::Destroy();
+
+#if USE_PHYSX5
+		PhysicsSystem::Destroy();
+#endif
 		RenderSystem::Destroy();
 		DestroyWindowSystem();
 		DestroyLogSystem();

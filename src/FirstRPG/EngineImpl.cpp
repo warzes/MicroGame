@@ -11,7 +11,7 @@
 #include "oRenderer.cpp"
 #include "Renderer.cpp"
 #include "Graphics.cpp"
-//#include "Physics.cpp"
+#include "Physics.cpp"
 //#include "UI.cpp"
 //#include "Navigation.cpp"
 #include "Scene.cpp"

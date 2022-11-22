@@ -1,5 +1,12 @@
 #pragma once
 
+// const used to convert degrees into radians
+#define TAU 2.0 * Pi
+#define ONE_DEG_IN_RAD (2.0 * Pi) / 360.0 // 0.017444444
+#define ONE_RAD_IN_DEG 360.0 / (2.0 * Pi) //57.2957795
+#define DEG2RAD(a) ((a)*(Pi/180.0))
+#define RAD2DEG(a) ((a)*(180.0/Pi))
+
 constexpr const char* vertex_shader_text = R"(
 #version 330 core
 
@@ -9,19 +16,23 @@ layout(location = 1) in vec2 aTexCoord;
 uniform mat4 uWorld;
 uniform mat4 uView;
 uniform mat4 uProjection;
+uniform vec3 uColor;
 
 out vec2 vTexCoord;
+out vec3 vColor;
 
 void main()
 {
 	gl_Position = uProjection * uView * uWorld * vec4(vPos, 1.0);
 	vTexCoord = aTexCoord;
+    vColor = uColor;
 }
 )";
 constexpr const char* fragment_shader_text = R"(
 #version 330 core
 
 in vec2 vTexCoord;
+in vec3 vColor;
 
 uniform sampler2D uSampler;
 
@@ -32,6 +43,8 @@ void main()
 	vec4 textureClr = texture(uSampler, vTexCoord);
 	if (textureClr.a < 0.02) discard;
 	fragColor = textureClr;
+
+    fragColor = vec4(vColor, 1.0);
 }
 )";
 
@@ -39,6 +52,7 @@ ShaderProgram shader;
 UniformLocation worldUniform;
 UniformLocation viewUniform;
 UniformLocation projectionUniform;
+UniformLocation colorUniform;
 
 g3d::Model model;
 g3d::Material material;
@@ -48,12 +62,11 @@ Camera ncamera;
 
 Poly polyModel;
 
-
 namespace temp {
 
 	// Base struct for all collision shapes
 	struct Collider {
-		glm::vec3    pos;            //origin in world space
+		glm::vec3    pos = glm::vec3(0);            //origin in world space
 		glm::mat3    matRS;          //rotation/scale component of model matrix
 		glm::mat3    matRS_inverse;
 		virtual glm::vec3 support(glm::vec3 dir) = 0;
@@ -143,20 +156,23 @@ namespace temp {
 
 	//Polytope: Just a set of points
 	struct Polytope : Collider {
-		float* points;    //(x0 y0 z0 x1 y1 z1 etc)
+		glm::vec3* points;    //(x0 y0 z0 x1 y1 z1 etc)
 		int     num_points;
 
 		//Dumb O(n) support function, just brute force check all points
-		glm::vec3 support(glm::vec3 dir) {
+		glm::vec3 support(glm::vec3 dir) 
+        {
 			dir = matRS_inverse * dir;
 
-			glm::vec3 furthest_point = glm::vec3(points[0], points[1], points[2]);
+			glm::vec3 furthest_point = points[0];
 			float max_dot = glm::dot(furthest_point, dir);
 
-			for (int i = 3; i < num_points * 3; i += 3) {
-				glm::vec3 v = glm::vec3(points[i], points[i + 1], points[i + 2]);
+			for (int i = 1; i < num_points; i++) 
+            {
+				glm::vec3 v = glm::vec3(points[i]);
 				float d = glm::dot(v, dir);
-				if (d > max_dot) {
+				if (d > max_dot) 
+                {
 					max_dot = d;
 					furthest_point = v;
 				}
@@ -464,10 +480,10 @@ namespace Player
 {
     //Player data
     glm::vec3 player_pos = glm::vec3(0, 2, 0);
-    glm::vec3 player_scale = glm::vec3(0.5, 0.9, 0.5);
-    glm::mat4 player_M = glm::translate(glm::scale(glm::mat4(1.0f), player_scale), player_pos);
+    glm::vec3 player_scale = glm::vec3(0.5, 0.9, 0.5);    
+    glm::mat4 player_M = glm::translate(player_pos) * glm::scale(glm::mat4(1.0f), player_scale);
     glm::vec3 player_vel = glm::vec3(0, 0, 0);
-    glm::vec4 player_colour = glm::vec4(0.1f, 0.8f, 0.3f, 1.0f);
+    glm::vec3 player_colour = glm::vec3(0.1f, 0.8f, 0.3f);
     bool player_is_on_ground = false;
     bool player_is_jumping = false;
     float player_max_stand_slope = 45;
@@ -488,37 +504,37 @@ namespace Player
 
         bool player_moved = false;
         //Find player's forward and right movement directions
-        //glm::vec3 fwd_xz_proj = glm::normalize(glm::vec3(g_camera.fwd.x, 0, g_camera.fwd.z));
-        //glm::vec3 rgt_xz_proj = glm::normalize(glm::vec3(g_camera.rgt.x, 0, g_camera.rgt.z));
+        glm::vec3 fwd_xz_proj = glm::normalize(glm::vec3(0.0f, 0.0f, 0.9f));
+        glm::vec3 rgt_xz_proj = glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f));
 
         //WASD Movement (constrained to the x-z plane)
-        if (IsKeyboardKeyDown(KEY_W))
+        if (IsKeyboardKeyDown(KEY_I))
         {
-            player_vel += /*fwd_xz_proj **/ player_acc * dt;
+            player_vel += fwd_xz_proj * player_acc * dt;
             player_moved = true;
         }
-        //else if (glm::dot(fwd_xz_proj, player_vel) > 0) player_vel -= fwd_xz_proj * player_acc * dt;
+        else if (glm::dot(fwd_xz_proj, player_vel) > 0) player_vel -= fwd_xz_proj * player_acc * dt;
 
-        if (IsKeyboardKeyDown(KEY_A))
+        if (IsKeyboardKeyDown(KEY_J))
         {
-            player_vel += -/*rgt_xz_proj **/ player_acc * dt;
+            player_vel += -rgt_xz_proj * player_acc * dt;
             player_moved = true;
         }
-        //else if (dot(-rgt_xz_proj, player_vel) > 0) player_vel += rgt_xz_proj * player_acc * dt;
+        else if (dot(-rgt_xz_proj, player_vel) > 0) player_vel += rgt_xz_proj * player_acc * dt;
 
-        if (IsKeyboardKeyDown(KEY_S)) 
+        if (IsKeyboardKeyDown(KEY_K))
         {
-            player_vel += -/*fwd_xz_proj **/ player_acc * dt;
+            player_vel += -fwd_xz_proj * player_acc * dt;
             player_moved = true;
         }
-        //else if (dot(-fwd_xz_proj, player_vel) > 0) player_vel += fwd_xz_proj * player_acc * dt;
+        else if (dot(-fwd_xz_proj, player_vel) > 0) player_vel += fwd_xz_proj * player_acc * dt;
 
-        if (IsKeyboardKeyDown(KEY_D)) 
+        if (IsKeyboardKeyDown(KEY_L)) 
         {
-            player_vel += /*rgt_xz_proj **/ player_acc * dt;
+            player_vel += rgt_xz_proj * player_acc * dt;
             player_moved = true;
         }
-        //else if (dot(rgt_xz_proj, player_vel) > 0) player_vel -= rgt_xz_proj * player_acc * dt;
+        else if (dot(rgt_xz_proj, player_vel) > 0) player_vel -= rgt_xz_proj * player_acc * dt;
         // NOTE about the else statements above: Checks if we aren't pressing a button 
         // but have velocity in that direction, if so slows us down faster w/ subtraction
         // This improves responsiveness and tightens up the feel of moving
@@ -578,13 +594,13 @@ namespace Player
             player_is_jumping = false;
         }
 
-        if (player_pos.x < -15) player_pos.x = -15;
-        if (player_pos.x > 15) player_pos.x = 15;
-        if (player_pos.z < -15) player_pos.z = -15;
-        if (player_pos.z > 15) player_pos.z = 15;
+        //if (player_pos.x < -15) player_pos.x = -15;
+        //if (player_pos.x > 15) player_pos.x = 15;
+        //if (player_pos.z < -15) player_pos.z = -15;
+        //if (player_pos.z > 15) player_pos.z = 15;
 
         //Update matrices
-        player_M = glm::translate(glm::scale(glm::mat4(1.0f), player_scale), player_pos);
+        player_M = glm::translate(player_pos) * glm::scale(glm::mat4(1.0f), player_scale);
     }
 }
 
@@ -597,23 +613,24 @@ g3d::Model capsuleModel;
 //Set up level geometry
 #define NUM_BOXES 5
 glm::mat4 box_M[NUM_BOXES];
-glm::vec4 box_colour[NUM_BOXES];
+glm::vec3 box_colour[NUM_BOXES];
 temp::BBox box_collider[NUM_BOXES];
 #define NUM_SPHERES 3
 glm::mat4 sphere_M[NUM_SPHERES];
-glm::vec4 sphere_colour[NUM_SPHERES];
+glm::vec3 sphere_colour[NUM_SPHERES];
 temp::Sphere sphere_collider[NUM_SPHERES];
 #define NUM_CYLINDERS 3
 glm::mat4 cylinder_M[NUM_CYLINDERS];
-glm::vec4 cylinder_colour[NUM_CYLINDERS];
+glm::vec3 cylinder_colour[NUM_CYLINDERS];
 temp::Cylinder cylinder_collider[NUM_CYLINDERS];
+temp::Polytope pol;
 
 const glm::vec3 box_pos[NUM_BOXES] = {
            glm::vec3(-6, 0,-6),
             glm::vec3(-6, 0, 6),
-            glm::vec3(0, 0, 0),
+            glm::vec3(0, 0, 4),
             glm::vec3(6, 0,-6),
-            glm::vec3(6, 0, 6)
+            glm::vec3(6, 1, 6)
 };
 
 const glm::vec3 box_scale[NUM_BOXES] = {
@@ -632,66 +649,19 @@ const glm::vec3 sphere_pos[NUM_SPHERES] = {
 
 temp::Capsule player_collider;
 
-// const used to convert degrees into radians
-#define TAU 2.0 * Pi
-#define ONE_DEG_IN_RAD (2.0 * Pi) / 360.0 // 0.017444444
-#define ONE_RAD_IN_DEG 360.0 / (2.0 * Pi) //57.2957795
-#define DEG2RAD(a) ((a)*(Pi/180.0))
-#define RAD2DEG(a) ((a)*(180.0/Pi))
-
-//// rotate around x axis by an angle in degrees
-//inline glm::mat4 rotate_x_deg(const glm::mat4& m, float deg) {
-//    // convert to radians
-//    float rad = deg * ONE_DEG_IN_RAD;
-//    glm::mat4 m_r = glm::mat4(1.0f);
-//    m_r.m[5] = cos(rad);
-//    m_r.m[9] = -sin(rad);
-//    m_r.m[6] = sin(rad);
-//    m_r.m[10] = cos(rad);
-//    return m_r * m;
-//}
-//
-//// rotate around y axis by an angle in degrees
-//inline glm::mat4 rotate_y_deg(const glm::mat4& m, float deg) {
-//    // convert to radians
-//    float rad = deg * ONE_DEG_IN_RAD;
-//    glm::mat4 m_r = glm::mat4(1.0f);
-//    m_r.m[0] = cos(rad);
-//    m_r.m[8] = sin(rad);
-//    m_r.m[2] = -sin(rad);
-//    m_r.m[10] = cos(rad);
-//    return m_r * m;
-//}
-//
-//// rotate around z axis by an angle in degrees
-//inline glm::mat4 rotate_z_deg(const glm::mat4& m, float deg) {
-//    // convert to radians
-//    float rad = deg * ONE_DEG_IN_RAD;
-//    glm::mat4 m_r = glm::mat4(1.0f);
-//    m_r.m[0] = cos(rad);
-//    m_r.m[4] = -sin(rad);
-//    m_r.m[1] = sin(rad);
-//    m_r.m[5] = cos(rad);
-//    return m_r * m;
-//}
-
 void InitTest()
 {
-	ncamera.Teleport(0, 5, -10);
+	ncamera.Teleport(0, 3, -6);
 	ncamera.LookAt(glm::vec3(0, 0, 0));
 
 	ncamera.Enable();
-	ncamera.m_speed = 1;
+	ncamera.m_speed = 3;
 
-    //box_M[0] = glm::translate(glm::rotate((glm::scale(box_scale[0]), 45), box_pos[0]);
-    box_M[0] = glm::translate(glm::scale(box_scale[0]), box_pos[0]);
-    box_M[1] = glm::translate(glm::scale(box_scale[1]), box_pos[1]);
-    box_M[2] = glm::translate(glm::scale(box_scale[2]), box_pos[2]);
-    //box_M[3] = glm::translate(glm::rotate_x_deg(glm::scale(box_scale[3]), 40), box_pos[3]);
-    //box_M[4] = glm::translate(glm::rotate_z_deg(glm::scale(box_scale[4]), 50), box_pos[4]);
-    box_M[3] = glm::translate(glm::scale(box_scale[3]), box_pos[3]);
-    box_M[4] = glm::translate(glm::scale(box_scale[4]), box_pos[4]);
-
+    box_M[0] = glm::translate(box_pos[0]) * glm::rotate(glm::radians(45.0f), glm::vec3(0, 1, 0)) * glm::scale(box_scale[0]);
+    box_M[1] = glm::translate(box_pos[1]) * glm::scale(box_scale[1]);
+    box_M[2] = glm::translate(box_pos[2]) * glm::scale(box_scale[2]);
+    box_M[3] = glm::translate(box_pos[3]) * glm::rotate(glm::radians(40.0f), glm::vec3(1, 0, 0)) * glm::scale(box_scale[3]);
+    box_M[4] = glm::translate(box_pos[4]) * glm::rotate(glm::radians(50.0f), glm::vec3(0, 0, 1)) * glm::scale(box_scale[4]);
 
     //Set up physics objects
     for (int i = 0; i < NUM_BOXES; i++)
@@ -701,7 +671,7 @@ void InitTest()
         box_collider[i].max = glm::vec3(0.5, 1, 0.5);
         box_collider[i].matRS = box_M[i];
         box_collider[i].matRS_inverse = glm::inverse(box_M[i]);
-        box_colour[i] = glm::vec4(0.8f, 0.1f, 0.1f, 1);
+        box_colour[i] = glm::vec3(0.8f, 0.1f, 0.1f);
     }
 
     sphere_M[0] = glm::translate(sphere_pos[0]);
@@ -715,7 +685,7 @@ void InitTest()
         sphere_collider[i].r = 1;
         sphere_collider[i].matRS = sphere_M[i];
         sphere_collider[i].matRS_inverse = inverse(sphere_M[i]);
-        sphere_colour[i] = glm::vec4(0.1f, 0.8f, 0.1f, 1);
+        sphere_colour[i] = glm::vec3(0.1f, 0.8f, 0.1f);
     }
 
     {
@@ -731,9 +701,9 @@ void InitTest()
             2, 3, 3
         };
 
-        cylinder_M[0] = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(cylinder_r[0], cylinder_h[0], cylinder_r[0])), cylinder_pos[0]);
-        cylinder_M[1] = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(cylinder_r[1], cylinder_h[1], cylinder_r[1])), cylinder_pos[1]);
-        cylinder_M[2] = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(cylinder_r[2], cylinder_h[2], cylinder_r[2])), cylinder_pos[2]);
+        cylinder_M[0] = glm::translate(cylinder_pos[0]) * glm::scale(glm::mat4(1.0f), glm::vec3(cylinder_r[0], cylinder_h[0], cylinder_r[0]));
+        cylinder_M[1] = glm::translate(cylinder_pos[1]) * glm::scale(glm::mat4(1.0f), glm::vec3(cylinder_r[1], cylinder_h[1], cylinder_r[1]));
+        cylinder_M[2] = glm::translate(cylinder_pos[2]) * glm::scale(glm::mat4(1.0f), glm::vec3(cylinder_r[2], cylinder_h[2], cylinder_r[2]));
 
         //Set up physics objects
         for (int i = 0; i < NUM_CYLINDERS; i++)
@@ -744,7 +714,7 @@ void InitTest()
             cylinder_collider[i].y_cap = cylinder_pos[i].y + 1;
             cylinder_collider[i].matRS = cylinder_M[i];
             cylinder_collider[i].matRS_inverse = glm::inverse(cylinder_M[i]);
-            cylinder_colour[i] = glm::vec4(0.8f, 0.1f, 0.8f, 1);
+            cylinder_colour[i] = glm::vec3(0.8f, 0.1f, 0.8f);
         }
     }
 
@@ -755,10 +725,6 @@ void InitTest()
     player_collider.y_base = 1;
     player_collider.y_cap = 2;
 
-
-
-
-
 	// Load shader
 	{
 		shader.CreateFromMemories(vertex_shader_text, fragment_shader_text);
@@ -767,6 +733,7 @@ void InitTest()
 		worldUniform = shader.GetUniformVariable("uWorld");
 		viewUniform = shader.GetUniformVariable("uView");
 		projectionUniform = shader.GetUniformVariable("uProjection");
+        colorUniform = shader.GetUniformVariable("uColor");
 	}
 
 	// Load Texture
@@ -780,6 +747,23 @@ void InitTest()
 		model.SetMaterial(material);
 
 		polyModel = model.GetPoly();
+
+        pol.points = polyModel.verts.data();
+        pol.num_points = polyModel.cnt;
+        pol.pos = { 0, 0, 20 };
+        pol.matRS = glm::translate(glm::vec3{ 0, 0, 20 });
+        pol.matRS_inverse = glm::inverse(pol.matRS);
+
+
+        cubeModel.Create("../data/models/cube.obj");
+        cubeModel.SetMaterial(material);
+        sphereModel.Create("../data/models/sphere.obj");
+        sphereModel.SetMaterial(material);
+        cylinderModel.Create("../data/models/cylinder.obj");
+        cylinderModel.SetMaterial(material);
+        capsuleModel.Create("../data/models/capsule.obj");
+        capsuleModel.SetMaterial(material);
+
 	}
 
 	RenderSystem::SetFrameColor(glm::vec3(0.15, 0.15, 0.15));
@@ -811,56 +795,186 @@ void FrameTest(float deltaTime)
 			
 	glm::vec3 wasdec = tempMath::scale3(glm::vec3(IsKeyboardKeyDown(KEY_A) - IsKeyboardKeyDown(KEY_D), IsKeyboardKeyDown(KEY_E) - IsKeyboardKeyDown(KEY_C), IsKeyboardKeyDown(KEY_W) - IsKeyboardKeyDown(KEY_S)), ncamera.m_speed * deltaTime);
 
-	wasdec2 += tempMath::scale3(glm::vec3(IsKeyboardKeyDown(KEY_L) - IsKeyboardKeyDown(KEY_J), IsKeyboardKeyDown(KEY_U) - IsKeyboardKeyDown(KEY_O), IsKeyboardKeyDown(KEY_I) - IsKeyboardKeyDown(KEY_K)), ncamera.m_speed * deltaTime);
+	//wasdec2 += tempMath::scale3(glm::vec3(IsKeyboardKeyDown(KEY_L) - IsKeyboardKeyDown(KEY_J), IsKeyboardKeyDown(KEY_U) - IsKeyboardKeyDown(KEY_O), IsKeyboardKeyDown(KEY_I) - IsKeyboardKeyDown(KEY_K)), ncamera.m_speed * deltaTime);
 
 	ncamera.Move(wasdec.x, wasdec.y, wasdec.z);
 	ncamera.Fps(mouse.x, mouse.y);
 
-	std::string ss = std::to_string(ncamera.m_position.x) + "|" + std::to_string(ncamera.m_position.y) + "|" + std::to_string(ncamera.m_position.z);
-	puts(ss.c_str());
+	//std::string ss = std::to_string(ncamera.m_position.x) + "|" + std::to_string(ncamera.m_position.y) + "|" + std::to_string(ncamera.m_position.z);
+	//puts(ss.c_str());
 
 	shader.Bind();
 
 	shader.SetUniform(viewUniform, ncamera.m_view);
 	shader.SetUniform(projectionUniform, GetCurrentProjectionMatrix());
+
+    transform.Translate(0, 0, 20);
+    shader.SetUniform(colorUniform, glm::vec3(0,0,1));
 	shader.SetUniform(worldUniform, transform.GetWorld());
 	model.Draw();
 
-	//DebugDraw::DrawGrid(0);
+
+
+    {
+        Player::player_update(deltaTime);
+
+        //do collision detection
+        {
+            player_collider.pos = Player::player_pos;
+            bool hit_ground = false;
+            //BOXES
+            for (int i = 0; i < NUM_BOXES; i++)
+            {
+                glm::vec3 mtv(0, 0, 0); //minimum translation vector
+                if (temp::gjk(&player_collider, &box_collider[i], &mtv)) 
+                {
+                    float ground_slope = RAD2DEG(acos(glm::dot(glm::normalize(mtv), glm::vec3(0, 1, 0))));
+                    if (ground_slope < Player::player_max_stand_slope) {
+                        hit_ground = true;
+                        Player::player_vel.y = 0;
+                        Player::player_is_on_ground = true;
+                        Player::player_is_jumping = false;
+                    }
+                }
+                player_collider.pos += mtv;
+            }
+            //SPHERES
+            for (int i = 0; i < NUM_SPHERES; i++)
+            {
+                if (temp::gjk(&player_collider, &sphere_collider[i]))
+                {
+                    sphere_colour[i] = glm::vec4(0.8f, 0.8f, 0.1f, 1);
+                }
+                else sphere_colour[i] = glm::vec4(0.1f, 0.8f, 0.1f, 1);
+            }
+            //CYLINDERS
+            for (int i = 0; i < NUM_CYLINDERS; i++)
+            {
+                glm::vec3 mtv(0, 0, 0); //minimum translation vector
+                if (temp::gjk(&player_collider, &cylinder_collider[i], &mtv))
+                {
+
+                    float ground_slope = RAD2DEG(acos(glm::dot(glm::normalize(mtv), glm::vec3(0, 1, 0))));
+                    if (ground_slope < Player::player_max_stand_slope) {
+                        hit_ground = true;
+                        Player::player_vel.y = 0;
+                        Player::player_is_on_ground = true;
+                        Player::player_is_jumping = false;
+                    }
+                }
+                player_collider.pos += mtv;
+            }
+            //Triangle
+   /*         if (gjk(&player_collider, &triangle_collider)) {
+                vec3 support = player_collider.support(-triangle_collider.normal);
+                float penetration_depth = dot(support - triangle_collider.points[0], -triangle_collider.normal);
+                vec3 mtv = triangle_collider.normal * penetration_depth;
+
+                player_collider.pos += mtv;
+            }*/
+
+            // Poly
+            glm::vec3 mtv(0, 0, 0); //minimum translation vector
+            if (temp::gjk(&player_collider, &pol), &mtv)
+            {
+                float ground_slope = RAD2DEG(acos(glm::dot(glm::normalize(mtv), glm::vec3(0, 1, 0))));
+                if (ground_slope < Player::player_max_stand_slope) {
+                    hit_ground = true;
+                    Player::player_vel.y = 0;
+                    Player::player_is_on_ground = true;
+                    Player::player_is_jumping = false;
+                }
+            }
+            player_collider.pos += mtv;
+               
+            //Grace Period for jumping when running off platforms
+            {
+                static float grace_timer = 0;
+                const float grace_time = 0.25;
+                if (!hit_ground && Player::player_pos.y > 0)
+                {
+                    grace_timer += deltaTime;
+                    if (grace_timer > grace_time * 1.5 * glm::length(Player::player_vel) / Player::player_top_speed)
+                    {
+                        grace_timer = 0;
+                        Player::player_is_on_ground = false;
+                    }
+                }
+            }
+
+            Player::player_pos = player_collider.pos;
+            Player::player_M = glm::translate(Player::player_pos) * glm::scale(glm::mat4(1.0f), Player::player_scale);
+        }
+
+        //ncamera.Teleport(Player::player_pos.x*0.5, Player::player_pos.y * 0.5 +5, Player::player_pos.z * 0.5 -6);
+
+
+
+        //Cubes
+        for (int i = 0; i < NUM_BOXES; i++)
+        {
+            shader.SetUniform(worldUniform, box_M[i]);
+            shader.SetUniform(colorUniform, box_colour[i]);
+            cubeModel.Draw();
+        }
+
+        //Spheres
+        for (int i = 0; i < NUM_SPHERES; i++)
+        {
+            shader.SetUniform(worldUniform, sphere_M[i]);
+            shader.SetUniform(colorUniform, sphere_colour[i]);
+            sphereModel.Draw();
+        }
+
+        //Cylinders
+        for (int i = 0; i < NUM_CYLINDERS; i++)
+        {
+            shader.SetUniform(worldUniform, cylinder_M[i]);
+            shader.SetUniform(colorUniform, cylinder_colour[i]);
+            cylinderModel.Draw();
+        }
+
+        //Player
+        shader.SetUniform(worldUniform, Player::player_M);
+        shader.SetUniform(colorUniform, Player::player_colour);
+        capsuleModel.Draw();
+    }
+
+	DebugDraw::DrawGrid(0);
 
 	unsigned rgbSel;
 	
 
-	// Poly-Capsule (GJK) intersection
-	{
-		float x = wasdec2.x;
-		float y = wasdec2.y;
-		float z = wasdec2.z;
-		Capsule c = Capsule(glm::vec3(x, y, z), glm::vec3(x, y + 0.5f, z), 0.2f);
+	//// Poly-Capsule (GJK) intersection
+	//{
+	//	float x = wasdec2.x;
+	//	float y = wasdec2.y;
+	//	float z = wasdec2.z;
+	//	Capsule c = Capsule(glm::vec3(x, y, z), glm::vec3(x, y + 0.5f, z), 0.2f);
 
-		collide::GJKResult gjk;
-		if (collide::PolyHitCapsule(&gjk, polyModel, c))
-		{
-			rgbSel = RED;
-			wasdec2 = oldwasdec2;
-		}			
-		else
-		{
-			oldwasdec2 = wasdec2;
-			rgbSel = GREEN;
-		}
+	//	collide::GJKResult gjk;
+	//	if (collide::PolyHitCapsule(&gjk, polyModel, c))
+	//	{
+	//		rgbSel = RED;
+	//		wasdec2 = oldwasdec2;
+	//	}			
+	//	else
+	//	{
+	//		oldwasdec2 = wasdec2;
+	//		rgbSel = GREEN;
+	//	}
 
-		x = wasdec2.x;
-		y = wasdec2.y;
-		z = wasdec2.z;
-		c = Capsule(glm::vec3(x, y, z), glm::vec3(x, y + 0.5f, z), 0.2f);
+	//	x = wasdec2.x;
+	//	y = wasdec2.y;
+	//	z = wasdec2.z;
+	//	c = Capsule(glm::vec3(x, y, z), glm::vec3(x, y + 0.5f, z), 0.2f);
 
-		DebugDraw::DrawCapsule(c.a, c.b, c.r, rgbSel);
+	//	DebugDraw::DrawCapsule(c.a, c.b, c.r, rgbSel);
 
-		DebugDraw::DrawBox(gjk.p0, glm::vec3(0.05f, 0.05f, 0.05f), WHITE);
-		DebugDraw::DrawBox(gjk.p1, glm::vec3(0.05f, 0.05f, 0.05f), PURPLE);
-		DebugDraw::DrawLine(gjk.p0, gjk.p1, rgbSel);
+	//	DebugDraw::DrawBox(gjk.p0, glm::vec3(0.05f, 0.05f, 0.05f), WHITE);
+	//	DebugDraw::DrawBox(gjk.p1, glm::vec3(0.05f, 0.05f, 0.05f), PURPLE);
+	//	DebugDraw::DrawLine(gjk.p0, gjk.p1, rgbSel);
 
 		DebugDraw::Flush(ncamera);
-	}
+	//}
 }

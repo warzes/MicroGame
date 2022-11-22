@@ -83,7 +83,7 @@ void FrameTest(float deltaTime)
 			if (hit) rgbSel = RED;
 			else rgbSel = WHITE;
 
-			DebugDraw::DrawTriangle(tri.p0, tri.p1, tri.p2, rgbSel);
+			DebugDraw::DrawTriangle(tri.verts[0], tri.verts[1], tri.verts[2], rgbSel);
 		}
 
 		// Plane-Ray Intersection
@@ -221,8 +221,8 @@ void FrameTest(float deltaTime)
 			}
 			else rgbSel = WHITE;
 
-			DebugDraw::DrawSphere(a.pos, 1, rgbSel);
-			DebugDraw::DrawSphere(b.pos, 1, rgbSel);
+			DebugDraw::DrawSphere(a.position, 1, rgbSel);
+			DebugDraw::DrawSphere(b.position, 1, rgbSel);
 		}
 
 		// AABB-AABB intersection*/
@@ -286,7 +286,7 @@ void FrameTest(float deltaTime)
 			else rgbSel = WHITE;
 
 			DebugDraw::DrawBox(glm::vec3(20, 0, 8), glm::vec3(1, 1, 1), rgbSel);
-			DebugDraw::DrawSphere(s.pos, 1, rgbSel);
+			DebugDraw::DrawSphere(s.position, 1, rgbSel);
 		}
 
 		// Sphere-AABB intersection*/
@@ -309,7 +309,7 @@ void FrameTest(float deltaTime)
 			else rgbSel = WHITE;
 
 			DebugDraw::DrawBox(glm::vec3(x, y, z), glm::vec3(1, 1, 1), rgbSel);
-			DebugDraw::DrawSphere(s.pos, 1, rgbSel);
+			DebugDraw::DrawSphere(s.position, 1, rgbSel);
 		}
 
 		// Capsule-Sphere intersection*/
@@ -326,7 +326,7 @@ void FrameTest(float deltaTime)
 				rgbSel = RED;
 			}
 			else rgbSel = WHITE;
-			DebugDraw::DrawSphere(b.pos, 1, rgbSel);
+			DebugDraw::DrawSphere(b.position, 1, rgbSel);
 			DebugDraw::DrawCapsule(glm::vec3(-20.5f, -1.0f, 7.5f), glm::vec3(-20 + 0.5f, 1.0f, 8.5f), 0.2f, rgbSel);
 		}
 
@@ -350,7 +350,7 @@ void FrameTest(float deltaTime)
 			else rgbSel = WHITE;
 
 			DebugDraw::DrawCapsule(glm::vec3(x, y - 1.0f, z), glm::vec3(x, y + 1.0f, z - 1.0f), 0.2f, rgbSel);
-			DebugDraw::DrawSphere(s.pos, 1, rgbSel);
+			DebugDraw::DrawSphere(s.position, 1, rgbSel);
 		}
 
 		// Capsule-AABB intersection*/
@@ -406,7 +406,7 @@ void FrameTest(float deltaTime)
 				rgbSel = RED;
 			else rgbSel = WHITE;
 
-			DebugDraw::DrawSphere(s.pos, 1, rgbSel);
+			DebugDraw::DrawSphere(s.position, 1, rgbSel);
 			DebugDraw::DrawPyramid(glm::vec3(-10.5f, -0.5f, -7.5f), 0.5f/*glm::vec3(-10.5f,1.0f,-7.5f)*/, 1.0f, rgbSel);
 
 			DebugDraw::DrawBox(gjk.p0, glm::vec3(0.05f, 0.05f, 0.05f), rgbSel);
@@ -424,7 +424,7 @@ void FrameTest(float deltaTime)
 				rgbSel = RED;
 			else rgbSel = WHITE;
 
-			DebugDraw::DrawSphere(s.pos, 1, rgbSel);
+			DebugDraw::DrawSphere(s.position, 1, rgbSel);
 			DebugDraw::DrawDiamond(glm::vec3(-20.5f, -0.5f, -7.5f), glm::vec3(-20.5f, 1.0f, -7.5f), 0.5f, rgbSel);
 
 			DebugDraw::DrawBox(gjk.p0, glm::vec3(0.05f, 0.05f, 0.05f), rgbSel);

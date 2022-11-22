@@ -43,7 +43,6 @@ Camera* Camera::GetActive()
 	if (!last_camera)
 	{
 		defaults.m_view = glm::mat4(1.0f);
-		defaults.m_proj = glm::mat4(1.0f);
 		last_camera = &defaults;
 	}
 	return last_camera;
@@ -104,21 +103,6 @@ void Camera::Fps(float yaw, float pitch)
 	m_look = tempMath::norm3(glm::vec3(cos(y) * cos(p), sin(p), sin(y) * cos(p)));
 
 	m_view = glm::lookAt(m_position, m_position + m_look, m_up);
-
-	//tempMath::lookat44(m_view, m_position, tempMath::add3(m_position, m_look), m_up); // eye,center,up
-	tempMath::perspective44(m_proj, 45, GetFrameBufferWidth() / ((float)GetFrameBufferHeight() + !GetFrameBufferHeight()), 0.01f, 1000.f);
-
-#if 0 // isometric/dimetric
-#define orthogonal(proj, fov, aspect, znear, zfar) \
-    ortho44((proj), -(fov) * (aspect), (fov) * (aspect), -(fov), (fov), (znear), (zfar))
-
-	float DIMETRIC = 30.000f;
-	float ISOMETRIC = 35.264f;
-	float aspect = window_width() / ((float)window_height() + !!window_height());
-	orthogonal(cam->proj, 45, aspect, -1000, 1000); // why -1000?
-	// cam->yaw = 45;
-	cam->pitch = -ISOMETRIC;
-#endif
 }
 
 #define concat(a,b)      conc4t(a,b)

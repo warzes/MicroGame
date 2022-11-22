@@ -20,7 +20,6 @@ struct Camera
 
 
 	glm::mat4 m_view = glm::mat4(1.0f);
-	glm::mat4 m_proj = glm::mat4(1.0f);
 	glm::vec3 m_position = glm::vec3(0.0f);
 	glm::vec3 m_up = glm::vec3(0.0f);
 	glm::vec3 m_look = glm::vec3(0.0f);

@@ -45,6 +45,9 @@
     <ClCompile Include="Scene.cpp">
       <Filter>MicroEngine\Engine</Filter>
     </ClCompile>
+    <ClCompile Include="Physics.cpp">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MicroEngine">
@@ -143,6 +146,9 @@
     </ClInclude>
     <ClInclude Include="Scene.h">
       <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Test200PhysX.h">
+      <Filter>Test</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
