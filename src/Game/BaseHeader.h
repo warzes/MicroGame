@@ -287,9 +287,9 @@ Left handed
 //#undef _SILENCE_CXX20_CISO646_REMOVED_WARNING
 #endif // USE_PHYSX5
 #if USE_BULLET
-#include <BulletDynamics/Dynamics/btDynamicsWorld.h>
-#include <btBulletCollisionCommon.h>
-#include <btBulletDynamicsCommon.h>
+//#include <BulletDynamics/Dynamics/btDynamicsWorld.h>
+#	include <btBulletCollisionCommon.h>
+#	include <btBulletDynamicsCommon.h>
 #endif // USE_BULLET
 
 #if defined(_MSC_VER)

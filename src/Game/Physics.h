@@ -51,18 +51,36 @@ protected:
 class Collider
 {
 public:
-	enum
+	enum Type
 	{
+		None,
 		Box,
 		Capsule,
 		Sphere
 	};
+
+	void CreateBox(const glm::vec3& size);
+	void CreateCapsule(float radius, float height);
+	void CreateSphere(float radius);
+	void Destroy();
+
+	btCollisionShape* GetShape() { return m_shape; }
+
+	bool IsValid() const { return !m_shape && m_type != None; }
+
+private:
+	btCollisionShape* m_shape = nullptr;
+	Type m_type = None;
 };
 
 class Rigidbody
 {
 public:
-	Rigidbody(float mass);
+	Rigidbody();
+	~Rigidbody();
+
+	void SetFromRoot(Collider& collider, float mass);
+
 
 	void SetVelocity(const glm::vec3& velocity);
 	glm::vec3 GetVelocity() const;
@@ -77,8 +95,6 @@ private:
 	btRigidBody* m_body = nullptr;
 };
 
-
-
 namespace PhysicsSystem
 {
 	bool Create();
@@ -86,6 +102,9 @@ namespace PhysicsSystem
 	void Destroy();
 
 	void SetGravity(const glm::vec3& gravity);
+
+	void Add(Rigidbody* obj);
+	void Remove(Rigidbody* obj);
 
 	PhysicsObject* CreatePhysicsObject(btCollisionShape* pShape, 
 		const float& mass,

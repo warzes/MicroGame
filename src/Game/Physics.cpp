@@ -60,15 +60,6 @@ void PhysicsSystem::Destroy()
 // Physics System
 //=============================================================================
 //-----------------------------------------------------------------------------
-#if defined(_MSC_VER)
-#	if defined(_DEBUG)
-#		pragma comment( lib, "BulletCollision_Debug.lib" )
-#		pragma comment( lib, "BulletDynamics_Debug.lib" )
-#		pragma comment( lib, "LinearMath_Debug.lib" )
-#	else
-#endif
-#endif
-//-----------------------------------------------------------------------------
 PhysicsObject::PhysicsObject(btCollisionShape* pShape, float mass, const btVector3& initialPosition, const btQuaternion& initialRotation) 
 {
 	m_pShape = pShape;
@@ -103,30 +94,68 @@ PhysicsObject::~PhysicsObject()
 	delete m_pShape;
 }
 //-----------------------------------------------------------------------------
-Rigidbody::Rigidbody(float mass)
+void Collider::CreateBox(const glm::vec3& size)
+{
+	Destroy();
+	m_type = Box;
+	m_shape = new btBoxShape({ size.x, size.y, size.z });
+}
+//-----------------------------------------------------------------------------
+void Collider::CreateCapsule(float radius, float height)
+{
+	Destroy();
+	m_type = Capsule;
+	m_shape = new btCapsuleShape(radius, height);
+}
+//-----------------------------------------------------------------------------
+void Collider::CreateSphere(float radius)
+{
+	Destroy();
+	m_type = Sphere;
+	m_shape = new btSphereShape(radius);
+}
+//-----------------------------------------------------------------------------
+void Collider::Destroy()
+{
+	delete m_shape;
+	m_shape = nullptr;
+	m_type = None;
+}
+//-----------------------------------------------------------------------------
+Rigidbody::Rigidbody()
+{
+	m_transform.setIdentity();
+}
+//-----------------------------------------------------------------------------
+Rigidbody::~Rigidbody()
+{
+	delete m_motion;
+	delete m_body;
+}
+//-----------------------------------------------------------------------------
+void Rigidbody::SetFromRoot(Collider& collider, float mass)
 {
 	// TODO: owner root
-	//glm::vec3 ownerPos = p_owner.transform.GetWorldPosition();
-	//glm::quat ownerRot = p_owner.transform.GetWorldRotation();
-
+//glm::vec3 ownerPos = p_owner.transform.GetWorldPosition();
+//glm::quat ownerRot = p_owner.transform.GetWorldRotation();
 	m_transform.setIdentity();
 	// TODO: owner root
 	//m_transform.setOrigin(btVector3(ownerPos.x, ownerPos.y, ownerPos.z));
 	//m_transform.setRotation(btQuaternion(ownerRot.x, ownerRot.y, ownerRot.z, ownerRot.w));
 
-	//auto shape = p_owner.GetComponent<Collider>()->GetShape();
-	//if (shape)
-	//{
-	//	btVector3 inertia(0, 0, 0);
-	//	if (mass != 0.0)
-	//		shape->calculateLocalInertia(mass, inertia);
+	auto shape = collider.GetShape();
+	if (shape)
+	{
+		btVector3 inertia(0, 0, 0);
+		if (mass != 0.0)
+			shape->calculateLocalInertia(mass, inertia);
 
-	//	m_motion = new btDefaultMotionState(m_transform);
-	//	btRigidBody::btRigidBodyConstructionInfo info(mass, m_motion, shape, inertia);
-	//	m_body = new btRigidBody(info);
-	//	m_body->setCcdMotionThreshold(static_cast<float>(1e-7));
-	//	m_body->setCcdSweptSphereRadius(0.5f);
-	//}
+		m_motion = new btDefaultMotionState(m_transform);
+		btRigidBody::btRigidBodyConstructionInfo info(mass, m_motion, shape, inertia);
+		m_body = new btRigidBody(info);
+		m_body->setCcdMotionThreshold(static_cast<float>(1e-7));
+		m_body->setCcdSweptSphereRadius(0.5f);
+	}
 }
 //-----------------------------------------------------------------------------
 void Rigidbody::SetVelocity(const glm::vec3& velocity)
@@ -149,6 +178,17 @@ namespace
 	btDynamicsWorld* pWorld = nullptr;
 
 	std::vector<PhysicsObject*> GameObjects;
+	std::vector<Rigidbody*> RigidbodyObjects;
+}
+//-----------------------------------------------------------------------------
+void moveRigidbody(Rigidbody& target)
+{
+	//target.GetBody()->getMotionState()->getWorldTransform(*target.GetTransform());
+
+	//btVector3 newPosition = target.GetTransform()->getOrigin();
+	//btQuaternion newRotation = target.GetTransform()->getRotation();
+	//target.owner->transform.SetLocalPosition(glm::vec3(newPosition.getX(), newPosition.getY(), newPosition.getZ()));
+	//target.owner->transform.SetLocalRotation(glm::quat(newRotation.getW(), newRotation.getX(), newRotation.getY(), newRotation.getZ()));
 }
 //-----------------------------------------------------------------------------
 bool PhysicsSystem::Create()
@@ -165,7 +205,16 @@ bool PhysicsSystem::Create()
 //-----------------------------------------------------------------------------
 void PhysicsSystem::FixedUpdate(float deltaTime)
 {
-	if (pWorld) pWorld->stepSimulation(deltaTime);
+	if (pWorld)
+	{
+		pWorld->stepSimulation(deltaTime);
+
+		for (auto& rigidbody : RigidbodyObjects)
+		{
+			if (rigidbody)
+				moveRigidbody(*rigidbody);
+		}
+	}
 }
 //-----------------------------------------------------------------------------
 void PhysicsSystem::Destroy()
@@ -186,6 +235,16 @@ void PhysicsSystem::Destroy()
 void PhysicsSystem::SetGravity(const glm::vec3& gravity)
 {
 	if (pWorld) pWorld->setGravity({ gravity.x, gravity.y, gravity.z });
+}
+//-----------------------------------------------------------------------------
+void Add(Rigidbody* obj)
+{
+	RigidbodyObjects.push_back(obj);
+}
+//-----------------------------------------------------------------------------
+void Remove(Rigidbody* obj)
+{
+	// TODO:
 }
 //-----------------------------------------------------------------------------
 PhysicsObject* PhysicsSystem::CreatePhysicsObject(btCollisionShape* pShape, const float& mass, const btVector3& initialPosition, const btQuaternion& initialRotation)
