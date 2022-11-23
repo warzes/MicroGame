@@ -67,6 +67,7 @@ Left handed
 
 #if USE_PHYSX5
 
+#	define PX_PHYSX_STATIC_LIB
 #if 1
 #	include <PhysX5/PxPhysicsAPI.h>
 #else
@@ -282,9 +283,14 @@ Left handed
 #include "pvd/PxPvd.h"
 #include "pvd/PxPvdTransport.h"
 #endif
-using namespace physx;
+//using namespace physx;
 //#undef _SILENCE_CXX20_CISO646_REMOVED_WARNING
 #endif // USE_PHYSX5
+#if USE_BULLET
+#include <BulletDynamics/Dynamics/btDynamicsWorld.h>
+#include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
+#endif // USE_BULLET
 
 #if defined(_MSC_VER)
 #	pragma warning(pop)

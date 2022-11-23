@@ -11,7 +11,8 @@
 
 #	define TEST_100_SIMPLECOLLISIONS 0
 
-#	define TEST_200_PHYSX 1
+#	define TEST_200_PHYSX 0
+#	define TEST_201_BULLET 1
 
 #	define TEST_N_NEW 0
 
@@ -38,6 +39,10 @@
 #	if TEST_200_PHYSX
 #		include "Test200PhysX.h"
 #	endif
+#	if TEST_201_BULLET
+#		include "Test201Bullet.h"
+#	endif
+
 
 #	if TEST_N_NEW
 #		include "TestNNew.h"

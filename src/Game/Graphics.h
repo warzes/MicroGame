@@ -102,6 +102,8 @@ namespace g3d
 
 		void SetRotate(float yaw, float pitch);
 		void SetPosition(const glm::vec3& pos) { m_position = pos; }
+		void SetLook(const glm::vec3& pos) { m_front = pos; }
+
 		void SetYaw(float val) { m_yaw = val; }
 		void SetPitch(float val) { m_pitch = val; }
 		void SetSpeed(float val) { m_movementSpeed = val; }

@@ -150,6 +150,9 @@
     <ClInclude Include="Test200PhysX.h">
       <Filter>Test</Filter>
     </ClInclude>
+    <ClInclude Include="Test201Bullet.h">
+      <Filter>Test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="EngineMath.inl">

@@ -29,7 +29,7 @@ namespace engine
 		if (!RenderSystem::Create(createInfo.Render))
 			return false;
 
-#if USE_PHYSX5
+#if USE_PHYSX5 || USE_BULLET
 		if (!PhysicsSystem::Create())
 			return false;
 #endif
@@ -47,7 +47,7 @@ namespace engine
 		ShaderLoader::Destroy();
 		TextureLoader::Destroy();
 
-#if USE_PHYSX5
+#if USE_PHYSX5 || USE_BULLET
 		PhysicsSystem::Destroy();
 #endif
 		RenderSystem::Destroy();
@@ -69,6 +69,10 @@ namespace engine
 			frameTimeLast = frameTimeCurrent;
 			deltaTime = static_cast<float>(frameTimeDelta) * MicrosecondsToSeconds;
 		}
+
+#if USE_PHYSX5 || USE_BULLET
+		PhysicsSystem::FixedUpdate(deltaTime);
+#endif
 
 		RenderSystem::BeginFrame();
 	}
