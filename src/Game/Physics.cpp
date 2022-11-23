@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "Core.h"
 #include "Physics.h"
+#include "Platform.h"
 #if USE_PHYSX5
 //-----------------------------------------------------------------------------
 #if defined(_MSC_VER)
@@ -54,7 +55,6 @@ void PhysicsSystem::Destroy()
 #endif // USE_PHYSX5
 #if USE_BULLET
 // https://github.com/50C4L/portal-cpp-opengl
-// SimplexEngine
 //-----------------------------------------------------------------------------
 //=============================================================================
 // Physics System
@@ -133,16 +133,15 @@ Rigidbody::~Rigidbody()
 	delete m_body;
 }
 //-----------------------------------------------------------------------------
-void Rigidbody::SetFromRoot(Collider& collider, float mass)
+void Rigidbody::Set(const glm::vec3& position, const glm::quat& rotations)
 {
-	// TODO: owner root
-//glm::vec3 ownerPos = p_owner.transform.GetWorldPosition();
-//glm::quat ownerRot = p_owner.transform.GetWorldRotation();
 	m_transform.setIdentity();
-	// TODO: owner root
-	//m_transform.setOrigin(btVector3(ownerPos.x, ownerPos.y, ownerPos.z));
-	//m_transform.setRotation(btQuaternion(ownerRot.x, ownerRot.y, ownerRot.z, ownerRot.w));
-
+	m_transform.setOrigin({ position.x, position.y, position.z });
+	m_transform.setRotation({ rotations.x, rotations.y, rotations.z, rotations.w });
+}
+//-----------------------------------------------------------------------------
+void Rigidbody::Set(Collider& collider, float mass)
+{
 	auto shape = collider.GetShape();
 	if (shape)
 	{
@@ -158,6 +157,12 @@ void Rigidbody::SetFromRoot(Collider& collider, float mass)
 	}
 }
 //-----------------------------------------------------------------------------
+void Rigidbody::Set(const glm::vec3& position, const glm::quat& rotations, Collider& collider, float mass)
+{
+	Set(position, rotations);
+	Set(collider, mass);
+}
+//-----------------------------------------------------------------------------
 void Rigidbody::SetVelocity(const glm::vec3& velocity)
 {
 	m_body->setLinearVelocity({ velocity.x, velocity.y, velocity.z });
@@ -167,6 +172,59 @@ glm::vec3 Rigidbody::GetVelocity() const
 {
 	auto linearVelocity = m_body->getLinearVelocity();
 	return { linearVelocity.getX(), linearVelocity.getY(), linearVelocity.getZ() };
+}
+//-----------------------------------------------------------------------------
+void CharacterController::Create(Rigidbody* rigidbody, float movementSpeed, float jumpStrength, float mouseSensitivity)
+{
+	Destroy();
+
+	m_rigidbody = rigidbody;
+	m_mouseSensitivity = 10.0f * mouseSensitivity;
+	m_movementSpeed = movementSpeed;
+	m_jumpStrength = jumpStrength;
+
+	m_rigidbody->GetBody()->setAngularFactor({ 0, 0, 0 });
+	// m_rigidbody->GetBody()->setCollisionFlags(m_rigidbody->GetBody()->getCollisionFlags() | btCollisionObject::CF_CHARACTER_OBJECT);
+}
+//-----------------------------------------------------------------------------
+void CharacterController::Destroy()
+{
+}
+//-----------------------------------------------------------------------------
+void CharacterController::Update(float deltaTime)
+{
+	//if (m_inputManager.IsMouseLocked())
+		handleMouse(deltaTime);
+	handleKeyboard(deltaTime);
+}
+//-----------------------------------------------------------------------------
+void CharacterController::handleMouse(float deltaTime)
+{
+}
+//-----------------------------------------------------------------------------
+void CharacterController::handleKeyboard(float deltaTime)
+{
+	glm::vec3 movement(0.0f, 0.0f, 0.0f);
+
+	glm::vec3 forward = glm::normalize(/*m_camera.GetForward() **/ glm::vec3(0.0f, 0.0f, 1.0f)); // Scale Y to 0 to keep only X and Z (Fake forward)
+	glm::vec3 right = glm::cross(forward, { 0.0f, 1.0, 0.0f });
+
+	if (IsKeyboardKeyDown(KEY_LEFT))
+		movement += right;
+	if (IsKeyboardKeyDown(KEY_RIGHT))
+		movement -= right;
+	if (IsKeyboardKeyDown(KEY_DOWN))
+		movement -= forward;
+	if (IsKeyboardKeyDown(KEY_UP))
+		movement += forward;
+
+	m_rigidbody->SetVelocity({ movement.x * m_movementSpeed, m_rigidbody->GetVelocity().y, movement.z * m_movementSpeed });
+
+	if (IsKeyboardKeyPressed(KEY_SPACE))
+	{
+		m_rigidbody->GetBody()->clearForces();
+		m_rigidbody->GetBody()->applyCentralImpulse(btVector3(0.0f, 1.0f, 0.0f) * m_jumpStrength);
+	}
 }
 //-----------------------------------------------------------------------------
 namespace
@@ -209,11 +267,11 @@ void PhysicsSystem::FixedUpdate(float deltaTime)
 	{
 		pWorld->stepSimulation(deltaTime);
 
-		for (auto& rigidbody : RigidbodyObjects)
+		/*for (auto& rigidbody : RigidbodyObjects)
 		{
 			if (rigidbody)
 				moveRigidbody(*rigidbody);
-		}
+		}*/
 	}
 }
 //-----------------------------------------------------------------------------
@@ -237,14 +295,16 @@ void PhysicsSystem::SetGravity(const glm::vec3& gravity)
 	if (pWorld) pWorld->setGravity({ gravity.x, gravity.y, gravity.z });
 }
 //-----------------------------------------------------------------------------
-void Add(Rigidbody* obj)
+void PhysicsSystem::Add(Rigidbody* obj)
 {
 	RigidbodyObjects.push_back(obj);
+	pWorld->addRigidBody(obj->GetBody());
 }
 //-----------------------------------------------------------------------------
-void Remove(Rigidbody* obj)
+void PhysicsSystem::Remove(Rigidbody* obj)
 {
-	// TODO:
+	// TODO: remove in RigidbodyObjects
+	pWorld->removeRigidBody(obj->GetBody());
 }
 //-----------------------------------------------------------------------------
 PhysicsObject* PhysicsSystem::CreatePhysicsObject(btCollisionShape* pShape, const float& mass, const btVector3& initialPosition, const btQuaternion& initialRotation)

@@ -79,8 +79,9 @@ public:
 	Rigidbody();
 	~Rigidbody();
 
-	void SetFromRoot(Collider& collider, float mass);
-
+	void Set(const glm::vec3& position, const glm::quat& rotations);
+	void Set(Collider& collider, float mass);
+	void Set(const glm::vec3& position, const glm::quat& rotations, Collider& collider, float mass);
 
 	void SetVelocity(const glm::vec3& velocity);
 	glm::vec3 GetVelocity() const;
@@ -89,10 +90,61 @@ public:
 	btMotionState* GetMotion() { return m_motion; }
 	btRigidBody* GetBody() { return m_body; }
 
+	void GetScalarTransform(btScalar* transform)
+	{
+		if (m_motion)
+		{
+			btTransform trans;
+			m_motion->getWorldTransform(trans);
+			trans.getOpenGLMatrix(transform);
+		}
+	}
+
+	void GetPosAndRot(glm::vec3& pos, glm::quat& rot)
+	{
+		if (m_body)
+		{
+			m_body->getMotionState()->getWorldTransform(m_transform);
+
+			btVector3 newPosition = m_transform.getOrigin();
+			btQuaternion newRotation = m_transform.getRotation();
+			//target.owner->transform.SetLocalPosition(glm::vec3(newPosition.getX(), newPosition.getY(), newPosition.getZ()));
+			//target.owner->transform.SetLocalRotation(glm::quat(newRotation.getW(), newRotation.getX(), newRotation.getY(), newRotation.getZ()));
+
+			pos = { newPosition.getX(), newPosition.getY(), newPosition.getZ() };
+			rot = { newRotation.getW(), newRotation.getX(), newRotation.getY(), newRotation.getZ() };
+
+			std::string ss = std::to_string(newPosition.getX()) + "|" + std::to_string(newPosition.getY()) + "|" + std::to_string(newPosition.getZ());
+			puts(ss.c_str());
+		}
+	}
+
 private:
 	btTransform m_transform = {};
 	btMotionState* m_motion = nullptr;
 	btRigidBody* m_body = nullptr;
+};
+
+class CharacterController
+{
+public:
+	void Create(Rigidbody* rigidbody, float movementSpeed, float jumpStrength, float mouseSensitivity = 1.0f);
+	void Destroy();
+
+	void Update(float deltaTime);
+
+private:
+	void handleMouse(float deltaTime);
+	void handleKeyboard(float deltaTime);
+
+	Rigidbody* m_rigidbody;
+
+	// Internal stuffs
+	float m_mouseSensitivity;
+	float m_movementSpeed;
+	float m_yaw = 0.0f;
+	float m_pitch = 0.0f;
+	float m_jumpStrength;
 };
 
 namespace PhysicsSystem

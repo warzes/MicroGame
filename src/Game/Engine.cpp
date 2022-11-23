@@ -71,6 +71,7 @@ namespace engine
 		}
 
 #if USE_PHYSX5 || USE_BULLET
+		assert(deltaTime > 0);
 		PhysicsSystem::FixedUpdate(deltaTime);
 #endif
 
