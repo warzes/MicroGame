@@ -1,3 +1,5 @@
+#include "../Game/EngineConfig.h"
+
 #if defined(_MSC_VER)
 #	pragma warning(push, 0)
 #	pragma warning(disable : 4701)
@@ -6,6 +8,7 @@
 #	pragma warning(disable : 5264)
 #endif
 
+#if USE_BULLET
 // BulletCollision
 #include "BulletCollision/BroadphaseCollision/btAxisSweep3.cpp"
 #include "BulletCollision/BroadphaseCollision/btDbvt.cpp"
@@ -104,6 +107,7 @@
 #include "BulletCollision/Gimpact/btGImpactCollisionAlgorithm.cpp"
 #include "BulletCollision/Gimpact/btGenericPoolAllocator.cpp"
 #include "BulletCollision/Gimpact/gim_contact.cpp"
+#endif
 
 #if defined(_MSC_VER)
 #	pragma warning(pop)

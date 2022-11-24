@@ -4,17 +4,17 @@
 #include "Platform.h"
 #if USE_PHYSX5
 //-----------------------------------------------------------------------------
-#if defined(_MSC_VER)
-#	pragma comment( lib, "PhysXExtensions_static_64.lib" )
-#	pragma comment( lib, "PhysXPvdSDK_static_64.lib" )
-#	pragma comment( lib, "PhysX_static_64.lib" )
+//#if defined(_MSC_VER)
+//#	pragma comment( lib, "PhysXExtensions_static_64.lib" )
+	//#	pragma comment( lib, "PhysXPvdSDK_static_64.lib" )
+//#	pragma comment( lib, "PhysX_static_64.lib" )
 //#	pragma comment( lib, "PhysXVehicle_static_64.lib" )
 //#	pragma comment( lib, "PhysXVehicle2_static_64.lib" )
-#	pragma comment( lib, "PhysXCharacterKinematic_static_64.lib" )
+//#	pragma comment( lib, "PhysXCharacterKinematic_static_64.lib" )
 //#	pragma comment( lib, "PhysXCooking_static_64.lib" )
-#	pragma comment( lib, "PhysXCommon_static_64.lib" )
-#	pragma comment( lib, "PhysXFoundation_static_64.lib" )
-#endif
+//#	pragma comment( lib, "PhysXCommon_static_64.lib" )
+//#	pragma comment( lib, "PhysXFoundation_static_64.lib" )
+//#endif
 //-----------------------------------------------------------------------------
 namespace
 {
@@ -45,6 +45,10 @@ bool PhysicsSystem::Create()
 	}
 
 	return true;
+}
+//-----------------------------------------------------------------------------
+void FixedUpdate(float deltaTime)
+{
 }
 //-----------------------------------------------------------------------------
 void PhysicsSystem::Destroy()
@@ -229,11 +233,11 @@ void CharacterController::handleKeyboard(float deltaTime)
 //-----------------------------------------------------------------------------
 namespace
 {
-	btBroadphaseInterface* pBroadphase = nullptr;
-	btCollisionConfiguration* pCollisionConfiguration = nullptr;
-	btCollisionDispatcher* pDispatcher = nullptr;
-	btConstraintSolver* pSolver = nullptr;
-	btDynamicsWorld* pWorld = nullptr;
+	btBroadphaseInterface* Broadphase = nullptr;
+	btCollisionConfiguration* CollisionConfiguration = nullptr;
+	btCollisionDispatcher* Dispatcher = nullptr;
+	btConstraintSolver* ConstraintSolver = nullptr;
+	btDynamicsWorld* DynamicsWorld = nullptr;
 
 	std::vector<PhysicsObject*> GameObjects;
 	std::vector<Rigidbody*> RigidbodyObjects;
@@ -251,21 +255,22 @@ void moveRigidbody(Rigidbody& target)
 //-----------------------------------------------------------------------------
 bool PhysicsSystem::Create()
 {
-	pCollisionConfiguration = new btDefaultCollisionConfiguration();
-	pDispatcher = new btCollisionDispatcher(pCollisionConfiguration);
-	pBroadphase = new btDbvtBroadphase();
-	pSolver = new btSequentialImpulseConstraintSolver();
-	pWorld = new btDiscreteDynamicsWorld(pDispatcher, pBroadphase, pSolver, pCollisionConfiguration);
-	pWorld->setGravity(btVector3(0.0f, -9.8f, 0.0f));
+	CollisionConfiguration = new btDefaultCollisionConfiguration();
+	Dispatcher = new btCollisionDispatcher(CollisionConfiguration);
+	Broadphase = new btDbvtBroadphase();
+	ConstraintSolver = new btSequentialImpulseConstraintSolver();
+	DynamicsWorld = new btDiscreteDynamicsWorld(Dispatcher, Broadphase, ConstraintSolver, CollisionConfiguration);
+	DynamicsWorld->setGravity(btVector3(0.0f, -9.8f, 0.0f));
+	DynamicsWorld->getDispatchInfo().m_allowedCcdPenetration = 0.0001f; // ???
 
 	return true;
 }
 //-----------------------------------------------------------------------------
 void PhysicsSystem::FixedUpdate(float deltaTime)
 {
-	if (pWorld)
+	if (DynamicsWorld)
 	{
-		pWorld->stepSimulation(deltaTime);
+		DynamicsWorld->stepSimulation(deltaTime);
 
 		/*for (auto& rigidbody : RigidbodyObjects)
 		{
@@ -283,28 +288,28 @@ void PhysicsSystem::Destroy()
 	//}
 	//GameObjects.clear();
 
-	delete pWorld; pWorld = nullptr;
-	delete pSolver; pSolver = nullptr;
-	delete pBroadphase; pBroadphase = nullptr;
-	delete pDispatcher; pDispatcher = nullptr;
-	delete pCollisionConfiguration; pCollisionConfiguration = nullptr;
+	delete DynamicsWorld; DynamicsWorld = nullptr;
+	delete ConstraintSolver; ConstraintSolver = nullptr;
+	delete Broadphase; Broadphase = nullptr;
+	delete Dispatcher; Dispatcher = nullptr;
+	delete CollisionConfiguration; CollisionConfiguration = nullptr;
 }
 //-----------------------------------------------------------------------------
 void PhysicsSystem::SetGravity(const glm::vec3& gravity)
 {
-	if (pWorld) pWorld->setGravity({ gravity.x, gravity.y, gravity.z });
+	if (DynamicsWorld) DynamicsWorld->setGravity({ gravity.x, gravity.y, gravity.z });
 }
 //-----------------------------------------------------------------------------
 void PhysicsSystem::Add(Rigidbody* obj)
 {
 	RigidbodyObjects.push_back(obj);
-	pWorld->addRigidBody(obj->GetBody());
+	DynamicsWorld->addRigidBody(obj->GetBody());
 }
 //-----------------------------------------------------------------------------
 void PhysicsSystem::Remove(Rigidbody* obj)
 {
 	// TODO: remove in RigidbodyObjects
-	pWorld->removeRigidBody(obj->GetBody());
+	DynamicsWorld->removeRigidBody(obj->GetBody());
 }
 //-----------------------------------------------------------------------------
 PhysicsObject* PhysicsSystem::CreatePhysicsObject(btCollisionShape* pShape, const float& mass, const btVector3& initialPosition, const btQuaternion& initialRotation)
@@ -312,9 +317,14 @@ PhysicsObject* PhysicsSystem::CreatePhysicsObject(btCollisionShape* pShape, cons
 	PhysicsObject* pObject = new PhysicsObject(pShape, mass, initialPosition, initialRotation);
 	GameObjects.push_back(pObject);
 
-	if (pWorld) pWorld->addRigidBody(pObject->GetRigidBody());
+	if (DynamicsWorld) DynamicsWorld->addRigidBody(pObject->GetRigidBody());
 
 	return pObject;
+}
+//-----------------------------------------------------------------------------
+btDynamicsWorld* PhysicsSystem::GetbtDynamicsWorld()
+{
+	return DynamicsWorld;
 }
 //-----------------------------------------------------------------------------
 #endif // USE_BULLET

@@ -11,6 +11,7 @@
 namespace PhysicsSystem
 {
 	bool Create();
+	void FixedUpdate(float deltaTime);
 	void Destroy();
 }
 
@@ -112,10 +113,7 @@ public:
 			//target.owner->transform.SetLocalRotation(glm::quat(newRotation.getW(), newRotation.getX(), newRotation.getY(), newRotation.getZ()));
 
 			pos = { newPosition.getX(), newPosition.getY(), newPosition.getZ() };
-			rot = { newRotation.getW(), newRotation.getX(), newRotation.getY(), newRotation.getZ() };
-
-			std::string ss = std::to_string(newPosition.getX()) + "|" + std::to_string(newPosition.getY()) + "|" + std::to_string(newPosition.getZ());
-			puts(ss.c_str());
+			rot = { newRotation.getW(), newRotation.getX(), newRotation.getY(), newRotation.getZ() };			
 		}
 	}
 
@@ -162,6 +160,8 @@ namespace PhysicsSystem
 		const float& mass,
 		const btVector3& initialPosition = btVector3(0.0f, 0.0f, 0.0f),
 		const btQuaternion& initialRotation = btQuaternion(0, 0, 1, 1));
+
+	btDynamicsWorld* GetbtDynamicsWorld(); // TODO: delete
 }
 
 #endif // USE_BULLET

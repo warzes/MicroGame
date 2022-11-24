@@ -98,7 +98,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;$(SolutionDir)3rdparty\Bullet\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;$(SolutionDir)3rdparty\Bullet\;$(SolutionDir)3rdparty\PhysX5\;$(SolutionDir)3rdparty\PhysX5\pvd\include\;$(SolutionDir)3rdparty\PhysX5\filebuf\include\;$(SolutionDir)3rdparty\PhysX5\foundation\include\;$(SolutionDir)3rdparty\PhysX5\fastxml\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CallingConvention>FastCall</CallingConvention>
@@ -121,7 +121,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;$(SolutionDir)3rdparty\Bullet\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;$(SolutionDir)3rdparty\Bullet\;$(SolutionDir)3rdparty\PhysX5\;$(SolutionDir)3rdparty\PhysX5\pvd\include\;$(SolutionDir)3rdparty\PhysX5\filebuf\include\;$(SolutionDir)3rdparty\PhysX5\foundation\include\;$(SolutionDir)3rdparty\PhysX5\fastxml\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <CallingConvention>FastCall</CallingConvention>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -143,7 +143,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;$(SolutionDir)3rdparty\Bullet\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;$(SolutionDir)3rdparty\Bullet\;$(SolutionDir)3rdparty\PhysX5\;$(SolutionDir)3rdparty\PhysX5\pvd\include\;$(SolutionDir)3rdparty\PhysX5\filebuf\include\;$(SolutionDir)3rdparty\PhysX5\foundation\include\;$(SolutionDir)3rdparty\PhysX5\fastxml\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CallingConvention>FastCall</CallingConvention>
@@ -166,7 +166,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;$(SolutionDir)3rdparty\Bullet\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)3rdparty\;$(SolutionDir)3rdparty\Bullet\;$(SolutionDir)3rdparty\PhysX5\;$(SolutionDir)3rdparty\PhysX5\pvd\include\;$(SolutionDir)3rdparty\PhysX5\filebuf\include\;$(SolutionDir)3rdparty\PhysX5\foundation\include\;$(SolutionDir)3rdparty\PhysX5\fastxml\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <CallingConvention>FastCall</CallingConvention>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -253,6 +253,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Physics.h" />
+    <ClInclude Include="Test101SimpleFPS.h" />
     <ClInclude Include="Test200PhysX.h" />
     <ClInclude Include="Test201Bullet.h" />
     <ClInclude Include="UI.h" />
@@ -264,7 +265,7 @@
     <ClInclude Include="Core.h" />
     <ClInclude Include="Container.h" />
     <ClInclude Include="EngineMath.h" />
-    <ClInclude Include="Collide.h" />
+    <ClInclude Include="Collisions.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="Platform.h" />
     <ClInclude Include="Audio.h" />

@@ -1,3 +1,5 @@
+#include "../Game/EngineConfig.h"
+
 #if defined(_MSC_VER)
 #	pragma warning(push, 0)
 #	pragma warning(disable : 4702)
@@ -5,6 +7,7 @@
 #	pragma warning(disable : 5264)
 #endif
 
+#if USE_BULLET
 // BulletDynamics
 #include "BulletDynamics/Dynamics/btDiscreteDynamicsWorld.cpp"
 #include "BulletDynamics/Dynamics/btRigidBody.cpp"
@@ -48,6 +51,7 @@
 #include "BulletDynamics/Vehicle/btRaycastVehicle.cpp"
 #include "BulletDynamics/Vehicle/btWheelInfo.cpp"
 #include "BulletDynamics/Character/btKinematicCharacterController.cpp"
+#endif
 
 #if defined(_MSC_VER)
 #	pragma warning(pop)

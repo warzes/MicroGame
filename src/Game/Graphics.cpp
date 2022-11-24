@@ -928,7 +928,7 @@ namespace g3d
 	{
 		Poly poly;
 
-#if 0
+#if 1
 		for (size_t i = 0; i < indices.size(); i++) // TODO: медленно, надо переделать
 		{
 			poly.verts.push_back(vertices[indices[i]].position);

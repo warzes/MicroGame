@@ -123,7 +123,7 @@
     <ClInclude Include="EngineMath.h">
       <Filter>MicroEngine\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Collide.h">
+    <ClInclude Include="Collisions.h">
       <Filter>MicroEngine\Engine</Filter>
     </ClInclude>
     <ClInclude Include="Utility.h">
@@ -160,6 +160,9 @@
       <Filter>Test</Filter>
     </ClInclude>
     <ClInclude Include="Test201Bullet.h">
+      <Filter>Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Test101SimpleFPS.h">
       <Filter>Test</Filter>
     </ClInclude>
   </ItemGroup>

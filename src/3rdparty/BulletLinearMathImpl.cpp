@@ -1,3 +1,5 @@
+#include "../Game/EngineConfig.h"
+
 #if defined(_MSC_VER)
 #	pragma warning(push, 0)
 #	pragma warning(disable : 4701)
@@ -8,6 +10,7 @@
 
 // LinearMath
 
+#if USE_BULLET
 #include "LinearMath/btAlignedAllocator.cpp"
 #include "LinearMath/btGeometryUtil.cpp"
 #include "LinearMath/btSerializer.cpp"
@@ -22,6 +25,7 @@
 #include "LinearMath/TaskScheduler/btTaskScheduler.cpp"
 #include "LinearMath/TaskScheduler/btThreadSupportPosix.cpp"
 #include "LinearMath/TaskScheduler/btThreadSupportWin32.cpp"
+#endif
 
 #if defined(_MSC_VER)
 #	pragma warning(pop)

@@ -1,4 +1,4 @@
-#include "Collide.h"
+#include "Collisions.h"
 
 namespace collide
 {

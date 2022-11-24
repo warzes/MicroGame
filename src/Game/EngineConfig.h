@@ -12,4 +12,4 @@
 // Physics Config
 //=============================================================================
 #define USE_PHYSX5 0
-#define USE_BULLET 1
+#define USE_BULLET 0
