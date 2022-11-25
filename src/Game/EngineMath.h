@@ -15,6 +15,16 @@ inline constexpr float DegToRad(const float a)
 	return 0.01745329251994329547f * a;
 }
 
+inline float Length(const glm::vec3& v)
+{
+	return sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
+}
+
+inline float LengthSq(const glm::vec3& v)
+{
+	return (v.x * v.x + v.y * v.y + v.z * v.z);
+}
+
 //=============================================================================
 // Algebra
 //=============================================================================
@@ -677,7 +687,7 @@ namespace collide
 	/* line/segment */
 
 	float LineDistance2Point(const Line& l, const glm::vec3& p);
-	glm::vec3 LineClosestPoint(const Line& l, const glm::vec3& p);
+	//glm::vec3 LineClosestPoint(const Line& l, const glm::vec3& p);
 
 	/* ray */
 

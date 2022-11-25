@@ -170,5 +170,8 @@
     <None Include="EngineMath.inl">
       <Filter>MicroEngine\Engine</Filter>
     </None>
+    <None Include="Collisions.inl">
+      <Filter>MicroEngine\Engine</Filter>
+    </None>
   </ItemGroup>
 </Project>

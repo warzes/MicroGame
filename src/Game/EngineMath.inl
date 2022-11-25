@@ -138,13 +138,6 @@ namespace collide
 		return dot3(ap, ap) - (e * e) / f;
 	}
 
-	inline glm::vec3 LineClosestPoint(const Line& l, const glm::vec3& p)
-	{
-		vec3 ab = sub3(l.b, l.a), pa = sub3(p, l.a);
-		float t = dot3(pa, ab) / dot3(ab, ab);
-		return add3(l.a, scale3(ab, t < 0 ? 0 : t > 1 ? 1 : t));
-	}
-
 	inline float RayTestPlane(const Ray& r, const glm::vec4& plane)
 	{
         /* Ray: P = origin + rd * t
@@ -591,7 +584,7 @@ namespace collide
 	inline vec3 CapsuleClosestPoint(const Capsule& c, vec3 p)
 	{
 		/* calculate closest point to internal capsule segment */
-		vec3 pp = LineClosestPoint(Line(c.a, c.b), p);
+		vec3 pp = Collisions::ClosestPointOnLineSegment(Line(c.a, c.b), p);
 
 		/* extend point out by radius in normal direction */
 		vec3 d = norm3(sub3(p, pp));

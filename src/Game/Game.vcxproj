@@ -281,6 +281,7 @@
     <ClInclude Include="TestNNew.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Collisions.inl" />
     <None Include="EngineMath.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

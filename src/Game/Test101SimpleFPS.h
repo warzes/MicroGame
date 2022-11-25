@@ -1,5 +1,11 @@
 #pragma once
 
+https://gdbooks.gitbooks.io/3dcollisions/content/Chapter4/sphere_to_triangle.html
+https://github.com/bjornbytes/lovr/tree/master/src/modules/physics
+https://github.com/RandyGaul/qu3e
+https://github.com/jrouwe/JoltPhysics
+reactphysics3d
+
 constexpr const char* vertex_shader_text = R"(
 #version 330 core
 
