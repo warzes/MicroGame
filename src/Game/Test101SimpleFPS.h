@@ -1,10 +1,10 @@
 #pragma once
 
-https://gdbooks.gitbooks.io/3dcollisions/content/Chapter4/sphere_to_triangle.html
-https://github.com/bjornbytes/lovr/tree/master/src/modules/physics
-https://github.com/RandyGaul/qu3e
-https://github.com/jrouwe/JoltPhysics
-reactphysics3d
+//https://gdbooks.gitbooks.io/3dcollisions/content/Chapter4/sphere_to_triangle.html
+//https://github.com/bjornbytes/lovr/tree/master/src/modules/physics
+//https://github.com/RandyGaul/qu3e
+//https://github.com/jrouwe/JoltPhysics
+//reactphysics3d
 
 constexpr const char* vertex_shader_text = R"(
 #version 330 core
@@ -58,6 +58,9 @@ Transform transform;
 
 Camera ncamera;
 
+VertexArrayBuffer vao;
+VertexBuffer vb;
+
 namespace Player
 {
 	glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -85,7 +88,7 @@ float TrianglePoint(
 {
 	// recalculate surface normal of this triangle
 	glm::vec3 side1 = { tri_1_x - tri_0_x, tri_1_y - tri_0_y, tri_1_z - tri_0_z };
-	glm::vec3 side2 = { tri_1_x - tri_0_x, tri_1_y - tri_0_y, tri_1_z - tri_0_z };
+	glm::vec3 side2 = { tri_2_x - tri_0_x, tri_2_y - tri_0_y, tri_2_z - tri_0_z };
 	glm::vec3 norm = glm::normalize(glm::cross(side1, side2));
 
 	// distance from src to a vertex on the triangle
@@ -334,7 +337,7 @@ float TriangleCapsuleFindClosest(const Poly& poly,
 	glm::vec3& outNorm)
 {
 	//declare the variables that will be returned by the function
-	float finalLength = std::numeric_limits<float>::infinity(), where_x, where_y, where_z, n_x, n_y, n_z;
+	float finalLength = std::numeric_limits<float>::infinity(), where_x = 0.0f, where_y = 0.0f, where_z = 0.0f, n_x = 0.0f, n_y = 0.0f, n_z = 0.0f;
 	// cache references to this model's properties for efficiency
 	float translation_x = 0.0f, translation_y = 0.0f, translation_z = 0.0f, scale_x =1.0f, scale_y = 1.0f, scale_z = 1.0f;
 
@@ -668,10 +671,50 @@ void InitTest()
 		model.SetMaterial(material);
 		transform.Translate(0, 0, 0);
 
-		modelPoly = model.GetPoly();
+		struct  tt
+		{
+			static void AddQuad(std::vector<Vertex_Pos3_TexCoord>& vertices, glm::vec3 pos)
+			{
+				std::vector<Vertex_Pos3_TexCoord> temp = 
+				{
+					{ {-1.0f+pos.x, 0.0f+pos.y-2.0f, -1.0f+pos.z}, {0.f, 0.f} },
+					{ {-1.0f+pos.x, 0.0f+pos.y-2.0f,  1.0f+pos.z}, {0.f, 1.f} },
+					{ { 1.0f+pos.x, 0.0f+pos.y-2.0f, -1.0f+pos.z}, {1.f, 1.f} },
+					{ {-1.0f+pos.x, 0.0f+pos.y-2.0f,  1.0f+pos.z}, {0.f, 1.f} },
+					{ { 1.0f+pos.x, 0.0f+pos.y-2.0f,  1.0f+pos.z}, {1.f, 1.f} },
+					{ { 1.0f+pos.x, 0.0f+pos.y-2.0f, -1.0f+pos.z}, {1.f, 1.f} },
+				};
+
+				for (size_t i = 0; i < temp.size(); i++)
+				{
+					vertices.push_back(temp[i]);
+				}
+			}
+		};
+
+		std::vector<Vertex_Pos3_TexCoord> vertices;
+
+		for (int x = 0; x < 10; x++)
+		{
+			for (int y = 0; y < 10; y++)
+			{
+				tt::AddQuad(vertices, glm::vec3((x-5)*2, 0.0f, (y-5) * 2));
+			}
+		}
+
+		vb.Create(RenderResourceUsage::Static, vertices.size(), sizeof(vertices[0]), vertices.data());
+		vao.Create(&vb, nullptr, &shader);
+
+		for (size_t i = 0; i < vertices.size(); i++)
+		{
+			modelPoly.verts.push_back(vertices[i].position);
+		}
+		modelPoly.cnt = vertices.size();
+
+		//modelPoly = model.GetPoly();
 	}
 
-	RenderSystem::SetFrameColor(glm::vec3(0.15, 0.15, 0.15));
+	//RenderSystem::SetFrameColor(glm::vec3(0.15, 0.15, 0.15));
 }
 
 void CloseTest()
@@ -707,7 +750,6 @@ void FrameTest(float deltaTime)
 		Player::position.y,
 		Player::position.z + Player::speed.z * fraction,
 	};
-
 	
 
 	shader.Bind();
@@ -716,7 +758,8 @@ void FrameTest(float deltaTime)
 	shader.SetUniform(projectionUniform, GetCurrentProjectionMatrix());
 	shader.SetUniform(colorUniform, glm::vec3(0, 0, 1));
 	shader.SetUniform(worldUniform, transform.GetWorld());
-	model.Draw();	
+	//model.Draw();	
+	vao.Draw();
 
 	//DebugDraw::DrawGrid(0);
 	DebugDraw::DrawCapsule(

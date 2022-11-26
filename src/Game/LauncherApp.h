@@ -10,10 +10,11 @@
 #	define TEST_4_MANYMODEL 0
 
 #	define TEST_100_SIMPLECOLLISIONS 0
-#	define TEST_101_SIMPLEFPS 1
+#	define TEST_101_SIMPLEFPS 0
 
 #	define TEST_200_PHYSX 0
 #	define TEST_201_BULLET 0
+#	define TEST_202_MICROPHYS 1
 
 #	define TEST_N_NEW 0
 
@@ -46,6 +47,10 @@
 #	endif
 #	if TEST_201_BULLET
 #		include "Test201Bullet.h"
+#	endif
+
+#	if TEST_202_MICROPHYS
+#		include "Test202MicroPhys.h"
 #	endif
 
 

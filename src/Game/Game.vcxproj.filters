@@ -57,6 +57,9 @@
     <ClCompile Include="..\3rdparty\BulletLinearMathImpl.cpp">
       <Filter>MicroEngine\3rdparty</Filter>
     </ClCompile>
+    <ClCompile Include="Physics2.cpp">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MicroEngine">
@@ -163,6 +166,12 @@
       <Filter>Test</Filter>
     </ClInclude>
     <ClInclude Include="Test101SimpleFPS.h">
+      <Filter>Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics2.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Test202MicroPhys.h">
       <Filter>Test</Filter>
     </ClInclude>
   </ItemGroup>
