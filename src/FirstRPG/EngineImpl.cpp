@@ -12,6 +12,7 @@
 #include "Renderer.cpp"
 #include "Graphics.cpp"
 #include "Physics.cpp"
+#include "Physics2.cpp"
 //#include "UI.cpp"
 //#include "Navigation.cpp"
 #include "Scene.cpp"

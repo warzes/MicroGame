@@ -14,9 +14,10 @@
 
 #	define TEST_200_PHYSX 0
 #	define TEST_201_BULLET 0
-#	define TEST_202_MICROPHYS 1
+#	define TEST_202_MICROPHYS 0
 
 #	define TEST_N_NEW 0
+#	define TEST_N_NEW2 1
 
 #	if TEST_1_TRIANGLES
 #		include "Test001Triangles.h"
@@ -53,9 +54,12 @@
 #		include "Test202MicroPhys.h"
 #	endif
 
-
 #	if TEST_N_NEW
 #		include "TestNNew.h"
+#	endif
+
+#	if TEST_N_NEW2
+#		include "TestNNew2.h"
 #	endif
 
 #endif // USE_TEST

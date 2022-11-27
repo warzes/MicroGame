@@ -249,16 +249,19 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Collisions2.h" />
     <ClInclude Include="EngineConfig.h" />
     <ClInclude Include="oRenderer.h" />
     <ClInclude Include="Physics2.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Physics.h" />
+    <ClInclude Include="temp.h" />
     <ClInclude Include="Test101SimpleFPS.h" />
     <ClInclude Include="Test200PhysX.h" />
     <ClInclude Include="Test201Bullet.h" />
     <ClInclude Include="Test202MicroPhys.h" />
+    <ClInclude Include="TestNNew2.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="Navigation.h" />
     <ClInclude Include="Scene.h" />

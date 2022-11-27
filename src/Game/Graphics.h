@@ -205,6 +205,8 @@ namespace g3d
 
 		Poly GetPoly() const;
 
+		std::vector<Mesh>& GetSubMeshes() { return m_subMeshes; }
+
 	private:
 		bool createBuffer();
 		std::vector<Mesh> m_subMeshes;

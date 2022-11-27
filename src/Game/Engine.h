@@ -26,6 +26,7 @@
 #include "oRenderer.h"
 #include "Graphics.h"
 #include "Physics.h"
+#include "Physics2.h"
 #include "UI.h"
 #include "Navigation.h"
 #include "Scene.h"
