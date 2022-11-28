@@ -289,6 +289,9 @@ public:
 
 	Triangle& operator=(const Triangle&) = default;
 
+	//Tests for intersection with another triangle
+	bool Intersect(const Triangle& t) const;
+
 	// Compute the area of the triangle.
 	float Area() const
 	{

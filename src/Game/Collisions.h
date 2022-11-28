@@ -19,6 +19,8 @@ namespace Collisions
 
 	// Möller–Trumbore intersection algorithm
 	inline int RayInTri(const glm::vec3& from, const glm::vec3& to, const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, glm::vec3& intersect);
+
+
 }
 
 #include "Collisions.inl"

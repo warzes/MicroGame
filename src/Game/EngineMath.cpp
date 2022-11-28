@@ -1,5 +1,10 @@
 #include "stdafx.h"
 #include "EngineMath.h"
+
+extern "C" 
+{
+	int tri_tri_intersect(float V0[3], float V1[3], float V2[3], float U0[3], float U1[3], float U2[3]);
+};
 //-----------------------------------------------------------------------------
 //=============================================================================
 // Algebra
@@ -79,8 +84,17 @@ void Transform::updateTransforms()
 	m_isTransformChanged = TransformChanged::NONE;
 }
 //-----------------------------------------------------------------------------
-
-
+bool Triangle::Intersect(const Triangle& t) const
+{
+	return (tri_tri_intersect(
+		(float*)&verts[0].x,
+		(float*)&verts[1].x,
+		(float*)&verts[2].x,
+		(float*)&t.verts[0].x,
+		(float*)&t.verts[1].x,
+		(float*)&t.verts[2].x) != 0);
+}
+//-----------------------------------------------------------------------------
 
 
 

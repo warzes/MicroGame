@@ -30,6 +30,9 @@
     <ClCompile Include="..\3rdparty\BulletLinearMathImpl.cpp">
       <Filter>MicroEngine\3rdparty</Filter>
     </ClCompile>
+    <ClCompile Include="..\3rdparty\tritri.c">
+      <Filter>MicroEngine\3rdparty</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MicroEngine">
