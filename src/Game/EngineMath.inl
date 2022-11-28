@@ -998,9 +998,9 @@ namespace collide
 		return vec34(n, -dot3(n, p));
 	}
 
-	inline Frustum FrustumBuild(const glm::mat4& pv)
+	inline FrustumOld FrustumBuild(const glm::mat4& pv)
 	{
-		Frustum f;
+		FrustumOld f;
 		// TODO: починить
 		//f.l = vec4(pv[3] + pv[0], pv[7] + pv[4], pv[11] + pv[8], pv[15] + pv[12]);
 		//f.r = vec4(pv[3] - pv[0], pv[7] - pv[4], pv[11] - pv[8], pv[15] - pv[12]);
@@ -1013,7 +1013,7 @@ namespace collide
 		return f;
 	}
 
-	inline int FrustumTestSphere(const Frustum& f, const Sphere& s)
+	inline int FrustumTestSphere(const FrustumOld& f, const Sphere& s)
 	{
 		for (int i = 0; i < 6; i++)
 		{
@@ -1022,7 +1022,7 @@ namespace collide
 		return 1;
 	}
 
-	inline int FrustumTestAABB(const Frustum& f, const AABB& a)
+	inline int FrustumTestAABB(const FrustumOld& f, const AABB& a)
 	{
 		for (int i = 0; i < 6; i++) 
 		{
