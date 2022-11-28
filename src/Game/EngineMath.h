@@ -7,22 +7,115 @@
 // Core math
 //=============================================================================
 
-static const float Pi = float(3.141592653589793);
-static const float HalfPi = float(1.57079632679489661923);
+constexpr const float Pi = float(3.141592653589793);
+constexpr const float HalfPi = float(1.57079632679489661923);
+constexpr const float OneDegreeToRadians = Pi / 180.0f;
+constexpr const float OneRadiansToDegree = 180.0f / Pi;
 
-inline constexpr float DegToRad(const float a)
+inline constexpr float DegreesToRadians(const float degree)
 {
-	return 0.01745329251994329547f * a;
+	return OneDegreeToRadians * degree;
 }
 
-inline float Length(const glm::vec3& v)
+inline constexpr float RadiansToDegrees(const float radians)
+{
+	return OneRadiansToDegree * radians;
+}
+
+inline bool AreEqual(float first, float second)
+{
+	return glm::epsilonEqual(first, second, glm::epsilon<float>());
+}
+
+inline bool IsZero(float value)
+{
+	return AreEqual(value, 0.0f);
+}
+
+inline float Length(const glm::vec3& v) // TODO: delete
 {
 	return sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
-inline float LengthSq(const glm::vec3& v)
+inline float LengthSq(const glm::vec3& v) // TODO: delete
 {
 	return (v.x * v.x + v.y * v.y + v.z * v.z);
+}
+
+//=============================================================================
+// Matrix func
+//=============================================================================
+
+inline glm::mat4 ToGLMMat4(
+	float m11, float m12, float m13, float m14,
+	float m21, float m22, float m23, float m24,
+	float m31, float m32, float m33, float m34,
+	float m41, float m42, float m43, float m44)
+{
+	glm::mat4 data;
+	data[0][0] = m11;
+	data[0][1] = m21;
+	data[0][2] = m31;
+	data[0][3] = m41;
+	data[1][0] = m12;
+	data[1][1] = m22;
+	data[1][2] = m32;
+	data[1][3] = m42;
+	data[2][0] = m13;
+	data[2][1] = m23;
+	data[2][2] = m33;
+	data[2][3] = m43;
+	data[3][0] = m14;
+	data[3][1] = m24;
+	data[3][2] = m34;
+	data[3][3] = m44;
+	return data;
+}
+
+// ref https://stackoverflow.com/questions/17918033/glm-decompose-mat4-into-translation-and-rotation
+inline void MatrixDecompose(const glm::mat4& data, glm::vec3& outScale, glm::quat& outRotation, glm::vec3& outTranslation)
+{	
+	glm::vec3 rawScale;
+	glm::quat rawRotation;
+	glm::vec3 rawTranslation;
+	glm::vec3 rawSkew;
+	glm::vec4 rawPerspective;
+	glm::decompose(data, rawScale, rawRotation, rawTranslation, rawSkew, rawPerspective);
+
+	outScale = rawScale;
+	outRotation = glm::conjugate(rawRotation);
+	outTranslation = rawTranslation;
+}
+
+inline glm::vec3 GetScaleFromMatrix(const glm::mat4& data)
+{
+	glm::quat rotation;
+	glm::vec3 scale, translation;
+	MatrixDecompose(data, scale, rotation, translation);
+	return scale;
+}
+
+inline glm::quat GetRotationFromMatrix(const glm::mat4& data)
+{
+	glm::quat rotation;
+	glm::vec3 scale, translation;
+	MatrixDecompose(data, scale, rotation, translation);
+	return rotation;
+}
+
+inline glm::vec3 GetTranslationFromMatrix(const glm::mat4& data)
+{
+	return glm::vec3(data[3]);
+}
+
+inline glm::mat4 CreateMatrixRotationFromQuaternion(const glm::quat& q)
+{
+	return glm::mat4_cast(q);
+}
+
+inline glm::mat4 CreateMatrixRotationFromAxisAngle(const glm::vec3& axis, float radiansAngle)
+{
+	return CreateMatrixRotationFromQuaternion(glm::angleAxis(radiansAngle, axis));
 }
 
 //=============================================================================

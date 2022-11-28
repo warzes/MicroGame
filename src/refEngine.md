@@ -5,17 +5,19 @@
 	https://github.com/lohedges/aabbcc
 	https://github.com/jslee02/awesome-collision-detection
 	https://github.com/kroitor/gjk.c
-	https://github.com/fougue/claudette	https://gitlab.com/geoff-nagy/no-fly-zone/-/blob/master/src/3rdparty/glmmodel/glmmodel.cpp	https://github.com/deniskropp/TunnelStrike/raw/main/screenshots/TunnelStrike1.png
-https://sourceforge.net/projects/freesolid/
-https://sourceforge.net/projects/yaobi/
-https://gitlab.com/drummyfish/panda-rpg/-/tree/master/resources
-https://habr.com/ru/post/257339/
-https://content.minetest.net/packages/drummyfish/drummyfish/
-https://github.com/kibotrel/42-Doom
-https://github.com/rasmusbarr/nudge
-https://github.com/PyCee/NUS_library/tree/master/src/physics/collision
-https://github.com/RandyGaul/qu3e/tree/master/src
-https://github.com/flexible-collision-library/fcl
+	https://github.com/fougue/claudette	
+	https://gitlab.com/geoff-nagy/no-fly-zone/-/blob/master/src/3rdparty/glmmodel/glmmodel.cpp	
+	https://github.com/deniskropp/TunnelStrike/raw/main/screenshots/TunnelStrike1.png
+	https://sourceforge.net/projects/freesolid/
+	https://sourceforge.net/projects/yaobi/
+	https://gitlab.com/drummyfish/panda-rpg/-/tree/master/resources
+	https://habr.com/ru/post/257339/
+	https://content.minetest.net/packages/drummyfish/drummyfish/
+	https://github.com/kibotrel/42-Doom
+	https://github.com/rasmusbarr/nudge
+	https://github.com/PyCee/NUS_library/tree/master/src/physics/collision
+	https://github.com/RandyGaul/qu3e/tree/master/src
+	https://github.com/flexible-collision-library/fcl
 
 
 Collisions

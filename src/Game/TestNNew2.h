@@ -1,11 +1,5 @@
 #pragma once
 
-//это оставить, но подключить physx
-
-https://github.com/solenum/exengine
-
-#include "temp.h"
-
 constexpr const char* vertex_shader_text = R"(
 #version 330 core
 

@@ -6,32 +6,50 @@
 // Preprocessor
 //=============================================================================
 
+// Turn argument to string constant:
+// https://gcc.gnu.org/onlinedocs/cpp/Stringizing.html#Stringizing
+#define SE_STRINGIZE( _n )   SE_STRINGIZE_2( _n )
+#define SE_STRINGIZE_2( _n ) #_n
+
+#if defined(_MSC_VER)
+#	define TODO( _msg )  __pragma(message("" __FILE__ "(" SE_STRINGIZE(__LINE__) "): TODO: " _msg))
+#else
+#	define TODO( _msg )
+#endif
+
 #if defined(_MSC_VER)
 #	define SE_FORCE_INLINE __forceinline
 #	define SE_CONST_FUNC  __declspec(noalias)
+#	define SE_NO_VTABLE   __declspec(novtable) // https://habr.com/ru/post/442340/
 #elif defined(__clang__) || defined(__GNUC__)
 #	define SE_FORCE_INLINE inline __attribute__( (__always_inline__) )
 #	define SE_CONST_FUNC  __attribute__( (pure) )
+#	define SE_NO_VTABLE
 #endif
 
 template <class T> inline void SE_UNUSED(const T&) {}
 
-enum SE_EMPTY
-{
-	SEEmpty
-};
-enum SE_ZERO
-{
-	SEZero
-};
-enum SE_IDENTITY
-{
-	SEIdentity
-};
+enum SE_EMPTY { SEEmpty };
+enum SE_ZERO { SEZero };
+enum SE_IDENTITY { SEIdentity };
 
 //=============================================================================
 // Basic Inline Func
 //=============================================================================
+
+template <typename T>
+inline void SafeDelete(T*& resource)
+{
+	delete resource;
+	resource = nullptr;
+}
+
+template <typename T>
+inline void SafeDeleteArray(T*& resource)
+{
+	delete[] resource;
+	resource = nullptr;
+}
 
 inline constexpr bool IsPowerOfTwo(uint32_t x)
 {

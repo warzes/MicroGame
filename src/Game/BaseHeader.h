@@ -2,7 +2,9 @@
 
 #include "EngineConfig.h"
 
-#define _SILENCE_CXX20_CISO646_REMOVED_WARNING // проблема в physx5, подумать как удалить
+//=============================================================================
+// Disable Compile Warning
+//=============================================================================
 
 #if defined(_MSC_VER)
 #	pragma warning(disable : 4514)
@@ -132,7 +134,6 @@ Left handed
 #include "foundation/PxVecMath.h"
 #include "foundation/PxVecQuat.h"
 #include "foundation/PxVecTransform.h"
-
 
 //Not physics specific utilities and common code
 #include "common/PxCoreUtilityTypes.h"
@@ -293,6 +294,9 @@ Left handed
 #	include <btBulletDynamicsCommon.h>
 #endif // USE_BULLET
 
+//=============================================================================
+// Default Compile Warning
+//=============================================================================
 #if defined(_MSC_VER)
 #	pragma warning(pop)
 #endif
