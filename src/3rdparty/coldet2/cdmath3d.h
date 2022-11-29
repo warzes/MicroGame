@@ -81,7 +81,8 @@ namespace coldet
 
 		Matrix3D() {}
 
-		Matrix3D(float f11, float f12, float f13, float f14,
+		Matrix3D(
+			float f11, float f12, float f13, float f14,
 			float f21, float f22, float f23, float f24,
 			float f31, float f32, float f33, float f34,
 			float f41, float f42, float f43, float f44)
@@ -92,7 +93,7 @@ namespace coldet
 			sclr.s41 = f41; sclr.s42 = f42; sclr.s43 = f43; sclr.s44 = f44;
 		}
 
-		Matrix3D& operator*= (const Matrix3D& m)
+		Matrix3D& operator*=(const Matrix3D& m)
 		{
 			return *this = *this * m;
 		}
@@ -150,7 +151,8 @@ namespace coldet
 
 	inline Vector3D CrossProduct(const Vector3D& v1, const Vector3D& v2)
 	{
-		return Vector3D(v1.y * v2.z - v2.y * v1.z,
+		return Vector3D(
+			v1.y * v2.z - v2.y * v1.z,
 			v1.z * v2.x - v2.z * v1.x,
 			v1.x * v2.y - v2.x * v1.y);
 	}
@@ -171,7 +173,8 @@ namespace coldet
 
 	inline Matrix3D operator*(float scalar, const Matrix3D& m)
 	{
-		return Matrix3D(scalar * m(0, 0), scalar * m(0, 1), scalar * m(0, 2), scalar * m(0, 3),
+		return Matrix3D(
+			scalar * m(0, 0), scalar * m(0, 1), scalar * m(0, 2), scalar * m(0, 3),
 			scalar * m(1, 0), scalar * m(1, 1), scalar * m(1, 2), scalar * m(1, 3),
 			scalar * m(2, 0), scalar * m(2, 1), scalar * m(2, 2), scalar * m(2, 3),
 			scalar * m(3, 0), scalar * m(3, 1), scalar * m(3, 2), scalar * m(3, 3));
@@ -221,7 +224,6 @@ namespace coldet
 		return ScaleMatrix3D(Vector3D(s, s, s));
 	}
 
-
 	inline Matrix3D PitchMatrix3D(const float c, const float s)
 	{
 		return Matrix3D(1.0f, 0.0f, 0.0f, 0.0f,
@@ -230,12 +232,10 @@ namespace coldet
 			0.0f, 0.0f, 0.0f, 1.0f);
 	}
 
-
 	inline Matrix3D PitchMatrix3D(const float theta)
 	{
 		return PitchMatrix3D((float)cos(theta), (float)sin(theta));
 	}
-
 
 	inline Matrix3D YawMatrix3D(const float c, const float s)
 	{
@@ -245,12 +245,10 @@ namespace coldet
 			0.0f, 0.0f, 0.0f, 1.0f);
 	}
 
-
 	inline Matrix3D YawMatrix3D(const float theta)
 	{
 		return YawMatrix3D((float)cos(theta), (float)sin(theta));
 	}
-
 
 	inline Matrix3D RollMatrix3D(const float c, const float s)
 	{
@@ -259,7 +257,6 @@ namespace coldet
 			0.0f, 0.0f, 1.0f, 0.0f,
 			0.0f, 0.0f, 0.0f, 1.0f);
 	}
-
 
 	inline Matrix3D RollMatrix3D(const float theta)
 	{

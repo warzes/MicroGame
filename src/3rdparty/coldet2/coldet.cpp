@@ -1,5 +1,5 @@
 #include "sysdep.h"
-#include "coldetimpl.h"
+#include "coldet.h"
 #include "mytritri.h"
 #include <assert.h>
 
@@ -17,16 +17,12 @@ namespace coldet
 		int depth;
 	};
 
-	bool CollisionModel3DImpl::collision(CollisionModel3D* other,
-		int AccuracyDepth,
-		int MaxProcessingTime,
-		float* other_transform)
+	bool CollisionModel3D::collision(CollisionModel3D* other, int AccuracyDepth, int MaxProcessingTime, float* other_transform)
 	{
 		m_ColType = Models;
-		CollisionModel3DImpl* o = static_cast<CollisionModel3DImpl*>(other);
 		if (!m_Final) throw Inconsistency();
-		if (!o->m_Final) throw Inconsistency();
-		Matrix3D t = (other_transform == NULL ? o->m_Transform : *((Matrix3D*)other_transform));
+		if (!other->m_Final) throw Inconsistency();
+		Matrix3D t = (other_transform == NULL ? other->m_Transform : *((Matrix3D*)other_transform));
 		if (m_Static) t *= m_InvTransform;
 		else          t *= m_Transform.Inverse();
 		RotationState rs(t);
@@ -35,7 +31,7 @@ namespace coldet
 		if (MaxProcessingTime == 0) MaxProcessingTime = 0xFFFFFF;
 
 		unsigned EndTime, BeginTime = unsigned(get_tick_count());
-		int num = Max(m_Triangles.size(), o->m_Triangles.size());
+		int num = Max(m_Triangles.size(), other->m_Triangles.size());
 		int Allocated = Max(64, (num >> 4));
 		std::vector<Check> checks(Allocated);
 
@@ -43,7 +39,7 @@ namespace coldet
 		Check& c = checks[0];
 		c.m_first = &m_Root;
 		c.depth = 0;
-		c.m_second = &o->m_Root;
+		c.m_second = &other->m_Root;
 		while (queue_idx > 0)
 		{
 			if (queue_idx > (Allocated / 2)) // enlarge the queue.
@@ -81,7 +77,7 @@ namespace coldet
 									m_ColTri1 = *bt1;
 									m_iColTri1 = getTriangleIndex(bt1);
 									m_ColTri2 = tt;
-									m_iColTri2 = o->getTriangleIndex(bt2);
+									m_iColTri2 = other->getTriangleIndex(bt2);
 									return true;
 								}
 							}
@@ -160,7 +156,7 @@ namespace coldet
 		return false;
 	}
 
-	bool CollisionModel3DImpl::rayCollision(const float origin[3],
+	bool CollisionModel3D::rayCollision(const float origin[3],
 		const float direction[3],
 		bool closest,
 		float segmin,
@@ -239,7 +235,7 @@ namespace coldet
 		return false;
 	}
 
-	bool CollisionModel3DImpl::sphereCollision(const float origin[3], float radius)
+	bool CollisionModel3D::sphereCollision(const float origin[3], float radius)
 	{
 		m_ColType = Sphere;
 		Vector3D O;
@@ -281,7 +277,7 @@ namespace coldet
 		return false;
 	}
 
-	bool CollisionModel3DImpl::getCollidingTriangles(float t1[9], float t2[9], bool ModelSpace)
+	bool CollisionModel3D::getCollidingTriangles(float t1[9], float t2[9], bool ModelSpace)
 	{
 		if (ModelSpace)
 		{
@@ -316,14 +312,14 @@ namespace coldet
 		return true;
 	}
 
-	bool CollisionModel3DImpl::getCollidingTriangles(int& t1, int& t2)
+	bool CollisionModel3D::getCollidingTriangles(int& t1, int& t2)
 	{
 		t1 = m_iColTri1;
 		t2 = m_iColTri2;
 		return true;
 	}
 
-	bool CollisionModel3DImpl::getCollisionPoint(float p[3], bool ModelSpace)
+	bool CollisionModel3D::getCollisionPoint(float p[3], bool ModelSpace)
 	{
 		Vector3D& v = *((Vector3D*)p);
 		switch (m_ColType)
@@ -374,6 +370,56 @@ namespace coldet
 			return true;
 		}
 		return false;
+	}
+
+	EXPORT CollisionModel3D* newCollisionModel3D(bool Static)
+	{
+		return new CollisionModel3D(Static);
+	}
+
+	CollisionModel3D::CollisionModel3D(bool Static)
+		: m_Root(Vector3D::Zero, Vector3D::Zero, 0),
+		m_Transform(Matrix3D::Identity),
+		m_InvTransform(Matrix3D::Identity),
+		m_ColTri1(Vector3D::Zero, Vector3D::Zero, Vector3D::Zero),
+		m_ColTri2(Vector3D::Zero, Vector3D::Zero, Vector3D::Zero),
+		m_iColTri1(0),
+		m_iColTri2(0),
+		m_Final(false),
+		m_Static(Static),
+		m_Radius(0)
+	{}
+
+	void CollisionModel3D::addTriangle(const Vector3D& v1, const Vector3D& v2, const Vector3D& v3)
+	{
+		if (m_Final) throw Inconsistency();
+		m_Triangles.push_back(BoxedTriangle(v1, v2, v3));
+		m_Radius = Max(m_Radius, v1.SquareMagnitude());
+		m_Radius = Max(m_Radius, v2.SquareMagnitude());
+		m_Radius = Max(m_Radius, v3.SquareMagnitude());
+	}
+
+	void CollisionModel3D::setTransform(const Matrix3D& m)
+	{
+		m_Transform = m;
+		if (m_Static) m_InvTransform = m_Transform.Inverse();
+	}
+
+	void CollisionModel3D::finalize()
+	{
+		if (m_Final) throw Inconsistency();
+		// Prepare initial triangle list
+		m_Final = true;
+		m_Radius = sqrt(m_Radius);
+		for (unsigned i = 0; i < m_Triangles.size(); i++)
+		{
+			BoxedTriangle& bt = m_Triangles[i];
+			m_Root.m_Boxes.push_back(&bt);
+		}
+		int logdepth = 0;
+		for (int num = m_Triangles.size(); num > 0; num >>= 1, logdepth++);
+		m_Root.m_logdepth = int(logdepth * 1.5f);
+		m_Root.divide(0);
 	}
 
 } // namespace coldet
