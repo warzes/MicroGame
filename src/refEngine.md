@@ -25,8 +25,13 @@ Collisions
 		основной док по коллизии персонажа
 		https://github.com/jackw1111/learnOpenGL
 			пример реализации по статье
+	https://handmade.network/p/75/monter/blog/p/2916-collision_system_part_1__collision_detection_and_response_against_static_mesh
+	http://www.codercorner.com/Opcode.htm
+	https://github.com/humanoid-path-planner/hpp-fcl
+
 
 GJK
+	https://gist.github.com/vurtun/29727217c269a2fbf4c0ed9a1d11cb40
 	https://cse442-17f.github.io/Gilbert-Johnson-Keerthi-Distance-Algorithm/
 	https://github.com/andreacasalino/Flexible-GJK-and-EPA
 	http://uu.diva-portal.org/smash/get/diva2:343820/FULLTEXT01.pdf

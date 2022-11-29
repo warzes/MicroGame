@@ -178,12 +178,18 @@
     <ClInclude Include="Collisions2.h">
       <Filter>MicroEngine\Engine</Filter>
     </ClInclude>
+    <ClInclude Include="Collisions3.h">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="EngineMath.inl">
       <Filter>MicroEngine\Engine</Filter>
     </None>
     <None Include="Collisions.inl">
+      <Filter>MicroEngine\Engine</Filter>
+    </None>
+    <None Include="Collisions3.inl">
       <Filter>MicroEngine\Engine</Filter>
     </None>
   </ItemGroup>

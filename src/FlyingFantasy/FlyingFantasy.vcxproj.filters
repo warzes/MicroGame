@@ -27,6 +27,9 @@
     <ClCompile Include="..\3rdparty\coldet2Impl.cpp">
       <Filter>MicroEngine\3rdparty</Filter>
     </ClCompile>
+    <ClCompile Include="TestGenMap.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MicroEngine">
@@ -35,9 +38,15 @@
     <Filter Include="MicroEngine\3rdparty">
       <UniqueIdentifier>{86a6bab6-665f-43ea-ad04-d04d22e7bc8f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{b5063322-eb79-493f-9ef4-e8354ecccf2e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="GameApp.h" />
+    <ClInclude Include="TestGenMap.h">
+      <Filter>test</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -26,3 +26,4 @@ namespace Collisions
 
 #include "Collisions.inl"
 #include "Collisions2.h"
+#include "Collisions3.h"

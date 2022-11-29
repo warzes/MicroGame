@@ -846,7 +846,7 @@ void FrameTest(float deltaTime)
 
 		glm::vec3 ijklec = tempMath::scale3(glm::vec3(IsKeyboardKeyDown(KEY_L) - IsKeyboardKeyDown(KEY_J), 0, IsKeyboardKeyDown(KEY_I) - IsKeyboardKeyDown(KEY_K)), 500.0f * deltaTime);
 		entity->velocity.x = ijklec.x;
-		entity->velocity.y = -300.0f * deltaTime;
+		entity->velocity.y = -980.0f * deltaTime;
 		entity->velocity.z = ijklec.z;
 
 		entity->Update2(deltaTime);

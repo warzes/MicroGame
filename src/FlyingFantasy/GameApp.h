@@ -5,8 +5,22 @@
 // https://www.youtube.com/watch?v=yLQLoVcowLU
 // https://www.youtube.com/watch?v=0Id0LQj7pIs
 // https://github.com/jdah/microcraft
+// https://www.youtube.com/watch?v=hzFnMQk38WY&t=15s
 // Halloween3D
-// claudette
+// exengine
+
+/*
+идеи стиля
+https://sketchfab.com/3d-models/lakeside-campsite-edbf0844354e4e0bb679b6aea5b21228
+https://sketchfab.com/3d-models/abandoned-chest-f4279d84a65740d2b13f08b1b1db8404
+https://sketchfab.com/3d-models/voxel-castle-4e6a159081e94d4ab60fab1c1e9da5ab
+https://sketchfab.com/3d-models/voxel-kakariko-full-scene-6ef46d45927945259127a73484f10d24
+https://sketchfab.com/3d-models/stardew-valley-farmhouse-fan-art-a68c19d7ba85470cb885f7a32a8d7c76
+https://sketchfab.com/search?q=tag%3Amagicavoxel&sort_by=-likeCount&type=models
+
+*/
+
+#include "TestGenMap.h"
 
 constexpr const char* vertex_shader_text = R"(
 #version 330 core
@@ -61,8 +75,14 @@ Transform transform;
 Camera ncamera;
 
 
+TestGenMap genMap;
+
 bool StartGameApp()
 {
+	genMap.Init();
+	genMap.NewGen();
+
+
 	// Init Camera
 	{
 		ncamera.Teleport(0, 3, -6);
@@ -101,6 +121,7 @@ bool StartGameApp()
 
 void CloseGameApp()
 {
+	genMap.Destroy();
 	shader.Destroy();
 }
 
@@ -128,6 +149,11 @@ void UpdateGameApp(float deltaTime)
 
 void FrameGameApp(float deltaTime)
 {
+#if 1
+	genMap.Draw(ncamera);
+#else
+
+
 	shader.Bind();
 
 	shader.SetUniform(viewUniform, ncamera.m_view);
@@ -136,10 +162,7 @@ void FrameGameApp(float deltaTime)
 	shader.SetUniform(worldUniform, transform.GetWorld());
 	model.Draw();
 
-
-
 	Triangle tri(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(2.0f, 0.0f, 2.0f));
-
 
 	//DebugDraw::DrawCapsule(
 	//	glm::vec3(0.0f, 0.0f, 0.0f),
@@ -151,4 +174,5 @@ void FrameGameApp(float deltaTime)
 
 
 	DebugDraw::Flush(ncamera);
+#endif
 }

@@ -244,6 +244,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collisions2.h" />
+    <ClInclude Include="Collisions3.h" />
     <ClInclude Include="EngineConfig.h" />
     <ClInclude Include="oRenderer.h" />
     <ClInclude Include="Physics2.h" />
@@ -282,6 +283,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Collisions.inl" />
+    <None Include="Collisions3.inl" />
     <None Include="EngineMath.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
