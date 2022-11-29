@@ -95,9 +95,63 @@ bool Triangle::Intersect(const Triangle& t) const
 		(float*)&t.verts[2].x) != 0);
 }
 //-----------------------------------------------------------------------------
+bool Triangle::Intersect(const glm::vec3& O, const glm::vec3& D, glm::vec3& cp, float& tparm, float segmax) const
+{
+	Plane p(verts[0], verts[1], verts[2]);
+	float denom = glm::dot(p.normal, D);
 
+	if (std::fabs(denom) < 1e-8f) return false; // FuzzyIsNull
+	float t = -(p.equation.w + glm::dot(p.normal, O)) / denom;
+	if (t <= 0.0f) return false;
+	if (t > segmax) return false;
+	TriangleDesc td(*this, p);
+	cp = O + t * D;
+	if (td.PointInTri(cp))
+	{
+		tparm = t;
+		return true;
+	}
+	return false;
+}
+//-----------------------------------------------------------------------------
+bool Triangle::Intersect(const glm::vec3& O, float radius, glm::vec3* cp) const
+{
+	if (cp == nullptr)
+		return false;
 
-
+	glm::vec3& rcp = *cp;
+	const Plane p(this->verts[0], this->verts[1], this->verts[2]);
+	const float dist = p.SignedDistanceTo(O);
+	if (abs(dist) > radius)
+		return false;
+	glm::vec3 point = O - dist * p.normal;
+	TriangleDesc td(*this, p);
+	if (td.PointInTri(point)) 
+	{
+		rcp = point;
+		return true;
+	}
+	/////////////////////////////////////////////////////////
+	// Added code for edge intersection detection
+	const glm::vec3* v[] = { &this->verts[0], &this->verts[1], &this->verts[2], &this->verts[0] };
+	for (int i = 0; i < 3; ++i) 
+	{
+		const glm::vec3 u(*v[i + 1] - *v[i]), pa(O - *v[i]);
+		const float s = glm::dot(u, pa) / LengthSq(u);
+		if (s < 0)
+			rcp = *v[i];
+		else if (s > 1)
+			rcp = *v[i + 1];
+		else
+			rcp = *v[i] + s * u;
+		const float sq_dist = LengthSq(O - rcp);
+		if (sq_dist < (radius * radius))
+			return true;
+	}
+	/////////////////////////////////////////////////////////
+	return false;
+}
+//-----------------------------------------------------------------------------
 void FrustumCorners::Transform(glm::mat4 space)
 {
 	//move corners of the near plane

@@ -80,54 +80,6 @@ Camera ncamera;
 #define VERY_CLOSE_DIST 0.001
 #define SLOPE_WALK_ANGLE 0.80
 
-class Plane3 
-{
-public:
-	glm::vec4 equation;
-	glm::vec3 origin;
-	glm::vec3 normal;
-	Plane3() = default;
-	Plane3(const glm::vec3& origin, const glm::vec3& normal);
-	Plane3(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3);
-
-	bool IsFrontFacingTo(const glm::vec3& direction) const;
-	float SignedDistanceTo(const glm::vec3& point) const;
-};
-
-Plane3::Plane3(const glm::vec3& origin, const glm::vec3& normal)
-{
-	this->origin = origin;
-	this->normal = normal;
-	equation.x = normal.x;
-	equation.y = normal.y;
-	equation.z = normal.z;
-	equation.w = -glm::dot(origin, normal);
-}
-
-// Construct from triangle:
-Plane3::Plane3(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3)
-{
-	normal = glm::normalize(glm::cross(p2 - p1, p3 - p1));
-
-	origin = p1;
-
-	equation.x = normal.x;
-	equation.y = normal.y;
-	equation.z = normal.z;
-	equation.w = -glm::dot(normal, origin);
-}
-
-float Plane3::SignedDistanceTo(const glm::vec3& point) const
-{
-	return (glm::dot(point, normal)) + equation.w;
-}
-
-bool Plane3::IsFrontFacingTo(const glm::vec3& direction) const
-{
-	const float d = glm::dot(normal, direction);
-	return (d <= 0.0f);
-}
-
 class CollisionPacket
 {
 public:
@@ -151,7 +103,7 @@ public:
 	float t;
 	glm::vec3 intersectionPoint;
 
-	Plane3 plane;
+	Plane plane;
 
 	// iteration depth
 	int collisionRecursionDepth;
@@ -161,7 +113,7 @@ public:
 inline void CheckCollisionsTriangle(CollisionPacket* colPackage, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3)
 {
 	// Make the Plane containing this triangle.
-	Plane3 trianglePlane(p1, p2, p3);
+	Plane trianglePlane(p1, p2, p3);
 	// Is triangle front-facing to the velocity vector?
 	// only check front-facing triangles
 	if (!trianglePlane.IsFrontFacingTo(colPackage->normalizedVelocity))
@@ -569,7 +521,7 @@ inline void CharacterEntity::CollideWithWorld2(glm::vec3& e_position, glm::vec3&
 	glm::vec3 dest = e_position + e_velocity;
 	glm::vec3 src = e_position;
 
-	Plane3 first_plane;
+	Plane first_plane;
 
 	// check for collision
 	glm::vec3 temp;
@@ -613,7 +565,7 @@ inline void CharacterEntity::CollideWithWorld2(glm::vec3& e_position, glm::vec3&
 		if (i == 0)
 		{
 			float long_radius = 1.0 + VERY_CLOSE_DIST;
-			first_plane = Plane3(slidePlaneOrigin, slidePlaneNormal);
+			first_plane = Plane(slidePlaneOrigin, slidePlaneNormal);
 
 			float dist_to_plane = first_plane.SignedDistanceTo(dest) - long_radius;
 
@@ -622,7 +574,7 @@ inline void CharacterEntity::CollideWithWorld2(glm::vec3& e_position, glm::vec3&
 		}
 		else if (i == 1)
 		{
-			Plane3 second_plane(slidePlaneOrigin, slidePlaneNormal);
+			Plane second_plane(slidePlaneOrigin, slidePlaneNormal);
 
 			glm::vec3 crease = glm::cross(first_plane.normal, second_plane.normal);
 			float dis = glm::dot(dest - e_position, crease);
@@ -647,7 +599,7 @@ void CharacterEntity::CheckGrounded()
 	glm::vec3 b = collisionPackage.b * radius;
 	glm::vec3 c = collisionPackage.c * radius;
 
-	Plane3 plane(a, b, c);
+	Plane plane(a, b, c);
 	float f = glm::dot(plane.normal, axis);
 	if (f >= SLOPE_WALK_ANGLE)
 		grounded = 1;
@@ -728,7 +680,7 @@ glm::vec3 CharacterEntity::CollideWithWorld(const glm::vec3& pos, const glm::vec
 	glm::vec3 slidePlaneNormal = newBasePoint - collisionPackage.intersectionPoint;
 	slidePlaneNormal = glm::normalize(slidePlaneNormal);
 
-	Plane3 slidingPlane(slidePlaneOrigin, slidePlaneNormal);
+	Plane slidingPlane(slidePlaneOrigin, slidePlaneNormal);
 
 	glm::vec3 newDestinationPoint = destinationPoint - (float)slidingPlane.SignedDistanceTo(destinationPoint) * slidePlaneNormal;
 
@@ -741,7 +693,7 @@ glm::vec3 CharacterEntity::CollideWithWorld(const glm::vec3& pos, const glm::vec
 		glm::vec3 a = collisionPackage.a * radius;
 		glm::vec3 b = collisionPackage.b * radius;
 		glm::vec3 c = collisionPackage.c * radius;
-		Plane3 plane(a, b, c);
+		Plane plane(a, b, c);
 		glm::vec3 axis = { 0.0f, 1.0f, 0.0f };
 		float f = glm::dot(plane.normal, axis);
 		if (f >= SLOPE_WALK_ANGLE)

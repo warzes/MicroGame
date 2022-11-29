@@ -1,4 +1,12 @@
 ﻿//=============================================================================
+// Collisions
+//=============================================================================
+- для определения пересечения треугольников юзается tritri.c от Triangle/triangle intersection test routine, by Tomas Moller, 1997. See article "A Fast Triangle-Triangle Intersection Test"
+	Есть еще такой вариант https://webee.technion.ac.il/~ayellet/Ps/TroppTalShimshoni.pdf
+		https://cgm.technion.ac.il/Computer-Graphics-Multimedia/Software/TriangleIntersection/code.cpp
+		Возможно быстрее
+
+//=============================================================================
 // Renderer
 //=============================================================================
 - сделать всем ресурсам операторы перемещения и копирования

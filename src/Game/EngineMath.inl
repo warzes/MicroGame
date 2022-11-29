@@ -254,7 +254,7 @@ namespace collide
 		return 1;
 	}
 
-	inline Hit* RayHitPlane(const Ray& r, const Plane& p)
+	inline Hit* RayHitPlane(const Ray& r, const PlaneOld& p)
 	{
 		vec4 pf = Plane4(p.p, p.normal);
 		float t = RayTestPlane(r, pf);

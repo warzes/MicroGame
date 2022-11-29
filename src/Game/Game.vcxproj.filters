@@ -48,19 +48,13 @@
     <ClCompile Include="Physics.cpp">
       <Filter>MicroEngine\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\3rdparty\BulletCollisionImpl.cpp">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClCompile>
-    <ClCompile Include="..\3rdparty\BulletDynamicsImpl.cpp">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClCompile>
-    <ClCompile Include="..\3rdparty\BulletLinearMathImpl.cpp">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClCompile>
     <ClCompile Include="Physics2.cpp">
       <Filter>MicroEngine\Engine</Filter>
     </ClCompile>
     <ClCompile Include="..\3rdparty\tritri.c">
+      <Filter>MicroEngine\3rdparty</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\coldet2Impl.cpp">
       <Filter>MicroEngine\3rdparty</Filter>
     </ClCompile>
   </ItemGroup>

@@ -114,3 +114,51 @@ inline int Collisions::RayInTri(const glm::vec3& from, const glm::vec3& to, cons
 
 	return 0;
 }
+
+inline glm::vec3 Collisions::TriTriIntersect(const Triangle& t1, const Triangle& t2)
+{
+	Plane p1(t1.verts[0], t1.verts[1], t1.verts[2]);
+	int other_side = 0;
+	{
+		float f1 = p1.SignedDistanceTo(t2.verts[0]);
+		float f2 = p1.SignedDistanceTo(t2.verts[1]);
+		float f3 = p1.SignedDistanceTo(t2.verts[2]);
+		float f12 = f1 * f2;
+		float f23 = f2 * f3;
+		if (f12 > 0.0f && f23 > 0.0f) return glm::vec3(0.0f);
+		other_side = (f12 < 0.0f ? (f23 < 0.0f ? 1 : 0) : 2);
+	}
+	Plane p2(t2.verts[0], t2.verts[1], t2.verts[2]);
+	glm::vec3 n12(p1.normal + p2.normal);
+	TriangleDesc td2(t2, p2);
+	const glm::vec3& a2 = td2[other_side + 1];
+	const glm::vec3& b2 = td2[other_side];
+	const glm::vec3& c2 = td2[other_side + 2];
+	float t21 = -(p1.equation.w + p2.equation.w + glm::dot(a2, n12)) / (glm::dot((b2 - a2), n12));
+	TriangleDesc td1(t1, p1);
+	glm::vec3 P21(a2 + t21 * (b2 - a2));
+	if (td1.PointInTri(P21)) return P21;
+	float t22 = -(p1.equation.w + p2.equation.w + glm::dot(c2, n12)) / (glm::dot((b2 - c2), n12));
+	glm::vec3 P22(c2 + t22 * (b2 - c2));
+	if (td1.PointInTri(P22)) return P22;
+
+	{
+		float f1 = p2.SignedDistanceTo(t1.verts[0]);
+		float f2 = p2.SignedDistanceTo(t1.verts[1]);
+		float f3 = p2.SignedDistanceTo(t1.verts[2]);
+		float f12 = f1 * f2;
+		float f23 = f2 * f3;
+		if (f12 > 0.0f && f23 > 0.0f) return glm::vec3(0.0f);
+		other_side = (f12 < 0.0f ? (f23 < 0.0f ? 1 : 0) : 2);
+	}
+	const glm::vec3& a1 = td1[other_side + 1];
+	const glm::vec3& b1 = td1[other_side];
+	const glm::vec3& c1 = td1[other_side + 2];
+	float t11 = -(p1.equation.w + p2.equation.w + glm::dot(a1, n12)) / (glm::dot((b1 - a1), n12));
+	glm::vec3 P11(a1 + t11 * (b1 - a1));
+	if (td2.PointInTri(P11)) return P11;
+	float t12 = -(p1.equation.w + p2.equation.w + glm::dot(c1, n12)) / (glm::dot((b1 - c1), n12));
+	glm::vec3 P12(c1 + t12 * (b1 - c1));
+	if (td2.PointInTri(P12)) return P12;
+	return glm::vec3(0.0f);
+}

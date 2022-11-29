@@ -256,6 +256,55 @@ inline constexpr glm::vec3 RGBToVec(unsigned rgb)
 // Geometry
 //=============================================================================
 
+class Plane
+{
+public:
+	Plane() = default;
+	Plane(const glm::vec3& origin, const glm::vec3& normal);
+	Plane(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3);
+
+	bool IsFrontFacingTo(const glm::vec3& direction) const;
+	float SignedDistanceTo(const glm::vec3& point) const;
+
+	glm::vec4 equation;
+	glm::vec3 origin;
+	glm::vec3 normal;
+};
+
+inline Plane::Plane(const glm::vec3& Origin, const glm::vec3& Normal)
+{
+	origin = Origin;
+	normal = Normal;
+	equation.x = Normal.x;
+	equation.y = Normal.y;
+	equation.z = Normal.z;
+	equation.w = -glm::dot(Origin, Normal);
+}
+
+// Construct from triangle:
+inline Plane::Plane(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3)
+{
+	normal = glm::normalize(glm::cross(p2 - p1, p3 - p1));
+
+	origin = p1;
+
+	equation.x = normal.x;
+	equation.y = normal.y;
+	equation.z = normal.z;
+	equation.w = -glm::dot(normal, origin);
+}
+
+inline float Plane::SignedDistanceTo(const glm::vec3& point) const
+{
+	return (glm::dot(point, normal)) + equation.w;
+}
+
+inline bool Plane::IsFrontFacingTo(const glm::vec3& direction) const
+{
+	const float d = glm::dot(normal, direction);
+	return (d <= 0.0f);
+}
+
 class Line
 {
 public:
@@ -292,6 +341,23 @@ public:
 	//Tests for intersection with another triangle
 	bool Intersect(const Triangle& t) const;
 
+	/** Tests for intersection with a ray (O origin, D direction)
+	Returns true if collision occured.
+	Outputs collision point in cp
+	Outputs the distance from the origin to the collision point in tparm
+	This distance is relative to the magnitude of D
+	Allows testing against a finite segment, by specifying
+	the maximum length of the ray in segmax
+	This length is also relative to the magnitude of D
+	*/
+	bool Intersect(const glm::vec3& O, const glm::vec3& D, glm::vec3& cp, float& tparm, float segmax) const;
+
+	/** Test for intersection with a sphere (O origin)
+	Returns true if collision occured.
+	Outputs collision point in cp
+	*/
+	bool Intersect(const glm::vec3& O, float radius, glm::vec3* cp) const;
+
 	// Compute the area of the triangle.
 	float Area() const
 	{
@@ -317,6 +383,79 @@ public:
 	glm::vec3 center;
 };
 
+// Triangle description class.  It is used to determine if a point on the triangle's plane is inside the triangle.
+class TriangleDesc : public Triangle
+{
+public:
+	TriangleDesc(const Triangle& t, const Plane& p) : Triangle(t)
+	{
+		const glm::vec3& n = p.normal;
+		glm::vec3 a(abs(n.x), abs(n.y), abs(n.z));
+		if (a.x > a.y)
+		{
+			if (a.x > a.z) { i1 = 1; i2 = 2; }
+			else { i1 = 0; i2 = 1; }
+		}
+		else
+		{
+			if (a.y > a.z) { i1 = 0; i2 = 2; }
+			else { i1 = 0; i2 = 1; }
+		}
+	}
+
+#define PATCH__BUG_PRECISION_DAVIDGF
+#ifdef PATCH__BUG_PRECISION_DAVIDGF
+	// See http://sourceforge.net/p/coldet/discussion/45834/thread/28241f70/
+	static bool SameSide(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& a, const glm::vec3& b)
+	{
+		const glm::vec3 cp1 = glm::cross(b - a, p1 - a);
+		const glm::vec3 cp2 = glm::cross(b - a, p2 - a);
+		return (glm::dot(cp1, cp2) >= 0.0f);
+	}
+
+	bool PointInTri(const glm::vec3& P)
+	{
+		return (
+			SameSide(P, verts[0], verts[1], verts[2]) &&
+			SameSide(P, verts[1], verts[0], verts[2]) &&
+			SameSide(P, verts[2], verts[0], verts[1]));
+	}
+#else
+	bool PointInTri(const glm::vec3& P)
+	{
+		glm::vec3 u(P[i1] - verts[0][i1],
+			 verts[1][i1] - verts[0][i1],
+			 verts[2][i1] - verts[0][i1]);
+		glm::vec3 v(P[i2] - verts[0][i2],
+			 verts[1][i2] - verts[0][i2],
+			 verts[2][i2] - verts[0][i2]);
+		float a, b;
+		if (u.y == 0.0f)
+		{
+			b = u.x / u.z;
+			if (b >= 0.0f && b <= 1.0f) a = (v.x - b * v.z) / v.y;
+			else return false;
+		}
+		else
+		{
+			b = (v.x * u.y - u.x * v.y) / (v.z * u.y - u.z * v.y);
+			if (b >= 0.0f && b <= 1.0f) a = (u.x - b * u.z) / u.y;
+			else return false;
+		}
+		return (a >= 0 && (a + b) <= 1);
+	}
+#endif // PATCH_BUG_PRECISION_DAVIDGF
+
+	const glm::vec3& operator[] (int index)
+	{
+		if (index == 3) return verts[0];// TODO: ???
+		else if (index > 3) return verts[1];// TODO: ???
+		return verts[index];
+	}
+
+	int i1, i2;
+};
+
 class Sphere
 {
 public:
@@ -336,18 +475,18 @@ public:
 	float radius = 1.0f;
 };
 
-class Plane
+class PlaneOld
 {
 public:
-	Plane() = default;
-	Plane(const Plane&) = default;
-	Plane(const glm::vec3& P, const glm::vec3& N)
+	PlaneOld() = default;
+	PlaneOld(const PlaneOld&) = default;
+	PlaneOld(const glm::vec3& P, const glm::vec3& N)
 	{
 		p = P;
 		normal = N;
 	}
 
-	Plane& operator=(const Plane&) = default;
+	PlaneOld& operator=(const PlaneOld&) = default;
 
 	glm::vec3 p = { 0.0f, 0.0f, 0.0f };
 	glm::vec3 normal = { 0.0f, 0.0f, 0.0f };
@@ -910,7 +1049,7 @@ namespace collide
 	float RayTestTriangle(const Ray& r, const Triangle& t);
 	int RayTestSphere(float* t0, float* t1, const Ray& r, const Sphere& s);
 	int RayTestAABB(float* t0, float* t1, const Ray& r, const AABB& a);
-	Hit* RayHitPlane(const Ray& r, const Plane& p);
+	Hit* RayHitPlane(const Ray& r, const PlaneOld& p);
 	Hit* RayHitTriangle(const Ray& r, const Triangle& t);
 	Hit* RayHitSphere(const Ray& r, const Sphere& s);
 	Hit* RayHitAABB(const Ray& r, const AABB& a);
