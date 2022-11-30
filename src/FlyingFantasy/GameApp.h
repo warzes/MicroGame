@@ -85,10 +85,10 @@ bool StartGameApp()
 
 	// Init Camera
 	{
-		ncamera.Teleport(0, 3, -6);
+		ncamera.Teleport(0, 10, -6);
 		ncamera.LookAt(glm::vec3(0, 0, 0));
 		ncamera.Enable();
-		ncamera.m_speed = 5;
+		ncamera.m_speed = 10;
 	}
 
 	// Load shader
