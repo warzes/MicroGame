@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 //-----------------------------------------------------------------------------
 // Concept
@@ -10,7 +10,7 @@
 // exengine
 
 /*
-���� �����
+идеи стиля
 https://sketchfab.com/3d-models/lakeside-campsite-edbf0844354e4e0bb679b6aea5b21228
 https://sketchfab.com/3d-models/abandoned-chest-f4279d84a65740d2b13f08b1b1db8404
 https://sketchfab.com/3d-models/voxel-castle-4e6a159081e94d4ab60fab1c1e9da5ab
@@ -77,6 +77,8 @@ Camera ncamera;
 
 TestGenMap genMap;
 
+g2d::Text text;
+
 bool StartGameApp()
 {
 	genMap.Init();
@@ -116,6 +118,9 @@ bool StartGameApp()
 
 	RenderSystem::SetFrameColor(glm::vec3(0.15, 0.15, 0.15));
 
+	text.Create("../data/fonts/OpenSans-Regular.ttf", 40);
+
+
 	return true;
 }
 
@@ -151,7 +156,13 @@ void FrameGameApp(float deltaTime)
 {
 #if 1
 	genMap.Draw(ncamera);
+
+	glm::mat4 ortho = glm::ortho(0.0f, 640.0f, 480.0f, 0.0f);
+	text.SetText(L"Hello привет мир");
+	text.Draw(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0, 0.0, 1.0f), ortho);
 #else
+
+
 
 
 	shader.Bind();

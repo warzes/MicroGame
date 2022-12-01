@@ -1316,7 +1316,7 @@ bool RenderSystem::Create(const RenderSystem::CreateInfo& createInfo)
 	ClearColor = createInfo.ClearColor;
 
 	glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_DEPTH_TEST);
 

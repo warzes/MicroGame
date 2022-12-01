@@ -1396,8 +1396,8 @@ namespace g2d
 		std::string fontFileName = "../fonts/OpenSans-Regular.ttf";
 		const uint32_t atlasWidth = 1024;
 		const uint32_t atlasHeight = 1024;
-		//const uint32_t oversampleX = 2;
-		//const uint32_t oversampleY =2;
+		const uint32_t oversampleX = 2;
+		const uint32_t oversampleY = 2;
 		const uint32_t firstCharENG = ' ';
 		const uint32_t charCountENG = '~' - ' ' + 1;
 		const uint32_t firstCharRUS = 0x400;
@@ -1493,6 +1493,9 @@ void main()
 			font_.size = fontSize;
 			font_.fontFileName = fontFileName;
 
+			// Load from file
+
+			// TODO: переделать, когда появится единая функция загрузки из файла. Текущая функция FileSystem::Fileload() не подходит так как возвращает char[] а нужно uchar[]
 			std::ifstream file(fontFileName, std::ios::binary | std::ios::ate);
 			if (!file.is_open())
 			{
@@ -1506,22 +1509,28 @@ void main()
 			file.read(reinterpret_cast<char*>(&bytes[0]), size);
 			file.close();
 
-			auto atlasData = new uint8_t[font_.atlasWidth * font_.atlasHeight];
+			auto atlasData = std::vector<uint8_t>(font_.atlasWidth * font_.atlasHeight);
 
 			font_.charInfo = std::make_unique<stbtt_packedchar[]>(font_.charCountENG + font_.charCountRUS);
 
 			stbtt_pack_context context;
-			//if (!stbtt_PackBegin(&context, atlasData.get(), font_.atlasWidth, font_.atlasHeight, 0, 1, nullptr))
-			//	panic("Failed to initialize font");
-			stbtt_PackBegin(&context, atlasData, font_.atlasWidth, font_.atlasHeight, 0, 1, nullptr);
+			if (!stbtt_PackBegin(&context, atlasData.data(), font_.atlasWidth, font_.atlasHeight, 0, 1, nullptr))
+			{
+				LogError("Failed to initialize font");
+				return nullptr;
+			}
 
-			//stbtt_PackSetOversampling(&context, font_.oversampleX, font_.oversampleY);
-			//if (!stbtt_PackFontRange(&context, fontData.data(), 0, font_.size, font_.firstChar, font_.charCount, font_.charInfo.get()))
-			//    panic("Failed to pack font");
-
-			//stbtt_PackFontRange(&context, fontData.data(), 0, font_.size, font_.firstChar, font_.charCount, font_.charInfo.get());
-			stbtt_PackFontRange(&context, bytes.data(), 0, font_.size, font_.firstCharENG, font_.charCountENG, font_.charInfo.get());
-			stbtt_PackFontRange(&context, bytes.data(), 0, font_.size, font_.firstCharRUS, font_.charCountRUS, font_.charInfo.get() + font_.charCountENG);
+			stbtt_PackSetOversampling(&context, font_.oversampleX, font_.oversampleY);
+			if (!stbtt_PackFontRange(&context, bytes.data(), 0, font_.size, font_.firstCharENG, font_.charCountENG, font_.charInfo.get()))
+			{
+				LogError("Failed to pack EN font");
+				return nullptr;
+			}
+			if (!stbtt_PackFontRange(&context, bytes.data(), 0, font_.size, font_.firstCharRUS, font_.charCountRUS, font_.charInfo.get() + font_.charCountENG))
+			{
+				LogError("Failed to pack RU font");
+				return nullptr;
+			}
 
 			stbtt_PackEnd(&context);
 
@@ -1530,7 +1539,7 @@ void main()
 			createInfo.width = font_.atlasWidth;
 			createInfo.height = font_.atlasHeight;
 			createInfo.depth = 1;
-			createInfo.pixelData = atlasData;			
+			createInfo.pixelData = atlasData.data();
 
 			Texture2DInfo textureInfo;
 			//textureInfo.minFilter = TextureMinFilter::Linear;
@@ -1538,9 +1547,11 @@ void main()
 			textureInfo.mipmap = false;
 
 			//font_.texture.Create(GL_RGB, GL_RED, GL_UNSIGNED_BYTE, font_.atlasWidth, font_.atlasHeight, atlasData.get());
-			font_.texture.Create(createInfo, textureInfo);
-
-			delete[] atlasData;
+			if (!font_.texture.Create(createInfo, textureInfo))
+			{
+				LogError("Failed to create font texture");
+				return nullptr;
+			}
 
 			m_cacheFont.push_back(std::move(font_));
 			font = &m_cacheFont[m_cacheFont.size() - 1];
