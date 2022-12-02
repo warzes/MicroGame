@@ -13,4 +13,6 @@ Thumbs.db
 /bin/x64/FlyingFantasy_Release.*
 /bin/x64/FirstRPG_Debug.*
 /bin/x64/FirstRPG_Release.*
+/bin/x64/Roguelike_Debug.*
+/bin/x64/Roguelike_Release.*
 /bin/Log.txt

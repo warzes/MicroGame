@@ -1,4 +1,4 @@
-#include "stdafx.h"
+Ôªø#include "stdafx.h"
 #include "Base.h"
 #include "Core.h"
 #include "Platform.h"
@@ -105,7 +105,7 @@ void openglDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 }
 #endif
 //-----------------------------------------------------------------------------
-glm::vec3 ClearColor; // TODO: ‚ ÔÓÒÚ‡ÌÒÚ‚Ó ËÏÂÌ
+glm::vec3 ClearColor; // TODO: –≤ –ø—Ä–æ—Å—Ç—Ä–∞–Ω—Å—Ç–≤–æ –∏–º–µ–Ω
 float perspectiveFOV = 0.0f;
 float perspectiveNear = 0.01f;
 float perspectiveFar = 1000.0f;
@@ -264,6 +264,7 @@ bool ShaderProgram::CreateFromMemories(const std::string& vertexShaderMemory, co
 //-----------------------------------------------------------------------------
 bool ShaderProgram::CreateFromMemories(const std::string& vertexShaderMemory, const std::string& geometryShaderMemory, const std::string& fragmentShaderMemory)
 {
+	// –≤ OpenGL 4.1 –µ—Å—Ç—å –±–æ–ª–µ–µ –∫—Ä–∞—Ç–∫–∞—è glCreateShaderProgram - https://registry.khronos.org/OpenGL-Refpages/gl4/html/glCreateShaderProgram.xhtml
 	if (vertexShaderMemory.empty() || fragmentShaderMemory.empty()) return false;
 	if (vertexShaderMemory == "" || fragmentShaderMemory == "") return false;
 	if (m_id > 0) Destroy();
@@ -280,10 +281,13 @@ bool ShaderProgram::CreateFromMemories(const std::string& vertexShaderMemory, co
 
 		GL_CHECK(glAttachShader(m_id, glShaderVertex));
 		GL_CHECK(glAttachShader(m_id, glShaderFragment));
-		if (glShaderGeometry > 0)
-			GL_CHECK(glAttachShader(m_id, glShaderGeometry));
+		if (glShaderGeometry > 0) GL_CHECK(glAttachShader(m_id, glShaderGeometry));
 
 		GL_CHECK(glLinkProgram(m_id));
+
+		GL_CHECK(glDetachShader(m_id, glShaderVertex));
+		GL_CHECK(glDetachShader(m_id, glShaderFragment));
+		if (glShaderGeometry > 0) GL_CHECK(glDetachShader(m_id, glShaderGeometry));
 
 		GLint success = 0;
 		GL_CHECK(glGetProgramiv(m_id, GL_LINK_STATUS, &success));
@@ -302,8 +306,7 @@ bool ShaderProgram::CreateFromMemories(const std::string& vertexShaderMemory, co
 
 	GL_CHECK(glDeleteShader(glShaderVertex));
 	GL_CHECK(glDeleteShader(glShaderFragment));
-	if (glShaderGeometry > 0)
-		GL_CHECK(glDeleteShader(glShaderGeometry));
+	if (glShaderGeometry > 0) GL_CHECK(glDeleteShader(glShaderGeometry));
 
 	LogPrint("Program " + std::to_string(m_id));
 
@@ -338,7 +341,7 @@ void ShaderProgram::Destroy()
 #if USE_OPENGL_CACHE_STATE
 		if (currentRenderState::shaderProgram == m_id) UnBind();
 #endif
-		if (!ShaderLoader::IsLoad(*this)) // TODO: ÌÂ Û‰‡ÎˇÚ¸ ¯ÂÈ‰Â ÂÒÎË ÓÌ Á‡„ÛÊÂÌ ˜ÂÂÁ ÏÂÌÂ‰ÊÂ, ‚ ·Û‰Û˘ÂÏ Ò‰ÂÎ‡Ú¸ ÔÓ‰Ò˜ÂÚ ÒÒ˚ÎÓÍ Ë Û‰‡ÎˇÚ¸ ÂÒÎË ÌÂÚ
+		if (!ShaderLoader::IsLoad(*this)) // TODO: –Ω–µ —É–¥–∞–ª—è—Ç—å —à–µ–π–¥–µ—Ä –µ—Å–ª–∏ –æ–Ω –∑–∞–≥—Ä—É–∂–µ–Ω —á–µ—Ä–µ–∑ –º–µ–Ω–µ–¥–∂–µ—Ä, –≤ –±—É–¥—É—â–µ–º —Å–¥–µ–ª–∞—Ç—å –ø–æ–¥—Å—á–µ—Ç —Å—Å—ã–ª–æ–∫ –∏ —É–¥–∞–ª—è—Ç—å –µ—Å–ª–∏ –Ω–µ—Ç
 			glDeleteProgram(m_id);
 		m_id = 0;
 	}
@@ -558,9 +561,369 @@ std::vector<ShaderUniformInfo> ShaderProgram::GetUniformInfo() const
 	return std::vector<ShaderUniformInfo>();
 }
 //-----------------------------------------------------------------------------
-UniformLocation ShaderProgram::GetUniformVariable(const char* name)
+#if OPENGL_VERSION >= 43
+int ShaderProgram::GetInterfaceActiveResources(const unsigned interface) const
 {
-	return { glGetUniformLocation(m_id, name) };
+	return getInterfaceParameter(interface, GL_ACTIVE_RESOURCES);
+}
+#endif
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 43
+int ShaderProgram::GetInterfaceMaxNameLength(const unsigned interface) const
+{
+	return getInterfaceParameter(interface, GL_MAX_NAME_LENGTH);
+}
+#endif
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 43
+int ShaderProgram::GetInterfaceMaxActiveVariableCount(const unsigned interface) const
+{
+	return getInterfaceParameter(interface, GL_MAX_NUM_ACTIVE_VARIABLES);
+}
+#endif
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 43
+int ShaderProgram::GetInterfaceMaxCompatibleSubroutineCount(const unsigned interface) const
+{
+	return getInterfaceParameter(interface, GL_MAX_NUM_COMPATIBLE_SUBROUTINES);
+}
+#endif
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 43
+unsigned ShaderProgram::GetResourceIndex(const unsigned interface, const std::string& name) const
+{
+	return glGetProgramResourceIndex(m_id, interface, name.c_str());
+}
+#endif
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 43
+std::string ShaderProgram::GetResourceName(const unsigned interface, const unsigned index) const
+{
+	std::string name;
+	GLsizei length;
+	name.resize(GetInterfaceMaxNameLength(interface));
+	glGetProgramResourceName(m_id, interface, index, static_cast<GLsizei>(name.size()), &length, &name[0]);
+	name.resize(length);
+	return name;
+}
+#endif
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 43
+int ShaderProgram::GetResourceLocation(const unsigned interface, const std::string& name) const
+{
+	return glGetProgramResourceLocation(m_id, interface, name.c_str());
+}
+#endif
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 43
+int ShaderProgram::GetResourceLocationIndex(const unsigned interface, const std::string& name) const
+{
+	return glGetProgramResourceLocationIndex(m_id, interface, name.c_str());
+}
+#endif
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 43
+int ShaderProgram::GetResourceParameter(const unsigned interface, const unsigned index, unsigned parameter) const
+{
+	int result;
+	glGetProgramResourceiv(m_id, interface, index, 1, &parameter, 1, nullptr, &result);
+	return result;
+}
+#endif
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 43
+std::vector<int> ShaderProgram::GetResourceParameters(const unsigned interface, const unsigned index, const std::vector<unsigned>& parameters) const
+{
+	std::vector<GLint> result(parameters.size());
+	glGetProgramResourceiv(m_id, interface, index, static_cast<GLsizei>(parameters.size()), parameters.data(), static_cast<GLsizei>(result.size()), nullptr, result.data());
+	return result;
+}
+#endif
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 41
+std::vector<GLbyte> ShaderProgram::GetProgramBinary(unsigned format) const
+{
+	std::vector<GLbyte> result(GetBinaryLength());
+	glGetProgramBinary(m_id, static_cast<GLsizei>(result.size()), nullptr, &format, static_cast<void*>(result.data()));
+	return result;
+}
+#endif
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 41
+void ShaderProgram::SetProgramBinary(const unsigned format, const std::vector<GLbyte>& binary)
+{
+	glProgramBinary(m_id, format, static_cast<const void*>(binary.data()), static_cast<GLsizei>(binary.size()));
+}
+#endif
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetUniformLocation(const char* name) const
+{
+	return glGetUniformLocation(m_id, name);
+}
+//-----------------------------------------------------------------------------
+UniformLocation ShaderProgram::GetUniformVariable(const char* name) const
+{
+	return { GetUniformLocation(name)};
+}
+//-----------------------------------------------------------------------------
+std::string ShaderProgram::GetActiveUniformName(const unsigned index) const
+{
+	// –Ω–µ –∑–∞–±—ã—Ç—å —á—Ç–æ uniform location —ç—Ç–æ –Ω–µ —Ç–æ–∂–µ —Å–∞–º–æ–µ —á—Ç–æ uniform index, –ø–æ—ç—Ç–æ–º—É –Ω–µ–ª—å–∑—è –±—Ä–∞—Ç—å id –∏–∑ UniformLocation
+	// –ø–æ–ª—É—á–∏—Ç—å –∏–Ω–¥–µ–∫—Å—ã –º–æ–∂–Ω–æ —á–µ—Ä–µ–∑ GetUniformIndices
+	std::string result;
+	result.resize(GetActiveUniformNameLength(index));
+	GL_CHECK(glGetActiveUniformName(m_id, index, static_cast<GLsizei>(result.size()), nullptr, &result[0]));
+	return result;
+}
+//-----------------------------------------------------------------------------
+unsigned ShaderProgram::GetUniformIndex(const char* name) const
+{
+	unsigned index = 0;
+	GL_CHECK(glGetUniformIndices(m_id, 1, &name, &index));
+	return index;
+}
+//-----------------------------------------------------------------------------
+std::vector<unsigned> ShaderProgram::GetUniformIndices(const int count, const std::vector<std::string>& names) const
+{
+	std::vector<unsigned> indices(names.size());
+	std::vector<const char*> cnames(names.size());
+	std::transform(names.begin(), names.end(), cnames.begin(), [&](const std::string& varying) { return varying.c_str(); });
+	GL_CHECK(glGetUniformIndices(m_id, count, cnames.data(), indices.data()));
+	return indices;
+}
+//-----------------------------------------------------------------------------
+std::tuple<std::string, unsigned, int> ShaderProgram::GetActiveUniform(const unsigned index) const
+{
+	std::tuple<std::string, unsigned, int> result;
+	auto& name = std::get<0>(result);
+	auto& type = std::get<1>(result);
+	auto& size = std::get<2>(result);
+	name.resize(GetActiveUniformMaxLength());
+	GL_CHECK(glGetActiveUniform(m_id, index, static_cast<GLsizei>(name.size()), nullptr, &size, &type, &name[0]));
+	return result;
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetActiveUniformNameLength(const unsigned index) const
+{
+	return getActiveUniformParameter(index, GL_UNIFORM_NAME_LENGTH);
+}
+//-----------------------------------------------------------------------------
+unsigned ShaderProgram::GetActiveUniformGLType(const unsigned index) const
+{
+	return getActiveUniformParameter(index, GL_UNIFORM_TYPE);
+}
+//-----------------------------------------------------------------------------
+std::vector<unsigned> ShaderProgram::GetActiveUniformsGLTypes(const std::vector<unsigned>& indices) const
+{
+	auto result = getActiveUniformParameters(indices, GL_UNIFORM_TYPE);
+	return std::vector<unsigned>(result.begin(), result.end());
+}
+//-----------------------------------------------------------------------------
+unsigned ShaderProgram::GetActiveUniformOffset(const unsigned index) const
+{
+	return getActiveUniformParameter(index, GL_UNIFORM_OFFSET);
+}
+//-----------------------------------------------------------------------------
+std::vector<unsigned> ShaderProgram::GetActiveUniformsOffsets(const std::vector<unsigned>& indices) const
+{
+	auto result = getActiveUniformParameters(indices, GL_UNIFORM_OFFSET);
+	return std::vector<unsigned>(result.begin(), result.end());
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetActiveUniformSize(const unsigned index) const
+{
+	return getActiveUniformParameter(index, GL_UNIFORM_SIZE);
+}
+//-----------------------------------------------------------------------------
+std::vector<int> ShaderProgram::GetActiveUniformsSizes(const std::vector<unsigned>& indices) const
+{
+	return getActiveUniformParameters(indices, GL_UNIFORM_SIZE);
+}
+//-----------------------------------------------------------------------------
+unsigned ShaderProgram::GetActiveUniformBlockIndex(const unsigned index) const
+{
+	return getActiveUniformParameter(index, GL_UNIFORM_BLOCK_INDEX);
+}
+//-----------------------------------------------------------------------------
+std::vector<unsigned> ShaderProgram::GetActiveUniformsBlockIndices(const std::vector<unsigned>& indices) const
+{
+	auto result = getActiveUniformParameters(indices, GL_UNIFORM_BLOCK_INDEX);
+	return std::vector<unsigned>(result.begin(), result.end());
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetActiveUniformArrayStride(const unsigned index) const
+{
+	return getActiveUniformParameter(index, GL_UNIFORM_ARRAY_STRIDE);
+}
+//-----------------------------------------------------------------------------
+std::vector<int> ShaderProgram::GetActiveUniformsArrayStrides(const std::vector<unsigned>& indices) const
+{
+	return getActiveUniformParameters(indices, GL_UNIFORM_ARRAY_STRIDE);
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetActiveUniformMatrixStride(const unsigned index) const
+{
+	return getActiveUniformParameter(index, GL_UNIFORM_MATRIX_STRIDE);
+}
+//-----------------------------------------------------------------------------
+std::vector<int> ShaderProgram::GetActiveUniformsMatrixStrides(const std::vector<unsigned>& indices) const
+{
+	return getActiveUniformParameters(indices, GL_UNIFORM_MATRIX_STRIDE);
+}
+//-----------------------------------------------------------------------------
+bool ShaderProgram::GetActiveUniformIsRowMajor(const unsigned index) const
+{
+	return getActiveUniformParameter(index, GL_UNIFORM_IS_ROW_MAJOR) != 0;
+}
+//-----------------------------------------------------------------------------
+unsigned ShaderProgram::GetActiveUniformAtomicCounterBufferIndex(const unsigned index) const
+{
+	return getActiveUniformParameter(index, GL_UNIFORM_ATOMIC_COUNTER_BUFFER_INDEX);
+}
+//-----------------------------------------------------------------------------
+std::vector<unsigned> ShaderProgram::GetActiveUniformsAtomicCounterBufferIndices(const std::vector<unsigned>& indices) const
+{
+	auto result = getActiveUniformParameters(indices, GL_UNIFORM_ATOMIC_COUNTER_BUFFER_INDEX);
+	return std::vector<GLuint>(result.begin(), result.end());
+}
+//-----------------------------------------------------------------------------
+std::vector<int> ShaderProgram::GetActiveUniformsNameLengths(const std::vector<unsigned>& indices) const
+{
+	return getActiveUniformParameters(indices, GL_UNIFORM_NAME_LENGTH);
+}
+//-----------------------------------------------------------------------------
+unsigned ShaderProgram::GetUniformBlockIndex(const char* name) const
+{
+	// TODO: –ø—Ä–æ–≤–µ—Ä–∏—Ç—å —á—Ç–æ –≤—ã–¥–∞–µ—Ç —ç—Ç–∞ —Ñ—É–Ω–∫—Ü–∏—è –∏ GetUniformBlockIndex(unsigned) - –µ—Å–ª–∏ —Ä–∞–∑–Ω–æ–µ, —Ç–æ –ø–µ—Ä–µ–∏–º–µ–Ω–æ–≤–∞—Ç—å
+	return glGetUniformBlockIndex(m_id, name);
+}
+//-----------------------------------------------------------------------------
+std::string ShaderProgram::GetActiveUniformBlockName(const unsigned index) const
+{
+	std::string result;
+	result.resize(GetActiveUniformBlockNameLength(index));
+	GL_CHECK(glGetActiveUniformBlockName(m_id, index, static_cast<GLsizei>(result.size()), nullptr, &result[0]));
+	return result;
+}
+//-----------------------------------------------------------------------------
+unsigned ShaderProgram::GetActiveUniformBlockBinding(const unsigned index) const
+{
+	return getActiveUniformBlockParameter(index, GL_UNIFORM_BLOCK_BINDING);
+}
+//-----------------------------------------------------------------------------
+unsigned ShaderProgram::GetActiveUniformBlockDataSize(const unsigned index) const
+{
+	return getActiveUniformBlockParameter(index, GL_UNIFORM_BLOCK_DATA_SIZE);
+}
+//-----------------------------------------------------------------------------
+unsigned ShaderProgram::GetActiveUniformBlockNameLength(const unsigned index) const
+{
+	return getActiveUniformBlockParameter(index, GL_UNIFORM_BLOCK_NAME_LENGTH);
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetActiveUniformBlockUniformCount(const unsigned index) const
+{
+	return getActiveUniformBlockParameter(index, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS);
+}
+//-----------------------------------------------------------------------------
+bool ShaderProgram::GetActiveUniformBlockUniformIsReferencedByVertexShader(const unsigned index) const
+{
+	return getActiveUniformBlockParameter(index, GL_UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER) != 0;
+}
+//-----------------------------------------------------------------------------
+bool ShaderProgram::GetActiveUniformBlockUniformIsReferencedByFragmentShader(const unsigned index) const
+{
+	return getActiveUniformBlockParameter(index, GL_UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER) != 0;
+}
+//-----------------------------------------------------------------------------
+bool ShaderProgram::GetActiveUniformBlockUniformIsReferencedByComputeShader(const unsigned index) const
+{
+	return getActiveUniformBlockParameter(index, GL_UNIFORM_BLOCK_REFERENCED_BY_COMPUTE_SHADER) != 0;
+}
+//-----------------------------------------------------------------------------
+bool ShaderProgram::GetActiveUniformBlockUniformIsReferencedByGeometryShader(const unsigned index) const
+{
+	return getActiveUniformBlockParameter(index, GL_UNIFORM_BLOCK_REFERENCED_BY_GEOMETRY_SHADER) != 0;
+}
+//-----------------------------------------------------------------------------
+bool ShaderProgram::GetActiveUniformBlockUniformIsReferencedByTessellationControlShader(const unsigned index) const
+{
+	return getActiveUniformBlockParameter(index, GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_CONTROL_SHADER) != 0;
+}
+//-----------------------------------------------------------------------------
+bool ShaderProgram::GetActiveUniformBlockUniformIsReferencedByTessellationEvaluationShader(const unsigned index) const
+{
+	return getActiveUniformBlockParameter(index, GL_UNIFORM_BLOCK_REFERENCED_BY_TESS_EVALUATION_SHADER) != 0;
+}
+//-----------------------------------------------------------------------------
+std::vector<unsigned> ShaderProgram::GetActiveUniformBlockUniformIndices(const unsigned index) const
+{
+	std::vector<GLint> result(GetActiveUniformBlockUniformCount(index));
+	glGetActiveUniformBlockiv(m_id, index, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, &result[0]);
+	return std::vector<unsigned>(result.begin(), result.end());
+}
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 42
+unsigned ShaderProgram::GetActiveAtomicCounterBufferDataSize(const unsigned index) const
+{
+	return getActiveAtomicCounterBufferParameter(index, GL_ATOMIC_COUNTER_BUFFER_DATA_SIZE);
+}
+#endif
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 42
+int ShaderProgram::GetActiveAtomicCounterBufferCounters(const unsigned index) const
+{
+	return getActiveAtomicCounterBufferParameter(index, GL_ATOMIC_COUNTER_BUFFER_ACTIVE_ATOMIC_COUNTERS);
+}
+#endif
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 42
+bool ShaderProgram::GetActiveAtomicCounterBufferIsReferencedByVertexShader(const unsigned index) const
+{
+	return getActiveAtomicCounterBufferParameter(index, GL_ATOMIC_COUNTER_BUFFER_REFERENCED_BY_VERTEX_SHADER) != 0;
+}
+#endif
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 42
+bool ShaderProgram::GetActiveAtomicCounterBufferIsReferencedByFragmentShader(const unsigned index) const
+{
+	return getActiveAtomicCounterBufferParameter(index, GL_ATOMIC_COUNTER_BUFFER_REFERENCED_BY_FRAGMENT_SHADER) != 0;
+}
+#endif
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 42
+bool ShaderProgram::GetActiveAtomicCounterBufferIsReferencedByComputeShader(const unsigned index) const
+{
+	return getActiveAtomicCounterBufferParameter(index, GL_ATOMIC_COUNTER_BUFFER_REFERENCED_BY_COMPUTE_SHADER) != 0;
+}
+#endif
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 42
+bool ShaderProgram::GetActiveAtomicCounterBufferIsReferencedByGeometryShader(const unsigned index) const
+{
+	return getActiveAtomicCounterBufferParameter(index, GL_ATOMIC_COUNTER_BUFFER_REFERENCED_BY_GEOMETRY_SHADER) != 0;
+}
+#endif
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 42
+bool ShaderProgram::GetActiveAtomicCounterBufferIsReferencedByTessellationControlShader(const unsigned index) const
+{
+	return getActiveAtomicCounterBufferParameter(index, GL_ATOMIC_COUNTER_BUFFER_REFERENCED_BY_TESS_CONTROL_SHADER) != 0;
+}
+#endif
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 42
+bool ShaderProgram::GetActiveAtomicCounterBufferIsReferencedByTessellationEvaluationShader(const unsigned index) const
+{
+	return getActiveAtomicCounterBufferParameter(index, GL_ATOMIC_COUNTER_BUFFER_REFERENCED_BY_TESS_EVALUATION_SHADER) != 0;
+}
+#endif
+//-----------------------------------------------------------------------------
+std::vector<unsigned> ShaderProgram::GetActiveAtomicCounterBufferCounterIndices(const unsigned index) const
+{
+	std::vector<GLint> result(GetActiveUniformBlockUniformCount(index));
+	glGetActiveUniformBlockiv(m_id, index, GL_ATOMIC_COUNTER_BUFFER_ACTIVE_ATOMIC_COUNTER_INDICES, &result[0]);
+	return std::vector<GLuint>(result.begin(), result.end());
 }
 //-----------------------------------------------------------------------------
 void ShaderProgram::SetUniform(UniformLocation var, int value)
@@ -603,10 +966,202 @@ void ShaderProgram::SetUniform(UniformLocation var, const glm::mat4& mat)
 	glUniformMatrix4fv(var.id, 1, GL_FALSE, glm::value_ptr(mat));
 }
 //-----------------------------------------------------------------------------
+void ShaderProgram::SetUniformBlockBinding(const unsigned index, const unsigned binding) const
+{
+	glUniformBlockBinding(m_id, index, binding);
+}
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 43
+void ShaderProgram::SetShaderStorageBlockBinding(const unsigned index, const unsigned binding) const
+{
+	glShaderStorageBlockBinding(m_id, index, binding);
+}
+#endif
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetActiveAttributeCount() const
+{
+	return getParameter(GL_ACTIVE_ATTRIBUTES);
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetActiveAttributeMaxLength() const
+{
+	return getParameter(GL_ACTIVE_ATTRIBUTE_MAX_LENGTH);
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetActiveUniformCount() const
+{
+	return getParameter(GL_ACTIVE_UNIFORMS);
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetActiveUniformMaxLength() const
+{
+	return getParameter(GL_ACTIVE_UNIFORM_MAX_LENGTH);
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetActiveUniformBlockCount() const
+{
+	return getParameter(GL_ACTIVE_UNIFORM_BLOCKS);
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetActiveUniformBlockMaxNameLength() const
+{
+	return getParameter(GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH);
+}
+//-----------------------------------------------------------------------------
+unsigned ShaderProgram::GetTransformFeedbackBufferMode() const
+{
+	return getParameter(GL_TRANSFORM_FEEDBACK_BUFFER_MODE);
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetTransformFeedbackVaryingCount() const
+{
+	return getParameter(GL_TRANSFORM_FEEDBACK_VARYINGS);
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetTransformFeedbackVaryingMaxLength() const
+{
+	return getParameter(GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH);
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetGeometryVerticesOut() const
+{
+	return getParameter(GL_GEOMETRY_VERTICES_OUT);
+}
+//-----------------------------------------------------------------------------
+unsigned ShaderProgram::GetGeometryInputType() const
+{
+	return getParameter(GL_GEOMETRY_INPUT_TYPE);
+}
+//-----------------------------------------------------------------------------
+unsigned ShaderProgram::GetGeometryOutputType() const
+{
+	return getParameter(GL_GEOMETRY_OUTPUT_TYPE);
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetGeometryShaderInvocations() const
+{
+	return getParameter(GL_GEOMETRY_SHADER_INVOCATIONS);
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetTessellationControlOutputVertexCount() const
+{
+	return getParameter(GL_TESS_CONTROL_OUTPUT_VERTICES);
+}
+//-----------------------------------------------------------------------------
+unsigned ShaderProgram::GetTessellationGenerationMode() const
+{
+	return getParameter(GL_TESS_GEN_MODE);
+}
+//-----------------------------------------------------------------------------
+unsigned ShaderProgram::GetTessellationGenerationSpacing() const
+{
+	return getParameter(GL_TESS_GEN_SPACING);
+}
+//-----------------------------------------------------------------------------
+unsigned ShaderProgram::GetTessellationGenerationVertexOrder() const
+{
+	return getParameter(GL_TESS_GEN_VERTEX_ORDER);
+}
+//-----------------------------------------------------------------------------
+bool ShaderProgram::GetTessellationGenerationPointMode() const
+{
+	return getParameter(GL_TESS_GEN_POINT_MODE) != 0;
+}
+//-----------------------------------------------------------------------------
+bool ShaderProgram::IsSeparable() const
+{
+	return getParameter(GL_PROGRAM_SEPARABLE) != 0;
+}
+//-----------------------------------------------------------------------------
+bool ShaderProgram::IsBinaryRetrievable() const
+{
+	return getParameter(GL_PROGRAM_BINARY_RETRIEVABLE_HINT) != 0;
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetActiveAtomicCounterBufferCount() const
+{
+	return getParameter(GL_ACTIVE_ATOMIC_COUNTER_BUFFERS);
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::GetBinaryLength() const
+{
+	return getParameter(GL_PROGRAM_BINARY_LENGTH);
+}
+//-----------------------------------------------------------------------------
+void ShaderProgram::SetAttributeLocation(const std::string& attributeName, const unsigned location) const
+{
+	// Note: Link must be called after. Always prefer to specify this explicitly in glsl whenever possible.
+	glBindAttribLocation(m_id, location, attributeName.c_str());
+}
+//-----------------------------------------------------------------------------
+unsigned ShaderProgram::GetAttributeLocation(const std::string& attributeName) const
+{
+	return glGetAttribLocation(m_id, attributeName.c_str());
+}
+//-----------------------------------------------------------------------------
+std::tuple<std::string, unsigned, int> ShaderProgram::GetActiveAttribute(const unsigned location) const
+{
+	std::tuple<std::string, unsigned, int> result;
+	auto& name = std::get<0>(result);
+	auto& type = std::get<1>(result);
+	auto& size = std::get<2>(result);
+	name.resize(GetActiveAttributeMaxLength());
+	glGetActiveAttrib(m_id, location, static_cast<GLsizei>(name.size()), nullptr, &size, &type, &name[0]);
+	return result;
+}
+//-----------------------------------------------------------------------------
+void ShaderProgram::SetTransformFeedbackVaryings(const std::vector<std::string>& varyings, const unsigned bufferMode)
+{
+	std::vector<const char*> varyings_c(varyings.size());
+	std::transform(varyings.begin(), varyings.end(), varyings_c.begin(), [&](const std::string& varying)
+		{
+			return varying.c_str();
+		});
+	glTransformFeedbackVaryings(m_id, static_cast<GLsizei>(varyings.size()), varyings_c.data(), bufferMode);
+}
+//-----------------------------------------------------------------------------
+std::tuple<std::string, unsigned, int> ShaderProgram::GetTransformFeedbackVarying(const unsigned index) const
+{
+	std::tuple<std::string, unsigned, int> result;
+	auto& name = std::get<0>(result);
+	auto& type = std::get<1>(result);
+	auto& size = std::get<2>(result);
+	name.resize(GetTransformFeedbackVaryingMaxLength());
+	glGetTransformFeedbackVarying(m_id, index, static_cast<GLsizei>(name.size()), nullptr, &size, &type, &name[0]);
+	return result;
+}
+//-----------------------------------------------------------------------------
+void ShaderProgram::SetFragDataLocation(const unsigned colorNumber, const std::string& name) const
+{
+	glBindFragDataLocation(m_id, colorNumber, name.c_str());
+}
+//-----------------------------------------------------------------------------
+void ShaderProgram::SetFragDatLocationIndexed(const unsigned colorNumber, const unsigned index, const std::string& name) const
+{
+	glBindFragDataLocationIndexed(m_id, colorNumber, index, name.c_str());
+}
+//-----------------------------------------------------------------------------
+GLuint ShaderProgram::GetFragDataLocation(const std::string& name) const
+{
+	return glGetFragDataLocation(m_id, name.c_str());
+}
+//-----------------------------------------------------------------------------
+GLuint ShaderProgram::GetFragDataIndex(const std::string& name) const
+{
+	return glGetFragDataIndex(m_id, name.c_str());
+}
+//-----------------------------------------------------------------------------
+bool ShaderProgram::IsSlowValid() const
+{
+	if (!IsValid()) return false;
+	glValidateProgram(m_id);
+	return getParameter(GL_VALIDATE_STATUS) != 0;
+}
+//-----------------------------------------------------------------------------
 unsigned ShaderProgram::createShader(ShaderType type, const std::string& shaderString) const
 {
 	if (shaderString.empty() || shaderString == "") return 0;
-		
+			
 	const GLenum glShaderType = translate(type);
 	const GLuint shaderId = glCreateShader(glShaderType);
 
@@ -640,6 +1195,57 @@ unsigned ShaderProgram::createShader(ShaderType type, const std::string& shaderS
 	}
 
 	return shaderId;
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::getParameter(const unsigned parameter) const
+{
+	GLint result;
+	GL_CHECK(glGetProgramiv(m_id, parameter, &result));
+	return result;
+}
+//-----------------------------------------------------------------------------
+#if OPENGL_VERSION >= 43
+int ShaderProgram::getInterfaceParameter(const unsigned interface, const unsigned parameter) const
+{
+	GLint result;
+	GL_CHECK(glGetProgramInterfaceiv(m_id, interface, parameter, &result));
+	return result;
+}
+#endif
+//-----------------------------------------------------------------------------
+int ShaderProgram::getActiveUniformParameter(const unsigned index, const unsigned parameter) const
+{
+	int result = 0;
+	GL_CHECK(glGetActiveUniformsiv(m_id, 1, &index, parameter, &result));
+	return result;
+}
+//-----------------------------------------------------------------------------
+std::vector<int> ShaderProgram::getActiveUniformParameters(const std::vector<unsigned>& indices, const unsigned parameter) const
+{
+	std::vector<int> result(indices.size());
+	GL_CHECK(glGetActiveUniformsiv(m_id, static_cast<GLsizei>(indices.size()), indices.data(), parameter, result.data()));
+	return result;
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::getActiveUniformBlockParameter(const unsigned index, const unsigned parameter) const
+{
+	int result = 0;
+	GL_CHECK(glGetActiveUniformBlockiv(m_id, index, parameter, &result));
+	return result;
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::getActiveAtomicCounterBufferParameter(const unsigned index, const unsigned parameter) const
+{
+	GLint result;
+	GL_CHECK(glGetActiveAtomicCounterBufferiv(m_id, index, parameter, &result));
+	return result;
+}
+//-----------------------------------------------------------------------------
+int ShaderProgram::getProgramStageParameter(const unsigned shaderType, const unsigned parameter) const
+{
+	GLint result;
+	GL_CHECK(glGetProgramStageiv(m_id, shaderType, parameter, &result));
+	return result;
 }
 //-----------------------------------------------------------------------------
 namespace ShaderLoader
@@ -843,7 +1449,7 @@ bool Image::Create(uint16_t width, uint16_t height, uint8_t channels, const std:
 {
 	if (width == 0 || height == 0 || channels == 0 || channels > 4)
 		return false;
-	// TODO: ‚ÓÁ‚‡˘‡Ú¸ Ó¯Ë·ÍÛ ÂÒÎË width/height ÒÎË¯ÍÓÏ ·ÓÎ¸¯ÓÂ
+	// TODO: –≤–æ–∑–≤—Ä–∞—â–∞—Ç—å –æ—à–∏–±–∫—É –µ—Å–ª–∏ width/height —Å–ª–∏—à–∫–æ–º –±–æ–ª—å—à–æ–µ
 
 	Destroy();
 
@@ -851,12 +1457,12 @@ bool Image::Create(uint16_t width, uint16_t height, uint8_t channels, const std:
 	m_height = height;
 	m_comps = channels;
 
-	if (pixelData.empty()) // Á‡ÎËÚ¸ ·ÂÎ˚Ï
+	if (pixelData.empty()) // –∑–∞–ª–∏—Ç—å –±–µ–ª—ã–º
 	{
 		const size_t imageDataSize = width * height * channels;
 		m_pixels = std::move(std::vector<uint8_t>(imageDataSize, 255));
 	}
-	else  // ÒÍÓÔËÓ‚‡Ú¸ ‰‡ÌÌ˚Â
+	else  // —Å–∫–æ–ø–∏—Ä–æ–≤–∞—Ç—å –¥–∞–Ω–Ω—ã–µ
 		m_pixels = pixelData;
 
 	return false;
@@ -866,11 +1472,11 @@ bool Image::Load(const char* fileName, ImagePixelFormat desiredFormat, bool vert
 {
 	Destroy();
 
-	int desired—hannels = STBI_default;
-	if (desiredFormat == ImagePixelFormat::R_U8) desired—hannels = STBI_grey;
-	if (desiredFormat == ImagePixelFormat::RG_U8) desired—hannels = STBI_grey_alpha;
-	if (desiredFormat == ImagePixelFormat::RGB_U8) desired—hannels = STBI_rgb;
-	if (desiredFormat == ImagePixelFormat::RGBA_U8) desired—hannels = STBI_rgb_alpha;
+	int desired–°hannels = STBI_default;
+	if (desiredFormat == ImagePixelFormat::R_U8) desired–°hannels = STBI_grey;
+	if (desiredFormat == ImagePixelFormat::RG_U8) desired–°hannels = STBI_grey_alpha;
+	if (desiredFormat == ImagePixelFormat::RGB_U8) desired–°hannels = STBI_rgb;
+	if (desiredFormat == ImagePixelFormat::RGBA_U8) desired–°hannels = STBI_rgb_alpha;
 
 	int width = 0;
 	int height = 0;
@@ -883,12 +1489,12 @@ bool Image::Load(const char* fileName, ImagePixelFormat desiredFormat, bool vert
 	if (data.empty() || len <= 0)
 		return false;
 		
-	 stbi_uc* pixelData = stbi_load_from_memory((const stbi_uc*)data.data(), len, &width, &height, &comps, desired—hannels);
+	 stbi_uc* pixelData = stbi_load_from_memory((const stbi_uc*)data.data(), len, &width, &height, &comps, desired–°hannels);
 #else
-	stbi_uc* pixelData = stbi_load(fileName, &width, &height, &comps, desired—hannels);
+	stbi_uc* pixelData = stbi_load(fileName, &width, &height, &comps, desired–°hannels);
 #endif
 
-	// TODO: ÔÓ‚ÂÍÛ ˜ÚÓ width ‚ÎÂÁÂÚ ‚ m_width (Ë ‰Îˇ ÓÒÚ‡Î¸Ì˚ı). 
+	// TODO: –ø—Ä–æ–≤–µ—Ä–∫—É —á—Ç–æ width –≤–ª–µ–∑–µ—Ç –≤ m_width (–∏ –¥–ª—è –æ—Å—Ç–∞–ª—å–Ω—ã—Ö). 
 	m_width = width;
 	m_height = height;
 	m_comps = comps;
@@ -900,7 +1506,7 @@ bool Image::Load(const char* fileName, ImagePixelFormat desiredFormat, bool vert
 		return false;
 	}
 
-	m_comps = desired—hannels ? desired—hannels : m_comps;
+	m_comps = desired–°hannels ? desired–°hannels : m_comps;
 
 	const size_t imageDataSize = m_width * m_height * m_comps;
 	m_pixels.assign(pixelData, pixelData + imageDataSize);
@@ -919,8 +1525,8 @@ void Image::Destroy()
 bool Image::IsTransparent() const
 {
 	bool isTransparent = false;
-	// TODO: ÏÓÊÂÚ ·˚Ú¸ ÏÂ‰ÎÂÌÌÓ, ÔÓ‚ÂËÚ¸ ÒÍÓÓÒÚ¸ Ë ÔÓËÒÍ‡Ú¸ ‰Û„ÓÂ Â¯ÂÌËÂ
-	if (m_comps == 4) // TODO: Ò‰ÂÎ‡Ú¸ Â˘Â Ë ‰Îˇ 2
+	// TODO: –º–æ–∂–µ—Ç –±—ã—Ç—å –º–µ–¥–ª–µ–Ω–Ω–æ, –ø—Ä–æ–≤–µ—Ä–∏—Ç—å —Å–∫–æ—Ä–æ—Å—Ç—å –∏ –ø–æ–∏—Å–∫–∞—Ç—å –¥—Ä—É–≥–æ–µ —Ä–µ—à–µ–Ω–∏–µ
+	if (m_comps == 4) // TODO: —Å–¥–µ–ª–∞—Ç—å –µ—â–µ –∏ –¥–ª—è 2
 	{
 		for (int i = 0; i < GetSizeData(); i += 4)
 		{
@@ -982,7 +1588,7 @@ inline bool getTextureFormatType(TexelsFormat inFormat, GLenum textureType, GLen
 		internalFormat = GL_RG8;
 		oglType = GL_UNSIGNED_BYTE;
 		const GLint swizzleMask[] = { GL_RED, GL_RED, GL_RED, GL_GREEN };
-		glTexParameteriv(textureType, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask); // TODO: ÏÓ„ÛÚ ·˚Ú¸ ÔÓ·ÎÂÏ˚ Ò ·‡ÛÁÂ‡ÏË, ÚÓ„‰‡ ÚÓÎ¸ÍÓ „ÛÁËÚ¸ stb Ò ÛÍ‡Á‡ÌËÂÏ ÌÛÊÌÓ„Ó ÙÓÏ‡Ú‡
+		glTexParameteriv(textureType, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask); // TODO: –º–æ–≥—É—Ç –±—ã—Ç—å –ø—Ä–æ–±–ª–µ–º—ã —Å –±—Ä–∞—É–∑–µ—Ä–∞–º–∏, —Ç–æ–≥–¥–∞ —Ç–æ–ª—å–∫–æ –≥—Ä—É–∑–∏—Ç—å stb —Å —É–∫–∞–∑–∞–Ω–∏–µ–º –Ω—É–∂–Ω–æ–≥–æ —Ñ–æ—Ä–º–∞—Ç–∞
 	}
 	else if (inFormat == TexelsFormat::RGB_U8)
 	{
@@ -1051,7 +1657,7 @@ bool Texture2D::Create(Image* image, const Texture2DInfo& textureInfo)
 
 	Texture2DCreateInfo createInfo;
 	{
-		// ÔÓ‚ÂËÚ¸ Ì‡ ÔÓÁ‡˜ÌÓÒÚ¸
+		// –ø—Ä–æ–≤–µ—Ä–∏—Ç—å –Ω–∞ –ø—Ä–æ–∑—Ä–∞—á–Ω–æ—Å—Ç—å
 		createInfo.isTransparent = image->IsTransparent();
 
 		createInfo.format = TexelsFormat::RGB_U8;
@@ -1131,7 +1737,7 @@ void Texture2D::Destroy()
 				Texture2D::UnBind(i);
 		}
 #endif
-		if (!TextureLoader::IsLoad(*this)) // TODO: ÌÂ Û‰‡ÎˇÚ¸ ÚÂÍÒÚÛÛ ÂÒÎË ÓÌ‡ Á‡„ÛÊÂÌ‡ ˜ÂÂÁ ÏÂÌÂ‰ÊÂ, ‚ ·Û‰Û˘ÂÏ Ò‰ÂÎ‡Ú¸ ÔÓ‰Ò˜ÂÚ ÒÒ˚ÎÓÍ Ë Û‰‡ÎˇÚ¸ ÂÒÎË ÌÂÚ
+		if (!TextureLoader::IsLoad(*this)) // TODO: –Ω–µ —É–¥–∞–ª—è—Ç—å —Ç–µ–∫—Å—Ç—É—Ä—É –µ—Å–ª–∏ –æ–Ω–∞ –∑–∞–≥—Ä—É–∂–µ–Ω–∞ —á–µ—Ä–µ–∑ –º–µ–Ω–µ–¥–∂–µ—Ä, –≤ –±—É–¥—É—â–µ–º —Å–¥–µ–ª–∞—Ç—å –ø–æ–¥—Å—á–µ—Ç —Å—Å—ã–ª–æ–∫ –∏ —É–¥–∞–ª—è—Ç—å –µ—Å–ª–∏ –Ω–µ—Ç
 			glDeleteTextures(1, &m_id);
 		m_id = 0;
 	}
