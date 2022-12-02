@@ -84,7 +84,6 @@ bool StartGameApp()
 	genMap.Init();
 	genMap.NewGen();
 
-
 	// Init Camera
 	{
 		ncamera.Teleport(0, 10, -6);
