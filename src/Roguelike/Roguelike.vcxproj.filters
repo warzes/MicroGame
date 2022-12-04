@@ -30,6 +30,12 @@
     <ClCompile Include="Sprite.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
+    <ClCompile Include="DrawHelper.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawTextHelper.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MicroEngine">
@@ -48,5 +54,12 @@
     <ClInclude Include="Sprite.h">
       <Filter>Framework</Filter>
     </ClInclude>
+    <ClInclude Include="DrawHelper.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawTextHelper.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="GameConfig.h" />
   </ItemGroup>
 </Project>

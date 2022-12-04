@@ -252,6 +252,8 @@ void VertexArrayBuffer::Draw(PrimitiveDraw primitive, uint32_t instanceCount)
 	{
 		currentVAO = m_id;
 		glBindVertexArray(m_id);
+		m_vbo->Bind();
+		if (m_ibo) m_ibo->Bind();
 	}
 
 	if (m_instanceBuffer)
@@ -287,6 +289,8 @@ void VertexArrayBuffer::DrawElementsBaseVertex(PrimitiveDraw primitive, uint32_t
 	{
 		currentVAO = m_id;
 		glBindVertexArray(m_id);
+		m_vbo->Bind();
+		if (m_ibo) m_ibo->Bind();
 	}
 
 	const unsigned indexSizeType = m_ibo->GetIndexSize() == sizeof(uint32_t) ? GL_UNSIGNED_INT : GL_UNSIGNED_SHORT;

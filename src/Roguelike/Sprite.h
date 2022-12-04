@@ -3,5 +3,5 @@
 class SpriteChar
 {
 public:
-	static void Draw(float left, float top, float width, float height);
+	static void Draw(const glm::vec2& pos, const glm::vec2& num, const glm::vec4& color);
 };

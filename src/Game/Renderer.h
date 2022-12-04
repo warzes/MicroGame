@@ -442,6 +442,8 @@ public:
 
 	void Bind() const;
 
+	void Update(unsigned offset, unsigned size, const void* data);
+
 	unsigned GetIndexCount() const { return m_indexCount; }
 	unsigned GetIndexSize() const { return m_indexSize; }
 

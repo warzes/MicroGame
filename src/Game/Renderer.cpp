@@ -1933,6 +1933,7 @@ void VertexBuffer::Destroy()
 //-----------------------------------------------------------------------------
 void VertexBuffer::Update(unsigned offset, unsigned size, const void* data)
 {
+	Bind();
 	glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 }
 //-----------------------------------------------------------------------------
@@ -1964,6 +1965,12 @@ void IndexBuffer::Destroy()
 {
 	glDeleteBuffers(1, &m_id);
 	m_id = 0;
+}
+//-----------------------------------------------------------------------------
+void IndexBuffer::Update(unsigned offset, unsigned size, const void* data)
+{
+	Bind();
+	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
 }
 //-----------------------------------------------------------------------------
 void IndexBuffer::Bind() const

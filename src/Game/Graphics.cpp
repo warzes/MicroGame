@@ -1574,9 +1574,9 @@ void main()
 
 	void Text::Destroy()
 	{
-		glDeleteVertexArrays(1, &vao);
-		glDeleteBuffers(1, &vertexBuffer);
-		glDeleteBuffers(1, &indexBuffer);
+		m_vb.Destroy();
+		m_ib.Destroy();
+		m_vao.Destroy();
 	}
 
 	void Text::SetText(const std::wstring& text)
@@ -1610,17 +1610,25 @@ void main()
 			}
 			indexElementCount = indexes.size();
 
-			glBindVertexArray(vao);
-			glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16_t) * indexElementCount, indexes.data(), GL_STATIC_DRAW);
+			if (!m_vao.IsValid())
+			{
+				m_vb.Create(RenderResourceUsage::Dynamic, vertices.size(), sizeof(vertices[0]), vertices.data());
+				m_ib.Create(RenderResourceUsage::Dynamic, indexElementCount, sizeof(uint16_t), indexes.data());
+				m_vao.Create(&m_vb, &m_ib, &cacheShader);
+			}
+			else
+			{
+				auto vb = m_vao.GetVertexBuffer();
+				vb->Update(0, sizeof(vertices), vertices.data());
+				auto ib = m_vao.GetIndexBuffer();
+				ib->Update(0, sizeof(indexes), indexes.data());
+			}
 		}
 	}
 
 	void Text::Draw(const glm::vec3& position, const glm::vec3& color, const glm::mat4& orthoMat)
 	{
-		if (m_text.empty() || !m_font || !m_font->texture.IsValid())
+		if (m_text.empty() || !m_font || !m_font->texture.IsValid() || !m_vao.IsValid())
 			return;
 
 		const glm::mat4 pm = orthoMat * glm::translate(glm::mat4(1.0f), glm::vec3(position.x, position.y, position.z));
@@ -1630,10 +1638,7 @@ void main()
 		cacheShader.SetUniform(m_idAttributeWorldViewProjMatrix, pm);
 
 		m_font->texture.Bind(0);
-		glBindVertexArray(vao);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-		glDrawElements(GL_TRIANGLES, indexElementCount, GL_UNSIGNED_SHORT, nullptr);
-		VertexArrayBuffer::UnBind();
+		m_vao.Draw();
 	}
 
 	bool Text::create(Font* font)
@@ -1648,16 +1653,6 @@ void main()
 			m_idAttributeWorldViewProjMatrix = cacheShader.GetUniformVariable("worldViewProjMatrix");
 			cacheShader.SetUniform("mainTex", 0);
 		}
-
-		glGenVertexArrays(1, &vao);
-		glGenBuffers(1, &vertexBuffer);
-		glGenBuffers(1, &indexBuffer);
-
-		glBindVertexArray(vao);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 
 		return true;
 	}

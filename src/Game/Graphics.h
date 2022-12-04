@@ -250,15 +250,17 @@ namespace g2d
 		void SetText(const std::wstring& text);
 		void Draw(const glm::vec3& position, const glm::vec3& color, const glm::mat4& orthoMat);
 
+		bool IsValid() const { return m_font != nullptr; }
+
 	private:
 		bool create(Font* font);
 
 		std::wstring m_text;
 		Font* m_font = nullptr;
-		unsigned vao = 0;
-		unsigned vertexBuffer = 0;
-		unsigned indexBuffer = 0;
 		uint16_t indexElementCount = 0;
+		VertexArrayBuffer m_vao;
+		VertexBuffer m_vb;
+		IndexBuffer m_ib;
 		float angle = 0;
 	};
 }

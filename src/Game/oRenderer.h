@@ -127,6 +127,9 @@ public:
 
 	static void UnBind();
 
+	VertexBuffer* GetVertexBuffer() { return m_vbo; }
+	IndexBuffer* GetIndexBuffer() { return m_ibo; }
+
 private:
 	unsigned m_id = 0;
 	VertexBuffer* m_vbo = nullptr;
@@ -182,6 +185,20 @@ struct Vertex_Pos2_Color
 	glm::vec3 color;
 };
 
+struct Vertex_Pos2_TexCoord_Color
+{
+	glm::vec2 position;
+	glm::vec2 texCoord;
+	glm::vec3 color;
+};
+
+struct Vertex_Pos2_TexCoord_Color4
+{
+	glm::vec2 position;
+	glm::vec2 texCoord;
+	glm::vec4 color;
+};
+
 struct Vertex_Pos3
 {
 	glm::vec3 position;
@@ -213,6 +230,9 @@ template<> inline std::vector<VertexAttributeRaw> GetVertexAttributes<Vertex_Pos
 	};
 }
 
+
+
+
 template<> inline std::vector<VertexAttributeRaw> GetVertexAttributes<Vertex_Pos2_TexCoord>()
 {
 	using T = Vertex_Pos2_TexCoord;
@@ -230,6 +250,28 @@ template<> inline std::vector<VertexAttributeRaw> GetVertexAttributes<Vertex_Pos
 	{
 		{.size = 2, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)},
 		{.size = 3, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, color)}
+	};
+}
+
+template<> inline std::vector<VertexAttributeRaw> GetVertexAttributes<Vertex_Pos2_TexCoord_Color>()
+{
+	using T = Vertex_Pos2_TexCoord_Color;
+	return
+	{
+		{.size = 2, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)},
+		{.size = 2, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, texCoord)},
+		{.size = 3, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, color)}
+	};
+}
+
+template<> inline std::vector<VertexAttributeRaw> GetVertexAttributes<Vertex_Pos2_TexCoord_Color4>()
+{
+	using T = Vertex_Pos2_TexCoord_Color4;
+	return
+	{
+		{.size = 2, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, position)},
+		{.size = 2, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, texCoord)},
+		{.size = 4, .type = VertexAttributeTypeRaw::Float, .normalized = false, .stride = sizeof(T), .pointer = (void*)offsetof(T, color)}
 	};
 }
 
