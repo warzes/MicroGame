@@ -61,9 +61,7 @@ void InitTest()
 
 	// Load Texture
 	{
-		Texture2DLoaderInfo info;
-		info.fileName = "../data/textures/crate.png";
-		texture2d.CreateFromFiles(info);
+		texture2d.Create("../data/textures/crate.png");
 	}
 
 	// Load geometry

@@ -3,6 +3,7 @@
 #include "Core.h"
 #include "Platform.h"
 #include "Renderer.h"
+#include "oRenderer.h"
 
 #include <stb/stb_image.h>
 //-----------------------------------------------------------------------------
@@ -1931,10 +1932,23 @@ void VertexBuffer::Destroy()
 	m_id = 0;
 }
 //-----------------------------------------------------------------------------
-void VertexBuffer::Update(unsigned offset, unsigned size, const void* data)
+void VertexBuffer::Update(unsigned offset, unsigned vertexCount, unsigned vertexSize, const void* data)
 {
 	Bind();
-	glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+
+	if (m_vertexCount != vertexCount || m_vertexSize != vertexSize || m_usage != RenderResourceUsage::Dynamic)
+	{
+		GL_CHECK(glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptrARB>(vertexCount * m_vertexSize), data, translate(RenderResourceUsage::Dynamic)));
+		m_usage = RenderResourceUsage::Dynamic;
+	}
+	else
+	{
+		GL_CHECK(glBufferSubData(GL_ARRAY_BUFFER, offset, static_cast<GLsizeiptrARB>(vertexCount * m_vertexSize), data));
+	}
+	m_vertexCount = vertexCount;
+	m_vertexSize = vertexSize;
+	
+	VertexArrayBuffer::UnBind();
 }
 //-----------------------------------------------------------------------------
 void VertexBuffer::Bind() const

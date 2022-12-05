@@ -415,7 +415,7 @@ public:
 	bool Create(RenderResourceUsage usage, unsigned vertexCount, unsigned vertexSize, const void* data);
 	void Destroy();
 
-	void Update(unsigned offset, unsigned size, const void* data);
+	void Update(unsigned offset, unsigned vertexCount, unsigned vertexSize, const void* data);
 
 	void Bind() const;
 

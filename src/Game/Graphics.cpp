@@ -1265,7 +1265,7 @@ outColor = vec4(1.0, 1.0, 1.0, 1.0);
 				startPos.x, startPos.y, startPos.z,// 0
 				endPos.x, endPos.y,  endPos.z// 1
 			};
-			vertexBuf.Update(0, sizeof(vertexData), vertexData);
+			vertexBuf.Update(0,2, sizeof(float)*3, vertexData);
 		}
 
 		//const glm::mat4 ModelMatrix = glm::translate(glm::mat4(1.0f), position);
@@ -1619,7 +1619,7 @@ void main()
 			else
 			{
 				auto vb = m_vao.GetVertexBuffer();
-				vb->Update(0, sizeof(vertices), vertices.data());
+				vb->Update(0, vertices.size(), sizeof(vertices[0]), vertices.data());
 				auto ib = m_vao.GetIndexBuffer();
 				ib->Update(0, sizeof(indexes), indexes.data());
 			}

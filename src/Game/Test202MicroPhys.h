@@ -2,8 +2,6 @@
 
 //это оставить, но подключить physx
 
-#include "temp.h"
-
 #define LEVEL_VERTEX_COUNT 84
 float levelVertices[LEVEL_VERTEX_COUNT * 3] = 
 {

@@ -49,6 +49,9 @@ void main()
 	VertexArrayBuffer vao;
 	VertexBuffer vb;
 	IndexBuffer ib;
+
+	std::vector<Vertex_Pos2_TexCoord_Color4> vertex;
+	std::vector<uint16_t> index;
 }
 
 void SpriteChar::Draw(const glm::vec2& pos, const glm::vec2& num, const glm::vec4& color)
@@ -83,15 +86,11 @@ void SpriteChar::Draw(const glm::vec2& pos, const glm::vec2& num, const glm::vec
 				1, 3, 2,
 			};
 
-			vb.Create(RenderResourceUsage::Dynamic, 4, sizeof(vertices[0]), vertices);
-			ib.Create(RenderResourceUsage::Static, 6, sizeof(uint16_t), indexData);
+			vb.Create(RenderResourceUsage::Dynamic, 1, sizeof(Vertex_Pos2_TexCoord_Color4), nullptr);
+			ib.Create(RenderResourceUsage::Dynamic, 6, sizeof(uint16_t), indexData);
 			vao.Create(&vb, &ib, &shader);
 		}
 	}
-
-	texture12x12.Bind();
-
-	shader.Bind();
 
 	{
 		const float numTileX = texture12x12.GetWidth() / 12.0f;
@@ -104,11 +103,11 @@ void SpriteChar::Draw(const glm::vec2& pos, const glm::vec2& num, const glm::vec
 		const float t3 = 0.0f + tex2 * (numTileY - num.y);
 		const float t4 = tex2 + tex2 * (numTileY - num.y);
 
-		const float sizeX = 12.0f;
-		const float sizeY = 12.0f;
+		const float sizeX = TileSize;
+		const float sizeY = TileSize;
 
-		const float posX = pos.x;
-		const float posY = pos.y;
+		const float posX = pos.x * TileSize;
+		const float posY = pos.y * TileSize;
 
 		const Vertex_Pos2_TexCoord_Color4 vertices[] =
 		{
@@ -118,8 +117,11 @@ void SpriteChar::Draw(const glm::vec2& pos, const glm::vec2& num, const glm::vec
 			{ { 0.5f*sizeX + posX,  0.5f*sizeX + posY}, {t2, t3}, {color.x, color.y, color.z, color.w} },
 		};
 		auto vb = vao.GetVertexBuffer();
-		vb->Update(0, sizeof(vertices), vertices);
+		vb->Update(0, 4, sizeof(Vertex_Pos2_TexCoord_Color4), vertices);
 	}
+
+	texture12x12.Bind();
+	shader.Bind();
 
 	const float widthHeight = 480.0f;
 	const float widthScreen = widthHeight * GetFrameBufferAspectRatio();
@@ -127,4 +129,8 @@ void SpriteChar::Draw(const glm::vec2& pos, const glm::vec2& num, const glm::vec
 	shader.SetUniform(wvpUniform, ortho);
 
 	vao.Draw();
+}
+
+void SpriteChar::Flush()
+{
 }

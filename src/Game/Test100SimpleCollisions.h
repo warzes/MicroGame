@@ -105,7 +105,7 @@ void FrameTest(float deltaTime)
 
 			// intersection
 			Ray r = Ray(ro, rd);
-			Plane pl = Plane(glm::vec3(0, 0, 28), glm::vec3(0, 0, 1));
+			PlaneOld pl = PlaneOld(glm::vec3(0, 0, 28), glm::vec3(0, 0, 1));
 			Hit* hit = collide::RayHitPlane(r, pl);
 			if (hit)
 			{
