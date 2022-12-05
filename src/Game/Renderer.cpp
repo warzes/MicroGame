@@ -1915,7 +1915,7 @@ bool VertexBuffer::Create(RenderResourceUsage usage, unsigned vertexCount, unsig
 
 	GL_CHECK(glGenBuffers(1, &m_id));
 	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, m_id));
-	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptrARB>(vertexCount * m_vertexSize), data, translate(m_usage)));
+	GL_CHECK(glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptrARB>(vertexCount * vertexSize), data, translate(m_usage)));
 
 	// Be polite and restore the previous bound OpenGL array buffer
 	GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(openGLArrayBufferBackup)));
@@ -1938,12 +1938,12 @@ void VertexBuffer::Update(unsigned offset, unsigned vertexCount, unsigned vertex
 
 	if (m_vertexCount != vertexCount || m_vertexSize != vertexSize || m_usage != RenderResourceUsage::Dynamic)
 	{
-		GL_CHECK(glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptrARB>(vertexCount * m_vertexSize), data, translate(RenderResourceUsage::Dynamic)));
+		GL_CHECK(glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptrARB>(vertexCount * vertexSize), data, translate(RenderResourceUsage::Dynamic)));
 		m_usage = RenderResourceUsage::Dynamic;
 	}
 	else
 	{
-		GL_CHECK(glBufferSubData(GL_ARRAY_BUFFER, offset, static_cast<GLsizeiptrARB>(vertexCount * m_vertexSize), data));
+		GL_CHECK(glBufferSubData(GL_ARRAY_BUFFER, offset, static_cast<GLsizeiptrARB>(vertexCount * vertexSize), data));
 	}
 	m_vertexCount = vertexCount;
 	m_vertexSize = vertexSize;
@@ -1981,10 +1981,23 @@ void IndexBuffer::Destroy()
 	m_id = 0;
 }
 //-----------------------------------------------------------------------------
-void IndexBuffer::Update(unsigned offset, unsigned size, const void* data)
+void IndexBuffer::Update(unsigned offset, unsigned indexCount, unsigned indexSize, const void* data)
 {
 	Bind();
-	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
+
+	if (m_indexCount != indexCount || m_indexSize != indexSize || m_usage != RenderResourceUsage::Dynamic)
+	{
+		GL_CHECK(glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptrARB>(indexCount * indexSize), data, translate(RenderResourceUsage::Dynamic)));
+		m_usage = RenderResourceUsage::Dynamic;
+	}
+	else
+	{
+		GL_CHECK(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, static_cast<GLsizeiptrARB>(indexCount * indexSize), data));
+	}
+	m_indexCount = indexCount;
+	m_indexSize = indexSize;
+
+	VertexArrayBuffer::UnBind();
 }
 //-----------------------------------------------------------------------------
 void IndexBuffer::Bind() const

@@ -6,14 +6,16 @@
 //-----------------------------------------------------------------------------
 bool StartGameApp()
 {
-
 	RenderSystem::SetFrameColor(glm::vec3(0.15, 0.15, 0.15));
+
+	SpriteChar::Init();
 
 	return true;
 }
 
 void CloseGameApp()
 {
+	SpriteChar::Close();
 }
 
 int x = 19;

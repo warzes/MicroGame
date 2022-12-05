@@ -1621,7 +1621,7 @@ void main()
 				auto vb = m_vao.GetVertexBuffer();
 				vb->Update(0, vertices.size(), sizeof(vertices[0]), vertices.data());
 				auto ib = m_vao.GetIndexBuffer();
-				ib->Update(0, sizeof(indexes), indexes.data());
+				ib->Update(0, indexElementCount, sizeof(uint16_t), indexes.data());
 			}
 		}
 	}

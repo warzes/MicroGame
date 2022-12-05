@@ -4,36 +4,62 @@
 #include "DrawTextHelper.h"
 //-----------------------------------------------------------------------------
 //TODO: нужна функция которвя возвращает размер строки в пикселях
-//в спрайт драв нужно сделать один дип (как в дебагдраве)
 //в рисовалке дерева возможно другие тайлы
+//-----------------------------------------------------------------------------
+void DrawHelper::GetScreenWorldViewport(int& left, int& right, int& top, int& bottom)
+{
+	left = 1;
+	right = ScreenHeight * GetFrameBufferAspectRatio() / TileSize - 13;
+	top = 1;
+	bottom = ScreenHeight / TileSize - 9;
+}
 //-----------------------------------------------------------------------------
 void DrawHelper::DrawMainUI()
 {
-	SpriteChar::Draw({ 1, 1 }, { 9, 13 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-	SpriteChar::Draw({ 38, 1 }, { 11, 12 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-	SpriteChar::Draw({ 1, 30 }, { 8, 13 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-	SpriteChar::Draw({ 38, 30 }, { 12, 12 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-
-
 	std::wstring nameMap = L"Тестовая карта";
-	int offstepNameX = (nameMap.length() / 2) / (16.0f / TileSize);
-	int skip1 = (39.0f / 2.0f - offstepNameX);
-	int skip2 = (39.0f / 2.0f + offstepNameX);
 
-	for (int x = 2; x < 38; x++)
+	// границы окна карты
+	int leftMapScreen = 1;
+	int rightMapScreen = 1;
+	int topMapScreen = 1;
+	int bottomMapScreen = 1;
+	GetScreenWorldViewport(leftMapScreen, rightMapScreen, topMapScreen, bottomMapScreen);
+
+	// позиция названия карты
+	const int offstepNameX = (nameMap.length() / 2.0f) / (16.0f / TileSize);
+	const int skip1 = (rightMapScreen / 2.0f - offstepNameX);
+	const int skip2 = (rightMapScreen / 2.0f + offstepNameX);
+
+	// отрисовка рамки окна карты
 	{
-		if (x <= skip1 || x >= skip2)
-			SpriteChar::Draw({ x, 1 }, { 13, 13 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-		SpriteChar::Draw({ x, 30 }, { 13, 13 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+		SpriteChar::Draw({ leftMapScreen, topMapScreen }, { 9, 13 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+		SpriteChar::Draw({ rightMapScreen, topMapScreen }, { 11, 12 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+		SpriteChar::Draw({ leftMapScreen, bottomMapScreen }, { 8, 13 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+		SpriteChar::Draw({ rightMapScreen, bottomMapScreen }, { 12, 12 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+		for (int x = leftMapScreen + 1; x < rightMapScreen; x++)
+		{
+			if (x <= skip1 || x >= skip2)
+				SpriteChar::Draw({ x, topMapScreen }, { 13, 13 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+			SpriteChar::Draw({ x, bottomMapScreen }, { 13, 13 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+		}
+
+		for (int y = topMapScreen + 1; y < bottomMapScreen; y++)
+		{
+			SpriteChar::Draw({ leftMapScreen, y }, { 10, 12 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+			SpriteChar::Draw({ rightMapScreen, y }, { 10, 12 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+		}
 	}
 
-	for (int y = 2; y < 30; y++)
-	{
-		SpriteChar::Draw({ 1, y }, { 10, 12 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-		SpriteChar::Draw({ 38, y }, { 10, 12 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-	}
-
-	DrawTextHelper::DrawCommonText(nameMap, glm::vec2((skip1+ (16.0f / TileSize))* TileSize, 8), glm::vec3(1.0f, 1.0f, 1.0f));
+	// название карты
+	DrawTextHelper::DrawCommonText(
+		nameMap,
+		glm::vec2((skip1 + (16.0f / TileSize)) * TileSize, 8.0f * topMapScreen),
+		glm::vec3(1.0f, 1.0f, 1.0f));
+}
+//-----------------------------------------------------------------------------
+void DrawHelper::DrawPlayer()
+{
 }
 //-----------------------------------------------------------------------------
 void DrawHelper::DrawTree(const glm::vec2& pos, int num)

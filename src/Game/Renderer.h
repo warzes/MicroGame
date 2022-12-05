@@ -412,6 +412,7 @@ namespace TextureLoader
 class VertexBuffer
 {
 public:
+	// TODO: возможность создания буфера без данных
 	bool Create(RenderResourceUsage usage, unsigned vertexCount, unsigned vertexSize, const void* data);
 	void Destroy();
 
@@ -437,12 +438,13 @@ private:
 class IndexBuffer
 {
 public:
+	// TODO: возможность создания буфера без данных
 	bool Create(RenderResourceUsage usage, unsigned indexCount, unsigned indexSize, const void* data);
 	void Destroy();
 
 	void Bind() const;
 
-	void Update(unsigned offset, unsigned size, const void* data);
+	void Update(unsigned offset, unsigned indexCount, unsigned indexSize, const void* data);
 
 	unsigned GetIndexCount() const { return m_indexCount; }
 	unsigned GetIndexSize() const { return m_indexSize; }

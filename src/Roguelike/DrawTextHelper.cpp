@@ -10,7 +10,7 @@ void DrawTextHelper::DrawCommonText(const std::wstring str, const glm::vec2& pos
 		CommonText.Create("../data/fonts/OpenSans-Regular.ttf", 16);
 	}
 
-	const float widthHeight = 480.0f;
+	const float widthHeight = ScreenHeight;
 	const float widthScreen = widthHeight * GetFrameBufferAspectRatio();
 	glm::mat4 ortho = glm::ortho(0.0f, widthScreen, widthHeight, 0.0f, 0.0f, 1.0f);
 	CommonText.SetText(str);

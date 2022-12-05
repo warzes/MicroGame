@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Sprite.h"
-
+//-----------------------------------------------------------------------------
 namespace
 {
 	constexpr const char* vertex_shader_text = R"(
@@ -52,9 +52,12 @@ void main()
 
 	std::vector<Vertex_Pos2_TexCoord_Color4> vertex;
 	std::vector<uint16_t> index;
+	unsigned currentNumVertex = 0;
+	unsigned currentNumIndex = 0;
+	unsigned currentIndex = 0;
 }
-
-void SpriteChar::Draw(const glm::vec2& pos, const glm::vec2& num, const glm::vec4& color)
+//-----------------------------------------------------------------------------
+void SpriteChar::Init()
 {
 	if (!shader.IsValid())
 	{
@@ -73,64 +76,81 @@ void SpriteChar::Draw(const glm::vec2& pos, const glm::vec2& num, const glm::vec
 
 		// Load geometry
 		{
-			constexpr Vertex_Pos2_TexCoord_Color4 vertices[] =
-			{
-				{ {-0.5f, -0.5f}, {0.f, 0.f}, {1.0f, 1.0f, 1.0f, 1.0f} },
-				{ { 0.5f, -0.5f}, {1.f, 0.f}, {1.0f, 1.0f, 1.0f, 1.0f} },
-				{ {-0.5f,  0.5f}, {0.f, 1.f}, {1.0f, 1.0f, 1.0f, 1.0f} },
-				{ { 0.5f,  0.5f}, {1.f, 1.f}, {1.0f, 1.0f, 1.0f, 1.0f} },
-			};
-			constexpr uint16_t indexData[] =
-			{
-				0, 1, 2,
-				1, 3, 2,
-			};
-
-			vb.Create(RenderResourceUsage::Dynamic, 1, sizeof(Vertex_Pos2_TexCoord_Color4), nullptr);
-			ib.Create(RenderResourceUsage::Dynamic, 6, sizeof(uint16_t), indexData);
+			vb.Create(RenderResourceUsage::Dynamic, 1, 1, nullptr);
+			ib.Create(RenderResourceUsage::Dynamic, 1, 1, nullptr);
 			vao.Create(&vb, &ib, &shader);
 		}
 	}
+}
+void SpriteChar::Close()
+{
+	vao.Destroy();
+	vb.Destroy();
+	ib.Destroy();
+	texture12x12.Destroy();
+	shader.Destroy();
+}
 
-	{
-		const float numTileX = texture12x12.GetWidth() / 12.0f;
-		const float numTileY = texture12x12.GetHeight() / 12.0f;
+void SpriteChar::Draw(const glm::vec2& pos, const glm::vec2& num, const glm::vec4& color)
+{
+	const float numTileX = texture12x12.GetWidth() / TileSize;
+	const float numTileY = texture12x12.GetHeight() / TileSize;
 
-		const float tex1 = 1.0f / numTileX;
-		const float tex2 = 1.0f / numTileY;
-		const float t1 = 0.0f + tex1 * num.x;
-		const float t2 = tex1 + tex1 * num.x;
-		const float t3 = 0.0f + tex2 * (numTileY - num.y);
-		const float t4 = tex2 + tex2 * (numTileY - num.y);
+	const float tex1 = 1.0f / numTileX;
+	const float tex2 = 1.0f / numTileY;
+	const float t1 = 0.0f + tex1 * num.x;
+	const float t2 = tex1 + tex1 * num.x;
+	const float t3 = 0.0f + tex2 * (numTileY - num.y);
+	const float t4 = tex2 + tex2 * (numTileY - num.y);
 
-		const float sizeX = TileSize;
-		const float sizeY = TileSize;
+	const float sizeX = TileSize;
+	const float sizeY = TileSize;
 
-		const float posX = pos.x * TileSize;
-		const float posY = pos.y * TileSize;
+	const float posX = pos.x * TileSize;
+	const float posY = pos.y * TileSize;
 
-		const Vertex_Pos2_TexCoord_Color4 vertices[] =
-		{
-			{ {-0.5f*sizeX + posX, -0.5f*sizeX + posY}, {t1, t4}, {color.x, color.y, color.z, color.w} },
-			{ { 0.5f*sizeX + posX, -0.5f*sizeX + posY}, {t2, t4}, {color.x, color.y, color.z, color.w} },
-			{ {-0.5f*sizeX + posX,  0.5f*sizeX + posY}, {t1, t3}, {color.x, color.y, color.z, color.w} },
-			{ { 0.5f*sizeX + posX,  0.5f*sizeX + posY}, {t2, t3}, {color.x, color.y, color.z, color.w} },
-		};
-		auto vb = vao.GetVertexBuffer();
-		vb->Update(0, 4, sizeof(Vertex_Pos2_TexCoord_Color4), vertices);
-	}
+	if (currentNumVertex + 3 >= vertex.size())
+		vertex.resize(currentNumVertex + 4);
 
-	texture12x12.Bind();
-	shader.Bind();
+	vertex[currentNumVertex + 0] = { {-0.5f * sizeX + posX, -0.5f * sizeX + posY}, {t1, t4}, {color.x, color.y, color.z, color.w} };
+	vertex[currentNumVertex + 1] = { { 0.5f * sizeX + posX, -0.5f * sizeX + posY}, {t2, t4}, {color.x, color.y, color.z, color.w} };
+	vertex[currentNumVertex + 2] = { {-0.5f * sizeX + posX,  0.5f * sizeX + posY}, {t1, t3}, {color.x, color.y, color.z, color.w} };
+	vertex[currentNumVertex + 3] = { { 0.5f * sizeX + posX,  0.5f * sizeX + posY}, {t2, t3}, {color.x, color.y, color.z, color.w} };
 
-	const float widthHeight = 480.0f;
-	const float widthScreen = widthHeight * GetFrameBufferAspectRatio();
-	glm::mat4 ortho = glm::ortho(0.0f, widthScreen, widthHeight, 0.0f, 0.0f, 1.0f);
-	shader.SetUniform(wvpUniform, ortho);
+	currentNumVertex = currentNumVertex + 4;
 
-	vao.Draw();
+	if (currentNumIndex + 5 >= index.size())
+		index.resize(currentNumIndex + 6);
+
+	index[currentNumIndex + 0] = currentIndex + 0;
+	index[currentNumIndex + 1] = currentIndex + 1;
+	index[currentNumIndex + 2] = currentIndex + 2;
+	index[currentNumIndex + 3] = currentIndex + 1;
+	index[currentNumIndex + 4] = currentIndex + 3;
+	index[currentNumIndex + 5] = currentIndex + 2;
+
+	currentNumIndex = currentNumIndex + 6;
+	currentIndex = currentIndex + 4;
 }
 
 void SpriteChar::Flush()
 {
+	texture12x12.Bind();
+	shader.Bind();
+	const float widthHeight = ScreenHeight;
+	const float widthScreen = widthHeight * GetFrameBufferAspectRatio();
+	glm::mat4 ortho = glm::ortho(0.0f, widthScreen, widthHeight, 0.0f, 0.0f, 1.0f);
+	shader.SetUniform(wvpUniform, ortho);
+
+	auto vb = vao.GetVertexBuffer();
+	vb->Update(0, currentNumVertex, sizeof(Vertex_Pos2_TexCoord_Color4), vertex.data());
+
+	auto ib = vao.GetIndexBuffer();
+	ib->Update(0, currentNumIndex, sizeof(uint16_t), index.data());
+
+	vao.Draw();
+
+	currentNumVertex = 0;
+	currentNumIndex = 0;
+	currentIndex = 0;
 }
