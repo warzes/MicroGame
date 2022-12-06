@@ -56,34 +56,43 @@ void DrawHelper::DrawMainUI()
 		nameMap,
 		glm::vec2((skip1 + (16.0f / TileSize)) * TileSize, 8.0f * topMapScreen),
 		glm::vec3(1.0f, 1.0f, 1.0f));
-}
-//-----------------------------------------------------------------------------
-void DrawHelper::DrawPlayer()
-{
+
+	// отрисовка персонажа в центре
+	SpriteChar::Draw({ 
+		rightMapScreen /2,
+		bottomMapScreen/2}, {1, 35}, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 }
 //-----------------------------------------------------------------------------
 void DrawHelper::DrawTree(const glm::vec2& pos, int num)
 {
 	for (int i = 0; i < num; i++)
 	{
-		SpriteChar::Draw({ pos.x - 1, pos.y - 1 - i*1 }, { 7, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
-		SpriteChar::Draw({ pos.x,     pos.y - 1 - i*1 }, { 10, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
-		SpriteChar::Draw({ pos.x + 1, pos.y - 1 - i*1 }, { 8, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
+		SpriteChar::DrawInMapScreen({ pos.x - 1, pos.y - 1 - i*1 }, { 7, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
+		SpriteChar::DrawInMapScreen({ pos.x,     pos.y - 1 - i*1 }, { 10, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
+		SpriteChar::DrawInMapScreen({ pos.x + 1, pos.y - 1 - i*1 }, { 8, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
 	}
 
 	for (int i = 0; i < num; i++)
 	{
-		SpriteChar::Draw({ pos.x - 1 - i*1, pos.y }, { 12, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
-		SpriteChar::Draw({ pos.x + 1 + i*1, pos.y }, { 13, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
+		SpriteChar::DrawInMapScreen({ pos.x - 1 - i*1, pos.y }, { 12, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
+		SpriteChar::DrawInMapScreen({ pos.x + 1 + i*1, pos.y }, { 13, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
 	}
 
 	for (int i = 0; i < num; i++)
 	{
-		SpriteChar::Draw({ pos.x - 1, pos.y + 1 + i*1}, { 6, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
-		SpriteChar::Draw({ pos.x,     pos.y + 1 + i*1}, { 11, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
-		SpriteChar::Draw({ pos.x + 1, pos.y + 1 + i*1}, { 9, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
+		SpriteChar::DrawInMapScreen({ pos.x - 1, pos.y + 1 + i*1}, { 6, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
+		SpriteChar::DrawInMapScreen({ pos.x,     pos.y + 1 + i*1}, { 11, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
+		SpriteChar::DrawInMapScreen({ pos.x + 1, pos.y + 1 + i*1}, { 9, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
 	}
 
-	SpriteChar::Draw({ pos.x, pos.y }, { 10, 3 }, glm::vec4(1.0f, 0.8f, 0.2f, 1.0f));
+	SpriteChar::DrawInMapScreen({ pos.x, pos.y }, { 10, 3 }, glm::vec4(1.0f, 0.8f, 0.2f, 1.0f));
+}
+//-----------------------------------------------------------------------------
+void DrawHelper::DrawGrass(const glm::vec2& pos, int num)
+{
+	if (num == 1) SpriteChar::DrawInMapScreen({ pos.x, pos.y }, { 10, 4 }, glm::vec4(0.1f, 1.0f, 0.3f, 1.0f));
+	else if (num == 2) SpriteChar::DrawInMapScreen({ pos.x, pos.y }, { 11, 4 }, glm::vec4(0.1f, 1.0f, 0.3f, 1.0f));
+	else if (num == 3) SpriteChar::DrawInMapScreen({ pos.x, pos.y }, { 14, 3 }, glm::vec4(0.1f, 1.0f, 0.3f, 1.0f));
+	else if (num == 4) SpriteChar::DrawInMapScreen({ pos.x, pos.y }, { 12, 3 }, glm::vec4(0.1f, 1.0f, 0.3f, 1.0f));
 }
 //-----------------------------------------------------------------------------

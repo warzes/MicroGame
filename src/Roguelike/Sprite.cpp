@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Sprite.h"
+#include "DrawHelper.h"
 //-----------------------------------------------------------------------------
 namespace
 {
@@ -133,6 +134,21 @@ void SpriteChar::Draw(const glm::vec2& pos, const glm::vec2& num, const glm::vec
 	currentIndex = currentIndex + 4;
 }
 
+void SpriteChar::DrawInMapScreen(const glm::vec2& pos, const glm::vec2& num, const glm::vec4& color)
+{
+	int leftMapScreen = 1;
+	int rightMapScreen = 1;
+	int topMapScreen = 1;
+	int bottomMapScreen = 1;
+	DrawHelper::GetScreenWorldViewport(leftMapScreen, rightMapScreen, topMapScreen, bottomMapScreen);
+
+	if (pos.x <= leftMapScreen || pos.x >= rightMapScreen ||
+		pos.y <= topMapScreen || pos.y >= bottomMapScreen)
+		return;
+
+	Draw(pos, num, color);
+}
+
 void SpriteChar::Flush()
 {
 	texture12x12.Bind();
@@ -142,11 +158,11 @@ void SpriteChar::Flush()
 	glm::mat4 ortho = glm::ortho(0.0f, widthScreen, widthHeight, 0.0f, 0.0f, 1.0f);
 	shader.SetUniform(wvpUniform, ortho);
 
-	auto vb = vao.GetVertexBuffer();
-	vb->Update(0, currentNumVertex, sizeof(Vertex_Pos2_TexCoord_Color4), vertex.data());
+	auto pvb = vao.GetVertexBuffer();
+	pvb->Update(0, currentNumVertex, sizeof(Vertex_Pos2_TexCoord_Color4), vertex.data());
 
-	auto ib = vao.GetIndexBuffer();
-	ib->Update(0, currentNumIndex, sizeof(uint16_t), index.data());
+	auto pib = vao.GetIndexBuffer();
+	pib->Update(0, currentNumIndex, sizeof(uint16_t), index.data());
 
 	vao.Draw();
 

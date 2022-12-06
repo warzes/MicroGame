@@ -7,9 +7,9 @@ public:
 
 	static void DrawMainUI();
 
-	static void DrawPlayer();
-
 	static void DrawTree(const glm::vec2& pos, int num  =1);
+
+	static void DrawGrass(const glm::vec2& pos, int num);
 
 
 };

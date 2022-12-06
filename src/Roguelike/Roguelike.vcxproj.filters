@@ -36,6 +36,9 @@
     <ClCompile Include="DrawTextHelper.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
+    <ClCompile Include="World.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MicroEngine">
@@ -46,6 +49,9 @@
     </Filter>
     <Filter Include="Framework">
       <UniqueIdentifier>{ed00eadf-d9b7-4dca-b0df-4faab038f764}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="World">
+      <UniqueIdentifier>{0569972e-b30b-4477-ab6e-77301fce67c2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -61,5 +67,8 @@
       <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="GameConfig.h" />
+    <ClInclude Include="World.h">
+      <Filter>World</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -2,6 +2,9 @@
 
 #include "Sprite.h"
 #include "DrawHelper.h"
+#include "World.h"
+
+Map map;
 
 //-----------------------------------------------------------------------------
 bool StartGameApp()
@@ -9,6 +12,8 @@ bool StartGameApp()
 	RenderSystem::SetFrameColor(glm::vec3(0.15, 0.15, 0.15));
 
 	SpriteChar::Init();
+
+	map.Create();
 
 	return true;
 }
@@ -20,6 +25,7 @@ void CloseGameApp()
 
 int x = 19;
 int y = 15;
+
 
 float pauseStepW = 0.0f;
 float pauseStepS = 0.0f;
@@ -86,9 +92,7 @@ void FrameGameApp(float deltaTime)
 {
 	DrawHelper::DrawMainUI();
 
-	DrawHelper::DrawTree(glm::vec2(6, 6), 2);
-
-	SpriteChar::Draw({ x, y }, { 1, 35 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	map.Draw(glm::vec2{x,y});
 
 	SpriteChar::Flush();
 }

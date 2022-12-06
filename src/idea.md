@@ -1,4 +1,10 @@
-﻿https://watabou.itch.io/village-generator - генератор деревни
+﻿Модели делать в стиле LEGO Bricktales (только без выступов лего, гладкими)
+
+
+
+
+
+https://watabou.itch.io/village-generator - генератор деревни
 
 
 
