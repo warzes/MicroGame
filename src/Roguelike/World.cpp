@@ -14,10 +14,19 @@ void Tile::Draw(const glm::vec2& pos)
 		object->Draw(pos);
 	else
 	{
-		if (type == Grass1) DrawHelper::DrawGrass(pos, 1);
+		if (type == None) return;
+
+		else if (type == Grass1) DrawHelper::DrawGrass(pos, 1);
 		else if (type == Grass2) DrawHelper::DrawGrass(pos, 2);
 		else if (type == Grass3) DrawHelper::DrawGrass(pos, 3);
 		else if (type == Grass4) DrawHelper::DrawGrass(pos, 4);
+
+		else if (type == Floor1) DrawHelper::DrawFloor(pos, 1, color);
+		else if (type == Floor2) DrawHelper::DrawFloor(pos, 2, color);
+		else if (type == Floor3) DrawHelper::DrawFloor(pos, 3, color);
+		else if (type == Floor4) DrawHelper::DrawFloor(pos, 4, color);
+
+		else if (type == Wall1) DrawHelper::DrawWall(pos, 1, color);
 	}
 }
 //-----------------------------------------------------------------------------

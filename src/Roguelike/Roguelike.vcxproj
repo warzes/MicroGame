@@ -223,10 +223,13 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Character.cpp" />
     <ClCompile Include="DrawHelper.cpp" />
     <ClCompile Include="DrawTextHelper.cpp" />
     <ClCompile Include="EngineImpl.cpp" />
+    <ClCompile Include="GenerateMap.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="privateGenerateMap.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -237,9 +240,12 @@
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Character.h" />
     <ClInclude Include="DrawHelper.h" />
     <ClInclude Include="GameApp.h" />
     <ClInclude Include="GameConfig.h" />
+    <ClInclude Include="GenerateMap.h" />
+    <ClInclude Include="privateGenerateMap.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="DrawTextHelper.h" />

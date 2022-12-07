@@ -3,6 +3,7 @@
 #include "Sprite.h"
 #include "DrawHelper.h"
 #include "World.h"
+#include "GenerateMap.h"
 
 Map map;
 
@@ -13,7 +14,8 @@ bool StartGameApp()
 
 	SpriteChar::Init();
 
-	map.Create();
+	//map.Create();
+	GenerateMap::GenerateDungeons(map);
 
 	return true;
 }
@@ -32,7 +34,7 @@ float pauseStepS = 0.0f;
 float pauseStepA = 0.0f;
 float pauseStepD = 0.0f;
 
-float speedStep = 7.0f;
+float speedStep = 15.0f;
 
 bool IsTurn = false;
 

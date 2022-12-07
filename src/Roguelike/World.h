@@ -28,8 +28,15 @@ public:
 		Grass2,
 		Grass3,
 		Grass4,
+
+		Floor1,
+		Floor2,
+		Floor3,
+		Floor4,
+		Wall1,
 	};
 	TileType type = None;
+	glm::vec4 color = glm::vec4(1.0f);
 };
 
 class Map

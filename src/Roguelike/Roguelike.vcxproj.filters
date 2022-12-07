@@ -39,6 +39,15 @@
     <ClCompile Include="World.cpp">
       <Filter>World</Filter>
     </ClCompile>
+    <ClCompile Include="Character.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="GenerateMap.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="privateGenerateMap.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MicroEngine">
@@ -68,6 +77,15 @@
     </ClInclude>
     <ClInclude Include="GameConfig.h" />
     <ClInclude Include="World.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Character.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="GenerateMap.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="privateGenerateMap.h">
       <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>

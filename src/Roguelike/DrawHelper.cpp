@@ -96,3 +96,16 @@ void DrawHelper::DrawGrass(const glm::vec2& pos, int num)
 	else if (num == 4) SpriteChar::DrawInMapScreen({ pos.x, pos.y }, { 12, 3 }, glm::vec4(0.1f, 1.0f, 0.3f, 1.0f));
 }
 //-----------------------------------------------------------------------------
+void DrawHelper::DrawFloor(const glm::vec2& pos, int num, const glm::vec4& color)
+{
+	if (num == 1) SpriteChar::DrawInMapScreen({ pos.x, pos.y }, { 10, 4 }, color);
+	else if (num == 2) SpriteChar::DrawInMapScreen({ pos.x, pos.y }, { 11, 4 }, color);
+	else if (num == 3) SpriteChar::DrawInMapScreen({ pos.x, pos.y }, { 14, 3 }, color);
+	else if (num == 4) SpriteChar::DrawInMapScreen({ pos.x, pos.y }, { 12, 3 }, color);
+}
+//-----------------------------------------------------------------------------
+void DrawHelper::DrawWall(const glm::vec2& pos, int num, const glm::vec4& color)
+{
+	if (num == 1) SpriteChar::DrawInMapScreen({ pos.x, pos.y }, { 3, 3 }, color);
+}
+//-----------------------------------------------------------------------------
