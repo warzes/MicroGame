@@ -1,64 +1,13 @@
 #pragma once
 
-#include <random>
 #include <array>
 #include <queue>
 
-inline int odd(int number)
-{
-	return number / 2 * 2 + 1;
-}
-
-inline int even(int number)
-{
-	return number / 2 * 2;
-}
-
-// Rng.h
-#pragma region Rng.h
-
-// Random Number Generator
-class Rng
-{
-public:
-	explicit Rng(unsigned int seed = std::random_device()());
-
-	void reset();
-	void setSeed(unsigned int seed);
-	unsigned int getSeed() const;
-
-	int getInt(int exclusiveMax); // [0, max)
-	int getInt(int min, int inclusiveMax); // [min, max]
-
-	bool getBool(double probability = 0.5);
-	float getFloat(float min, float max); // [min, max)
-
-	int rollDice(int n, int s); // roll S sided dice N times
-
-	template <typename T>
-	const T& getOne(const std::vector<T>& vector);
-
-	template <typename T>
-	void shuffle(std::vector<T>& vector);
-
-private:
-	unsigned int seed;
-	std::mt19937 mt;
-};
-
 template <typename T>
-const T& Rng::getOne(const std::vector<T>& vector)
+inline int sign(T value)
 {
-	return vector[getInt(vector.size())];
+	return (value > static_cast<T>(0)) - (value < static_cast<T>(0));
 }
-
-template <typename T>
-void Rng::shuffle(std::vector<T>& vector)
-{
-	std::shuffle(vector.begin(), vector.end(), mt);
-}
-
-#pragma endregion
 
 #pragma region GenTile.h
 
@@ -97,17 +46,10 @@ enum class GenTile
 struct Room
 {
 	Room() = default;
-	Room(int rectLeft, int rectTop, int rectWidth, int rectHeight) :
-		left(rectLeft),
-		top(rectTop),
-		width(rectWidth),
-		height(rectHeight)
-	{
-	}
+	Room(int rectLeft, int rectTop, int rectWidth, int rectHeight) : left(rectLeft), top(rectTop), width(rectWidth), height(rectHeight) { }
 
 	bool intersects(const Room& rectangle) const;
 	bool intersects(const Room& rectangle, Room& intersection) const;
-
 
 	int left = 0;
 	int top = 0;
@@ -227,23 +169,6 @@ inline Direction operator*(const Direction& d, float f)
 inline Point operator/(const Point& p, float f)
 {
 	return Point{ p.x / (int)f, p.y / (int)f };
-}
-
-
-inline int length(const Point& vector)
-{
-	return static_cast<int>(std::sqrt(vector.x * vector.x + vector.y * vector.y));
-}
-
-inline int lengthSquared(const Point& vector)
-{
-	return vector.x * vector.x + vector.y * vector.y;
-}
-
-template <typename T>
-inline int sign(T value)
-{
-	return (value > static_cast<T>(0)) - (value < static_cast<T>(0));
 }
 
 inline std::vector<Point> getLine(const Point& from, const Point& to, bool orthogonalSteps = false)

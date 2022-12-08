@@ -5,7 +5,7 @@
 //#include "Container.cpp"
 #include "EngineMath.cpp"
 //#include "Collisions.cpp"
-//#include "Utility.cpp"
+#include "Utility.cpp"
 #include "Platform.cpp"
 //#include "Audio.cpp"
 #include "oRenderer.cpp"

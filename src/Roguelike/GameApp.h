@@ -4,9 +4,10 @@
 #include "DrawHelper.h"
 #include "World.h"
 #include "GenerateMap.h"
-
+#include "Character.h"
+//-----------------------------------------------------------------------------
 Map map;
-
+Player player;
 //-----------------------------------------------------------------------------
 bool StartGameApp()
 {
@@ -14,87 +15,30 @@ bool StartGameApp()
 
 	SpriteChar::Init();
 
-	//map.Create();
 	GenerateMap::GenerateDungeons(map);
+
+	auto pos = GenerateMap::GetFindPosition(map);
+	player.SetPosition(pos.x, pos.y);
 
 	return true;
 }
-
+//-----------------------------------------------------------------------------
 void CloseGameApp()
 {
 	SpriteChar::Close();
 }
-
-int x = 19;
-int y = 15;
-
-
-float pauseStepW = 0.0f;
-float pauseStepS = 0.0f;
-float pauseStepA = 0.0f;
-float pauseStepD = 0.0f;
-
-float speedStep = 15.0f;
-
-bool IsTurn = false;
-
-
+//-----------------------------------------------------------------------------
 void UpdateGameApp(float deltaTime)
 {
-	IsTurn = false;
-
-	if (IsKeyboardKeyUp(KEY_W)) pauseStepW = 0.0f;
-	if (IsKeyboardKeyUp(KEY_S)) pauseStepS = 0.0f;
-	if (IsKeyboardKeyUp(KEY_A)) pauseStepA = 0.0f;
-	if (IsKeyboardKeyUp(KEY_D)) pauseStepD = 0.0f;
-
-	if (IsKeyboardKeyDown(KEY_W))
-	{
-		if (pauseStepW > 0.0f) pauseStepW -= speedStep * deltaTime;
-		else
-		{
-			IsTurn = true;
-			y--;
-			pauseStepW = 1.0f;
-		}
-	}
-	else if (IsKeyboardKeyDown(KEY_S))
-	{
-		if (pauseStepS > 0.0f) pauseStepS -= speedStep * deltaTime;
-		else
-		{
-			IsTurn = true;
-			y++;
-			pauseStepS = 1.0f;
-		}
-	}
-	else if (IsKeyboardKeyDown(KEY_A))
-	{
-		if (pauseStepA > 0.0f) pauseStepA -= speedStep * deltaTime;
-		else
-		{
-			IsTurn = true;
-			x--;
-			pauseStepA = 1.0f;
-		}
-	}
-	else if (IsKeyboardKeyDown(KEY_D))
-	{
-		if (pauseStepD > 0.0f) pauseStepD -= speedStep * deltaTime;
-		else
-		{
-			IsTurn = true;
-			x++;
-			pauseStepD = 1.0f;
-		}
-	}
+	player.Update(map, deltaTime);
 }
-
+//-----------------------------------------------------------------------------
 void FrameGameApp(float deltaTime)
 {
 	DrawHelper::DrawMainUI();
 
-	map.Draw(glm::vec2{x,y});
+	map.Draw(glm::vec2{ player.x, player.y });
 
 	SpriteChar::Flush();
 }
+//-----------------------------------------------------------------------------

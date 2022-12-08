@@ -11,9 +11,8 @@ void GenerateMap::GenerateDungeons(Map& map)
 	currentMap = new GenMap(SizeMap, SizeMap);
 
 	Rng rng;
-	Generator* generator = new ClassicDungeon;
-	generator->generate(*currentMap, rng);
-	delete generator;
+	ClassicDungeon generator;
+	generator.generate(*currentMap, rng);
 
 	for (int x = 0; x < SizeMap; x++)
 	{
@@ -40,10 +39,32 @@ void GenerateMap::GenerateDungeons(Map& map)
 
 			case GenTile::Wall:
 				map.tiles[x][y].type = Tile::Wall1;
+				map.tiles[x][y].moveFree = false;
 				break;
 			default:
 				break;
 			}
 		}
 	}
+}
+
+glm::vec2 GenerateMap::GetFindPosition(const Map& map)
+{
+	assert(currentMap);
+
+	int recursionLimit = 10000;
+
+	while (recursionLimit > 0)
+	{
+		recursionLimit--;
+		int x = rand() % (SizeMap - 1);
+		int y = rand() % (SizeMap - 1);
+
+		if (currentMap->getTile(x, y) == GenTile::Floor &&
+			currentMap->getTile(x, y - 1) == GenTile::Floor && currentMap->getTile(x, y + 1) == GenTile::Floor &&
+			currentMap->getTile(x - 1, y) == GenTile::Floor && currentMap->getTile(x + 1, y) == GenTile::Floor)
+			return glm::vec2{ x, y };
+	}
+
+	return glm::vec2();
 }

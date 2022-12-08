@@ -37,6 +37,8 @@ public:
 	};
 	TileType type = None;
 	glm::vec4 color = glm::vec4(1.0f);
+
+	bool moveFree = true;
 };
 
 class Map
@@ -45,6 +47,11 @@ public:
 	void Create();
 
 	void Draw(const glm::vec2& playerPos);
+
+	bool IsFreeMove(int x, int y) const
+	{
+		return tiles[x][y].moveFree;
+	}
 
 	Tile tiles[SizeMap][SizeMap];
 

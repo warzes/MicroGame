@@ -1,64 +1,25 @@
 #include "stdafx.h"
 #include "privateGenerateMap.h"
 
-#pragma region Rng.cpp
-
-Rng::Rng(unsigned int seed)
-	: seed(seed)
-	, mt(seed)
+inline int odd(int number)
 {
-	//std::cout << "RNG Seed: 0x" << std::hex << seed << std::dec << '\n';
+	return number / 2 * 2 + 1;
 }
 
-void Rng::reset()
+inline int even(int number)
 {
-	setSeed(std::random_device()());
+	return number / 2 * 2;
 }
 
-void Rng::setSeed(unsigned int seed)
+inline int length(const Point& vector)
 {
-	this->seed = seed;
-	mt.seed(seed);
-
-	//std::cout << "RNG Seed: 0x" << std::hex << seed << std::dec << '\n';
+	return static_cast<int>(std::sqrt(vector.x * vector.x + vector.y * vector.y));
 }
 
-unsigned int Rng::getSeed() const
+inline int lengthSquared(const Point& vector)
 {
-	return seed;
+	return vector.x * vector.x + vector.y * vector.y;
 }
-
-int Rng::getInt(int exclusiveMax)
-{
-	return std::uniform_int_distribution<>(0, exclusiveMax - 1)(mt);
-}
-
-int Rng::getInt(int min, int inclusiveMax)
-{
-	return min + std::uniform_int_distribution<>(0, inclusiveMax - min)(mt);
-}
-
-bool Rng::getBool(double probability)
-{
-	return std::bernoulli_distribution(probability)(mt);
-}
-
-float Rng::getFloat(float min, float max)
-{
-	return std::uniform_real_distribution<float>(min, max)(mt);
-}
-
-int Rng::rollDice(int n, int s)
-{
-	int result = 0;
-
-	for (int i = 0; i < n; ++i)
-		result += getInt(1, s);
-
-	return result;
-}
-
-#pragma endregion
 
 #pragma region Direction.cpp
 
@@ -342,7 +303,7 @@ void Generator::removeRegions(int removeProb, int minSize)
 		if (regionsSizes[i] > regionsSizes[biggestRegion])
 			biggestRegion = i;
 
-		if (rng->getInt(100) < removeProb || regionsSizes[i] < minSize)
+		if (rng->GetInt(100) < removeProb || regionsSizes[i] < minSize)
 			regionsForRemoval[i] = true;
 	}
 
@@ -504,7 +465,7 @@ void Generator::connectRegions(int minSize, PathType type, bool allowDiagonalSte
 
 		assert(!bestConnectors.empty());
 
-		auto bestConnector = rng->getOne(bestConnectors);
+		auto bestConnector = rng->GetOne(bestConnectors);
 		int bestToIndex = regions[bestConnector.second.x + bestConnector.second.y * width];
 
 		switch (type)
@@ -696,7 +657,7 @@ void Generator::constructBridges(int minSize)
 			break;
 		}
 
-		Connector* bestFrom = rng->getOne(bestConnectors);
+		Connector* bestFrom = rng->GetOne(bestConnectors);
 		Point bestToPos = bestFrom->begin + bestFrom->dir * bestFrom->length;
 		int bestToIndex = regions[bestToPos.x + bestToPos.y * width];
 
@@ -854,8 +815,8 @@ void Generator::growMaze(std::vector<Point>& maze, int x, int y, int windingProb
 		{
 			auto found = std::find(unmadeCells.begin(), unmadeCells.end(), lastDir);
 
-			if (found == unmadeCells.end() || rng->getInt(100) < windingProb)
-				lastDir = rng->getOne(unmadeCells);
+			if (found == unmadeCells.end() || rng->GetInt(100) < windingProb)
+				lastDir = rng->GetOne(unmadeCells);
 
 			map->setTile(cell + lastDir, floor);
 			map->setTile(cell + lastDir * 2, floor);
@@ -909,7 +870,7 @@ void Generator::fill(int wallProb)
 		{
 			if (x == 0 || x == width - 1 || y == 0 || y == height - 1)
 				map->setTile(x, y, wall);
-			else if (rng->getInt(100) < wallProb)
+			else if (rng->GetInt(100) < wallProb)
 				map->setTile(x, y, wall);
 			else
 				map->setTile(x, y, floor);
@@ -921,7 +882,7 @@ void Generator::fill(const Room& room, int wallProb)
 	for (int y = room.top; y < room.top + room.height; ++y)
 		for (int x = room.left; x < room.left + room.width; ++x)
 		{
-			if (rng->getInt(100) < wallProb)
+			if (rng->GetInt(100) < wallProb)
 				map->setTile(x, y, wall);
 			else
 				map->setTile(x, y, floor);
@@ -970,7 +931,7 @@ void Generator::carveCorridor(const Point& from, const Point& to)
 	int primary = std::abs(delta.x);
 	int secondary = std::abs(delta.y);
 
-	if (rng->getBool())
+	if (rng->GetBool())
 	{
 		std::swap(primary, secondary);
 		std::swap(primaryIncrement, secondaryIncrement);
@@ -980,12 +941,12 @@ void Generator::carveCorridor(const Point& from, const Point& to)
 	Point current = from;
 	int windingPoint = -1;
 
-	if (primary > 1 && rng->getBool())
+	if (primary > 1 && rng->GetBool())
 	{
 		// windingPoint = rng->getInt(primary);
 
 		// HACK: To avoid unpretty corridors
-		windingPoint = even(rng->getInt(primary));
+		windingPoint = even(rng->GetInt(primary));
 	}
 
 	while (true)
@@ -1061,7 +1022,7 @@ void Generator::carveWindingRoad(const Point& from, const Point& to, int perturb
 			line[j++] = line[i];
 
 			if (i < line.size() - 5 || i >= line.size() - 1)
-				i += rng->getInt(2, 3);
+				i += rng->GetInt(2, 3);
 			else if (i == line.size() - 5)
 				i += 2;
 			else
@@ -1078,8 +1039,8 @@ void Generator::carveWindingRoad(const Point& from, const Point& to, int perturb
 
 			for (std::size_t i = 0; i < j * perturbation; ++i)
 			{
-				std::size_t ri = 1 + rng->getInt(j - 2);
-				Direction rdir = Direction::All[rng->getInt(8)];
+				std::size_t ri = 1 + rng->GetInt(j - 2);
+				Direction rdir = Direction::All[rng->GetInt(8)];
 				Point rpos = line[ri] + rdir;
 
 				int lod2 = lengthSquared(rpos - line[ri - 1]);
@@ -1174,8 +1135,8 @@ void Generator::erode(int iterations)
 {
 	for (int i = 0; i < iterations; ++i)
 	{
-		int x = rng->getInt(1, width - 2);
-		int y = rng->getInt(1, height - 2);
+		int x = rng->GetInt(1, width - 2);
+		int y = rng->GetInt(1, height - 2);
 
 		if (map->getTile(x, y) != wall)
 			continue;
@@ -1188,7 +1149,7 @@ void Generator::erode(int iterations)
 				floors += 1;
 		}
 
-		if (floors >= 2 && rng->getInt(9 - floors) == 0)
+		if (floors >= 2 && rng->GetInt(9 - floors) == 0)
 			map->setTile(x, y, floor);
 	}
 }
@@ -1274,9 +1235,9 @@ void Dungeon::placeDoors(int doorProb)
 			{
 				if (map->getTile(x + dir.x, y + dir.y) == floor)
 				{
-					if (rng->getInt(100) < doorProb)
+					if (rng->GetInt(100) < doorProb)
 					{
-						if (rng->getInt(3) > 0)
+						if (rng->GetInt(3) > 0)
 							map->setTile(x, y, GenTile::ClosedDoor);
 						else
 							map->setTile(x, y, GenTile::OpenDoor);
@@ -1310,8 +1271,8 @@ void ClassicDungeon::onGenerate()
 
 	for (int i = 0; i < 15; ++i)
 	{
-		int x = rng->getInt(1, width - 2);
-		int y = rng->getInt(1, height - 2);
+		int x = rng->GetInt(1, width - 2);
+		int y = rng->GetInt(1, height - 2);
 
 		points.emplace_back(x, y);
 	}
@@ -1324,8 +1285,8 @@ void ClassicDungeon::onGenerate()
 		auto& point = *it;
 
 		Room room;
-		room.width = odd(rng->rollDice(4, 3));
-		room.height = odd(rng->rollDice(3, 3));
+		room.width = odd(rng->RollDice(4, 3));
+		room.height = odd(rng->RollDice(3, 3));
 		room.left = odd(std::min(std::max(1, point.x - room.width / 2), width - room.width - 2));
 		room.top = odd(std::min(std::max(1, point.y - room.height / 2), height - room.height - 2));
 
@@ -1360,7 +1321,7 @@ void ClassicDungeon::onGenerate()
 			{
 				if (map->getTile(x + dir.x, y + dir.y) == floor)
 				{
-					if (rng->getInt(9) > 0)
+					if (rng->GetInt(9) > 0)
 						map->setTile(x, y, GenTile::ClosedDoor);
 					else
 						map->setTile(x, y, GenTile::OpenDoor);
@@ -1406,12 +1367,12 @@ void BSPDugeon::onGenerate()
 		}
 		*/
 
-		if (room.width > room.height || (room.width == room.height && rng->getBool()))
+		if (room.width > room.height || (room.width == room.height && rng->GetBool()))
 		{
 			// Split horizontally
 			if (room.width > minWidth * 2)
 			{
-				int midPoint = odd(rng->getInt(minWidth, room.width - minWidth - 1));
+				int midPoint = odd(rng->GetInt(minWidth, room.width - minWidth - 1));
 
 				active.emplace(room.left, room.top, midPoint, room.height);
 				active.emplace(room.left + midPoint + 1, room.top, room.width - (midPoint + 1), room.height);
@@ -1426,7 +1387,7 @@ void BSPDugeon::onGenerate()
 			// Split vertically
 			if (room.height > minHeight * 2)
 			{
-				int midPoint = odd(rng->getInt(minHeight, room.height - minHeight - 1));
+				int midPoint = odd(rng->GetInt(minHeight, room.height - minHeight - 1));
 
 				active.emplace(room.left, room.top, room.width, midPoint);
 				active.emplace(room.left, room.top + midPoint + 1, room.width, room.height - (midPoint + 1));
@@ -1439,7 +1400,7 @@ void BSPDugeon::onGenerate()
 
 	for (auto it = inactive.begin(); it != inactive.end(); )
 	{
-		if (rng->getBool())
+		if (rng->GetBool())
 			it = inactive.erase(it);
 		else
 			++it;
@@ -1452,7 +1413,7 @@ void BSPDugeon::onGenerate()
 	{
 		Room& r1 = inactive[i];
 
-		if (rng->getBool(0.75))
+		if (rng->GetBool(0.75))
 		{
 			std::vector<Room> neighbors;
 
@@ -1477,7 +1438,7 @@ void BSPDugeon::onGenerate()
 
 			if (!neighbors.empty())
 			{
-				auto selected = rng->getOne(neighbors);
+				auto selected = rng->GetOne(neighbors);
 
 				if (selected.width > 1 || selected.height > 1)
 					carveRoom(selected);
@@ -1503,10 +1464,10 @@ void RoomsAndMazes::onGenerate()
 	for (int i = 0; i < 100; ++i)
 	{
 		Room room;
-		room.width = odd(rng->rollDice(3, 3));
-		room.height = odd(rng->rollDice(3, 3));
-		room.left = odd(rng->getInt(width - room.width - 1));
-		room.top = odd(rng->getInt(height - room.height - 1));
+		room.width = odd(rng->RollDice(3, 3));
+		room.height = odd(rng->RollDice(3, 3));
+		room.left = odd(rng->GetInt(width - room.width - 1));
+		room.top = odd(rng->GetInt(height - room.height - 1));
 
 		if (canCarve(room))
 			carveRoom(room);

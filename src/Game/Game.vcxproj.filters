@@ -57,6 +57,9 @@
     <ClCompile Include="..\3rdparty\coldet2Impl.cpp">
       <Filter>MicroEngine\3rdparty</Filter>
     </ClCompile>
+    <ClCompile Include="Utility.cpp">
+      <Filter>MicroEngine\Engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MicroEngine">

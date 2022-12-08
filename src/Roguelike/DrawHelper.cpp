@@ -14,53 +14,90 @@ void DrawHelper::GetScreenWorldViewport(int& left, int& right, int& top, int& bo
 	bottom = ScreenHeight / TileSize - 9;
 }
 //-----------------------------------------------------------------------------
+void DrawHelper::GetScreenMiniMapViewport(int& left, int& right, int& top, int& bottom)
+{
+	left = ScreenHeight * GetFrameBufferAspectRatio() / TileSize - 13+1;
+	right = left + 11;
+	top = 1;
+	bottom = 11;
+}
+//-----------------------------------------------------------------------------
+void DrawHelper::GetScreenInfoPlayerViewport(int& left, int& right, int& top, int& bottom)
+{
+	left = ScreenHeight * GetFrameBufferAspectRatio() / TileSize - 13 + 1;
+	right = left + 11;
+	top = 12;
+	bottom = ScreenHeight / TileSize -1;
+}
+//-----------------------------------------------------------------------------
+void DrawHelper::GetScreenLogViewport(int& left, int& right, int& top, int& bottom)
+{
+	left = 1;
+	right = ScreenHeight * GetFrameBufferAspectRatio() / TileSize - 13;
+	top = ScreenHeight / TileSize - 8;
+	bottom = ScreenHeight / TileSize - 1;
+}
+//-----------------------------------------------------------------------------
+void DrawHelper::DrawRect(int left, int right, int top, int bottom, int topSkipToLeft, int topSkipToRight, const std::wstring& text, const glm::vec4& color)
+{
+	SpriteChar::Draw({ left, top }, { 9, 13 }, color);
+	SpriteChar::Draw({ right, top }, { 11, 12 }, color);
+	SpriteChar::Draw({ left, bottom }, { 8, 13 }, color);
+	SpriteChar::Draw({ right, bottom }, { 12, 12 }, color);
+
+	for (int x = left + 1; x < right; x++)
+	{
+		if ((topSkipToLeft == 0 && topSkipToRight == 0) || (x <= topSkipToLeft || x >= topSkipToRight))
+			SpriteChar::Draw({ x, top }, { 13, 13 }, color);
+		SpriteChar::Draw({ x, bottom }, { 13, 13 }, color);
+	}
+
+	for (int y = top + 1; y < bottom; y++)
+	{
+		SpriteChar::Draw({ left, y }, { 10, 12 }, color);
+		SpriteChar::Draw({ right, y }, { 10, 12 }, color);
+	}
+
+	if (!text.empty())
+	{
+		// название карты
+		DrawTextHelper::DrawCommonText(
+			text,
+			glm::vec2((topSkipToLeft + (16.0f / TileSize)) * TileSize, 8.0f * top),
+			glm::vec3(1.0f, 1.0f, 1.0f));
+	}
+}
+//-----------------------------------------------------------------------------
 void DrawHelper::DrawMainUI()
 {
 	std::wstring nameMap = L"Тестовая карта";
 
-	// границы окна карты
-	int leftMapScreen = 1;
-	int rightMapScreen = 1;
-	int topMapScreen = 1;
-	int bottomMapScreen = 1;
-	GetScreenWorldViewport(leftMapScreen, rightMapScreen, topMapScreen, bottomMapScreen);
+	// границы окон
+	int leftScreen = 1;
+	int rightScreen = 1;
+	int topScreen = 1;
+	int bottomScreen = 1;
+	GetScreenWorldViewport(leftScreen, rightScreen, topScreen, bottomScreen);
 
 	// позиция названия карты
 	const int offstepNameX = (nameMap.length() / 2.0f) / (16.0f / TileSize);
-	const int skip1 = (rightMapScreen / 2.0f - offstepNameX);
-	const int skip2 = (rightMapScreen / 2.0f + offstepNameX);
-
-	// отрисовка рамки окна карты
-	{
-		SpriteChar::Draw({ leftMapScreen, topMapScreen }, { 9, 13 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-		SpriteChar::Draw({ rightMapScreen, topMapScreen }, { 11, 12 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-		SpriteChar::Draw({ leftMapScreen, bottomMapScreen }, { 8, 13 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-		SpriteChar::Draw({ rightMapScreen, bottomMapScreen }, { 12, 12 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-
-		for (int x = leftMapScreen + 1; x < rightMapScreen; x++)
-		{
-			if (x <= skip1 || x >= skip2)
-				SpriteChar::Draw({ x, topMapScreen }, { 13, 13 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-			SpriteChar::Draw({ x, bottomMapScreen }, { 13, 13 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-		}
-
-		for (int y = topMapScreen + 1; y < bottomMapScreen; y++)
-		{
-			SpriteChar::Draw({ leftMapScreen, y }, { 10, 12 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-			SpriteChar::Draw({ rightMapScreen, y }, { 10, 12 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-		}
-	}
-
-	// название карты
-	DrawTextHelper::DrawCommonText(
-		nameMap,
-		glm::vec2((skip1 + (16.0f / TileSize)) * TileSize, 8.0f * topMapScreen),
-		glm::vec3(1.0f, 1.0f, 1.0f));
+	const int skip1 = (rightScreen / 2.0f - offstepNameX);
+	const int skip2 = (rightScreen / 2.0f + offstepNameX);
+	DrawHelper::DrawRect(leftScreen, rightScreen, topScreen, bottomScreen, skip1, skip2, nameMap);
 
 	// отрисовка персонажа в центре
-	SpriteChar::Draw({ 
-		rightMapScreen /2,
-		bottomMapScreen/2}, {1, 35}, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	SpriteChar::Draw({
+		rightScreen / 2,
+		bottomScreen / 2 }, { 1, 35 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	GetScreenMiniMapViewport(leftScreen, rightScreen, topScreen, bottomScreen);
+	DrawHelper::DrawRect(leftScreen, rightScreen, topScreen, bottomScreen);
+
+	GetScreenInfoPlayerViewport(leftScreen, rightScreen, topScreen, bottomScreen);
+	DrawHelper::DrawRect(leftScreen, rightScreen, topScreen, bottomScreen);
+
+	GetScreenLogViewport(leftScreen, rightScreen, topScreen, bottomScreen);
+	DrawHelper::DrawRect(leftScreen, rightScreen, topScreen, bottomScreen);
 }
 //-----------------------------------------------------------------------------
 void DrawHelper::DrawTree(const glm::vec2& pos, int num)

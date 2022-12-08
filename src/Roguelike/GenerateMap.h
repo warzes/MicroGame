@@ -5,4 +5,6 @@
 namespace GenerateMap
 {
 	void GenerateDungeons(Map& map);
+
+	glm::vec2 GetFindPosition(const Map& map);
 }
