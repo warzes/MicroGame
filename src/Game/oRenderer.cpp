@@ -370,7 +370,7 @@ void FrameBuffer::Bind(const glm::vec3& color)
 
 void FrameBuffer::MainFrameBufferBind()
 {
-	if (!currentFrameBuffer) glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	if (currentFrameBuffer) glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, GetFrameBufferWidth(), GetFrameBufferHeight());
 	glClearColor(ClearColor.x, ClearColor.y, ClearColor.z, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -379,9 +379,9 @@ void FrameBuffer::MainFrameBufferBind()
 
 void FrameBuffer::BindTextureBuffer()
 {
+	Texture2D::UnBind(); // TODO:
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_texColorBuffer);
-	Texture2D::UnBind(); // TODO:
 }
 
 bool FrameBuffer::checkFramebuffer()

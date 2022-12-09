@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Character.h"
+
 class Object
 {
 public:
@@ -18,6 +20,16 @@ class Tile
 {
 public:
 	void Draw(const glm::vec2& pos);
+
+	bool IsFloor() const
+	{
+		return type == Floor1 || type == Floor2 || type == Floor3 || type == Floor4;
+	}
+
+	bool IsWall() const
+	{
+		return type == Wall1;
+	}
 
 	Object* object = nullptr;
 
@@ -41,6 +53,11 @@ public:
 	bool moveFree = true;
 };
 
+enum class MapType
+{
+	Dungeons
+};
+
 class Map
 {
 public:
@@ -55,4 +72,18 @@ public:
 
 	Tile tiles[SizeMap][SizeMap];
 
+	MapType type = MapType::Dungeons;
+	std::wstring name;
+};
+
+
+
+class World
+{
+public:
+	void SetMap(const std::wstring& name);
+private:
+	std::vector<Map> m_map;
+	unsigned m_currentMapId = 0;
+	Player m_player;
 };

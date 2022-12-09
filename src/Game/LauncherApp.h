@@ -4,7 +4,7 @@
 
 #if USE_TEST
 
-#	define TEST_1_TRIANGLES 0
+#	define TEST_1_TRIANGLES 1
 #	define TEST_2_TEXTUREQUADS 0
 #	define TEST_3_MODEL 0
 #	define TEST_4_MANYMODEL 0
@@ -17,7 +17,7 @@
 #	define TEST_202_MICROPHYS 0
 
 #	define TEST_N_NEW 0
-#	define TEST_N_NEW2 1
+#	define TEST_N_NEW2 0
 
 #	if TEST_1_TRIANGLES
 #		include "Test001Triangles.h"

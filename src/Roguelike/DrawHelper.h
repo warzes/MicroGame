@@ -3,6 +3,8 @@
 class DrawHelper
 {
 public:
+	static glm::mat4 GetOrtho();
+
 	static void GetScreenWorldViewport(int& left, int& right, int& top, int& bottom);
 	static void GetScreenMiniMapViewport(int& left, int& right, int& top, int& bottom);
 	static void GetScreenInfoPlayerViewport(int& left, int& right, int& top, int& bottom);
@@ -18,4 +20,6 @@ public:
 
 	static void DrawFloor(const glm::vec2& pos, int num, const glm::vec4& color);
 	static void DrawWall(const glm::vec2& pos, int num, const glm::vec4& color);
+
+
 };

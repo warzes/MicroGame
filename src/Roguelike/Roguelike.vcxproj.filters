@@ -48,6 +48,9 @@
     <ClCompile Include="privateGenerateMap.cpp">
       <Filter>World</Filter>
     </ClCompile>
+    <ClCompile Include="MinimapRender.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MicroEngine">
@@ -87,6 +90,9 @@
     </ClInclude>
     <ClInclude Include="privateGenerateMap.h">
       <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="MinimapRender.h">
+      <Filter>Framework</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -153,10 +153,7 @@ void SpriteChar::Flush()
 {
 	texture12x12.Bind();
 	shader.Bind();
-	const float widthHeight = ScreenHeight;
-	const float widthScreen = widthHeight * GetFrameBufferAspectRatio();
-	glm::mat4 ortho = glm::ortho(0.0f, widthScreen, widthHeight, 0.0f, 0.0f, 1.0f);
-	shader.SetUniform(wvpUniform, ortho);
+	shader.SetUniform(wvpUniform, DrawHelper::GetOrtho());
 
 	auto pvb = vao.GetVertexBuffer();
 	pvb->Update(0, currentNumVertex, sizeof(Vertex_Pos2_TexCoord_Color4), vertex.data());

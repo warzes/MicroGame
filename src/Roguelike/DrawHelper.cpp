@@ -6,6 +6,35 @@
 //TODO: нужна функция которвя возвращает размер строки в пикселях
 //в рисовалке дерева возможно другие тайлы
 //-----------------------------------------------------------------------------
+glm::mat4 DrawHelper::GetOrtho()
+{
+	static float screenAspect = 0.0f;
+	static glm::mat4 ortho;
+	if (screenAspect != GetFrameBufferAspectRatio())
+	{
+		screenAspect = GetFrameBufferAspectRatio();
+		const float widthHeight = ScreenHeight;
+		const float widthScreen = widthHeight * screenAspect;
+		ortho = glm::ortho(0.0f, widthScreen, widthHeight, 0.0f, 0.0f, 1.0f);
+	}
+	return ortho;
+
+#if 0 // тряска камеры
+	static float tr = 0.0f;
+	static bool rev = false;
+	
+	if (rev == false) tr += 0.03f;
+	else tr -= 0.03f;
+	
+	if (tr > 1.0f) rev = true;
+	if (tr < -1.0f) rev = false;
+
+	glm::mat4 trans = glm::translate(glm::vec3(tr, 0.0f, 0.0f));
+
+	return ortho * trans;
+#endif
+}
+//-----------------------------------------------------------------------------
 void DrawHelper::GetScreenWorldViewport(int& left, int& right, int& top, int& bottom)
 {
 	left = 1;

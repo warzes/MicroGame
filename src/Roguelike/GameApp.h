@@ -5,12 +5,17 @@
 #include "World.h"
 #include "GenerateMap.h"
 #include "Character.h"
+#include "MinimapRender.h"
 //-----------------------------------------------------------------------------
-Map map;
-Player player;
+World world;
+
+MinimapRender minimapRender;
 //-----------------------------------------------------------------------------
 bool StartGameApp()
 {
+	if (!minimapRender.Create())
+		return false;
+
 	RenderSystem::SetFrameColor(glm::vec3(0.15, 0.15, 0.15));
 
 	SpriteChar::Init();
@@ -26,6 +31,7 @@ bool StartGameApp()
 void CloseGameApp()
 {
 	SpriteChar::Close();
+	minimapRender.Destroy();
 }
 //-----------------------------------------------------------------------------
 void UpdateGameApp(float deltaTime)
@@ -36,9 +42,8 @@ void UpdateGameApp(float deltaTime)
 void FrameGameApp(float deltaTime)
 {
 	DrawHelper::DrawMainUI();
-
 	map.Draw(glm::vec2{ player.x, player.y });
-
 	SpriteChar::Flush();
+	minimapRender.Draw(map, player);
 }
 //-----------------------------------------------------------------------------

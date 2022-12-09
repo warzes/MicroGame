@@ -229,6 +229,7 @@
     <ClCompile Include="EngineImpl.cpp" />
     <ClCompile Include="GenerateMap.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MinimapRender.cpp" />
     <ClCompile Include="privateGenerateMap.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -245,6 +246,7 @@
     <ClInclude Include="GameApp.h" />
     <ClInclude Include="GameConfig.h" />
     <ClInclude Include="GenerateMap.h" />
+    <ClInclude Include="MinimapRender.h" />
     <ClInclude Include="privateGenerateMap.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="stdafx.h" />
