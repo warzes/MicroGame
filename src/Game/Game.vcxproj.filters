@@ -105,9 +105,6 @@
     <ClInclude Include="Test100SimpleCollisions.h">
       <Filter>Test</Filter>
     </ClInclude>
-    <ClInclude Include="World.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
     <ClInclude Include="EngineConfig.h">
       <Filter>MicroEngine\Engine</Filter>
     </ClInclude>
@@ -184,6 +181,7 @@
     <ClInclude Include="Collisions3.h">
       <Filter>MicroEngine\Engine</Filter>
     </ClInclude>
+    <ClInclude Include="World.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="EngineMath.inl">

@@ -56,7 +56,7 @@ void MinimapRender::Destroy()
 	m_shaderProgramQuad.Destroy();
 }
 //-----------------------------------------------------------------------------
-void MinimapRender::Draw(const Map& map, const Player& player)
+void MinimapRender::Draw(const World& world)
 {
 	glDisable(GL_DEPTH_TEST);
 
@@ -76,12 +76,12 @@ void MinimapRender::Draw(const Map& map, const Player& player)
 	{
 		for (size_t y = 0; y < SizeMap; y++)
 		{
-			if (map.tiles[x][y].IsFloor())
+			if (world.GetCurrentMap().tiles[x][y].IsFloor())
 			{
 				color = glm::vec3(0.0f, 1.0f, 1.0f);
 				
 			}
-			else if (map.tiles[x][y].IsWall())
+			else if (world.GetCurrentMap().tiles[x][y].IsWall())
 			{
 				color = glm::vec3(1.0f, 0.0f, 1.0f);
 			}
@@ -98,8 +98,8 @@ void MinimapRender::Draw(const Map& map, const Player& player)
 
 	// add player
 	{
-		const float posX = left * TileSize + player.x * sizeX + TileSize / 2.0f;
-		const float posY = top * TileSize + player.y * sizeY + TileSize / 2.0f;
+		const float posX = left * TileSize + world.GetPlayer().x * sizeX + TileSize / 2.0f;
+		const float posY = top * TileSize + world.GetPlayer().y * sizeY + TileSize / 2.0f;
 		// чтобы четче видеть игрока
 		const float offsetX = sizeX / 2.0f;
 		const float offsetY = sizeY / 2.0f;

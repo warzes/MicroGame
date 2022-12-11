@@ -271,7 +271,7 @@ public:
 };
 
 // TODO: в будущем из этого сделать €чейку, а мир - это массив €чеек
-class World
+class PhysicWorld
 {
 public:
 	void SetSize(const glm::vec3& center, const glm::vec3& size);

@@ -1,7 +1,6 @@
 #pragma once
 
-class Map;
-class Player;
+class World;
 
 class MinimapRender
 {
@@ -9,7 +8,7 @@ public:
 	bool Create();
 	void Destroy();
 
-	void Draw(const Map& map, const Player& player);
+	void Draw(const World& world);
 
 private:
 	void addQuad(float posX, float posY, float sizeX, float sizeY, float offsetX, float offsetY, const glm::vec3& color);

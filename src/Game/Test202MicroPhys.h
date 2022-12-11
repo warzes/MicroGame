@@ -327,7 +327,7 @@ Joint njoints[32];
 Connection nconnections[64]; // connection buffer
 PhysicPrimitiveBody body1;
 PhysicPrimitiveBody body2;
-World nworld;
+PhysicWorld nworld;
 
 void InitTest()
 {

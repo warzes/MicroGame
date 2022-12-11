@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "World.h"
 #include "DrawHelper.h"
+#include "GenerateMap.h"
 //-----------------------------------------------------------------------------
 void Object::Draw(const glm::vec2& pos)
 {
@@ -88,5 +89,24 @@ void World::SetMap(const std::wstring& name)
 {
 	// идея такая - у каждой карты есть название. сначала ищем в массиве карт - не было ли такой карты. если не было, то добавляем новую
 	// можно было хранить в мапе, но тогда бы пришлось искать при каждом обращении
+
+	// а пока одна карта
+
+	m_map.push_back({});
+
+	GenerateMap::GenerateDungeons(m_map[0]);
+
+	auto pos = GenerateMap::GetFindPosition(m_map[0]);
+	m_player.SetPosition(pos.x, pos.y);
+}
+//-----------------------------------------------------------------------------
+void World::UpdatePlayer(float deltaTime)
+{
+	m_player.Update(m_map[0], deltaTime);
+}
+//-----------------------------------------------------------------------------
+void World::Draw()
+{
+	m_map[0].Draw(glm::vec2{ m_player.x, m_player.y });
 }
 //-----------------------------------------------------------------------------

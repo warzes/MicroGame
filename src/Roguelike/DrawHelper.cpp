@@ -115,10 +115,12 @@ void DrawHelper::DrawMainUI()
 	DrawHelper::DrawRect(leftScreen, rightScreen, topScreen, bottomScreen, skip1, skip2, nameMap);
 
 	// отрисовка персонажа в центре
-	SpriteChar::Draw({
-		rightScreen / 2,
-		bottomScreen / 2 }, { 1, 35 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-
+	{
+		const int playerX = (rightScreen - leftScreen) / 2 + leftScreen;
+		const int playerY = (bottomScreen - topScreen) / 2 + topScreen - 1;
+		SpriteChar::Draw({ playerX, playerY }, { 1, 35 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	}
+	
 	GetScreenMiniMapViewport(leftScreen, rightScreen, topScreen, bottomScreen);
 	DrawHelper::DrawRect(leftScreen, rightScreen, topScreen, bottomScreen);
 

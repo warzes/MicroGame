@@ -62,13 +62,13 @@ void Transform::updateTransforms()
 {
 	if (m_isTransformChanged & TransformChanged::NONE) return;
 
-	// Calculate World Matrix
+	// Calculate PhysicWorld Matrix
 	m_worldMatrix = glm::translate(m_position) * glm::toMat4(m_rotation) * glm::scale(m_scale);
 
 	if (m_parent)
 		m_worldMatrix *= m_parent->m_worldMatrix; // TODO: делать дерево наследования, сейчас только одна ветвь
 
-	// Get World Transform
+	// Get PhysicWorld Transform
 	glm::vec3 pos, scale, skew; glm::vec4 perpective; glm::quat rot;
 	if (glm::decompose(m_worldMatrix, scale, rot, pos, skew, perpective))
 	{

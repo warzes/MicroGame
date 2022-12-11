@@ -126,23 +126,23 @@ void PhysicPrimitiveBody::MoveBy(const glm::vec3& offset)
 		joints[i].position = joints[i].position + offset;
 }
 //-----------------------------------------------------------------------------
-void World::SetSize(const glm::vec3& center, const glm::vec3& size)
+void PhysicWorld::SetSize(const glm::vec3& center, const glm::vec3& size)
 {
 	m_centerWorld = center;
 	m_sizeWorld = size;
 }
 //-----------------------------------------------------------------------------
-void World::SetGravity(const glm::vec3& gravity)
+void PhysicWorld::SetGravity(const glm::vec3& gravity)
 {
 	m_gravity = gravity;
 }
 //-----------------------------------------------------------------------------
-void World::AddBody(PhysicPrimitiveBody* body)
+void PhysicWorld::AddBody(PhysicPrimitiveBody* body)
 {
 	m_bodies.push_back(body);
 }
 //-----------------------------------------------------------------------------
-void World::Tick()
+void PhysicWorld::Tick()
 {
 	for (size_t i = 0; i < m_bodies.size(); i++)
 	{
@@ -315,7 +315,7 @@ void World::Tick()
 	}
 }
 //-----------------------------------------------------------------------------
-glm::vec3 World::aaboxInside(glm::vec3 point, float maxDistance)
+glm::vec3 PhysicWorld::aaboxInside(glm::vec3 point, float maxDistance)
 {
 	glm::vec3 center = m_centerWorld;
 	glm::vec3 size = m_sizeWorld / 2.0f;
@@ -361,7 +361,7 @@ glm::vec3 World::aaboxInside(glm::vec3 point, float maxDistance)
 	return point;
 }
 //-----------------------------------------------------------------------------
-bool World::bodyEnvironmentResolveCollision(PhysicPrimitiveBody* body)
+bool PhysicWorld::bodyEnvironmentResolveCollision(PhysicPrimitiveBody* body)
 {
 	glm::vec3 c;
 	float d;
@@ -393,7 +393,7 @@ bool World::bodyEnvironmentResolveCollision(PhysicPrimitiveBody* body)
 	return collision;
 }
 //-----------------------------------------------------------------------------
-uint8_t World::jointEnvironmentResolveCollision(Joint* joint, float elasticity, float friction)
+uint8_t PhysicWorld::jointEnvironmentResolveCollision(Joint* joint, float elasticity, float friction)
 {
 	glm::vec3 toJoint = joint->position - environmentDistance(joint->position, JOINT_SIZE(*joint));
 
@@ -494,7 +494,7 @@ uint8_t World::jointEnvironmentResolveCollision(Joint* joint, float elasticity, 
 	return 0;
 }
 //-----------------------------------------------------------------------------
-void World::bodyNonrotatingJointCollided(PhysicPrimitiveBody* b, int16_t jointIndex, glm::vec3 origPos, uint8_t success)
+void PhysicWorld::bodyNonrotatingJointCollided(PhysicPrimitiveBody* b, int16_t jointIndex, glm::vec3 origPos, uint8_t success)
 {
 	origPos = b->joints[jointIndex].position - origPos;
 
@@ -510,7 +510,7 @@ void World::bodyNonrotatingJointCollided(PhysicPrimitiveBody* b, int16_t jointIn
 	}
 }
 //-----------------------------------------------------------------------------
-uint8_t World::bodyEnvironmentCollide(const PhysicPrimitiveBody* body)
+uint8_t PhysicWorld::bodyEnvironmentCollide(const PhysicPrimitiveBody* body)
 {
 	for (uint16_t i = 0; i < body->jointCount; ++i)
 	{
@@ -525,7 +525,7 @@ uint8_t World::bodyEnvironmentCollide(const PhysicPrimitiveBody* body)
 	return 0;
 }
 //-----------------------------------------------------------------------------
-void World::bodyReshape(PhysicPrimitiveBody* body)
+void PhysicWorld::bodyReshape(PhysicPrimitiveBody* body)
 {
 	for (uint16_t i = 0; i < body->connectionCount; ++i)
 	{
@@ -568,7 +568,7 @@ void World::bodyReshape(PhysicPrimitiveBody* body)
 	}
 }
 //-----------------------------------------------------------------------------
-void World::bodyCancelOutVelocities(PhysicPrimitiveBody* body, uint8_t strong)
+void PhysicWorld::bodyCancelOutVelocities(PhysicPrimitiveBody* body, uint8_t strong)
 {
 	for (uint16_t i = 0; i < body->connectionCount; ++i)
 	{
@@ -634,7 +634,7 @@ void World::bodyCancelOutVelocities(PhysicPrimitiveBody* body, uint8_t strong)
 	}
 }
 //-----------------------------------------------------------------------------
-uint8_t World::bodiesResolveCollision(PhysicPrimitiveBody* b1, PhysicPrimitiveBody* b2)
+uint8_t PhysicWorld::bodiesResolveCollision(PhysicPrimitiveBody* b1, PhysicPrimitiveBody* b2)
 {
 	uint8_t r = 0;
 
@@ -666,7 +666,7 @@ uint8_t World::bodiesResolveCollision(PhysicPrimitiveBody* b1, PhysicPrimitiveBo
 	return r;
 }
 //-----------------------------------------------------------------------------
-uint8_t World::jointsResolveCollision(Joint* j1, Joint* j2, float mass1, float mass2, float elasticity, float friction)
+uint8_t PhysicWorld::jointsResolveCollision(Joint* j1, Joint* j2, float mass1, float mass2, float elasticity, float friction)
 {
 	glm::vec3 dir = j2->position - j1->position;
 
@@ -769,7 +769,7 @@ uint8_t World::jointsResolveCollision(Joint* j1, Joint* j2, float mass1, float m
 	return 0;
 }
 //-----------------------------------------------------------------------------
-void World::bodyActivate(PhysicPrimitiveBody* body)
+void PhysicWorld::bodyActivate(PhysicPrimitiveBody* body)
 {
 	// the if check has to be here, don't remove it
 	if (body->flags & BODY_FLAG_DEACTIVATED)
@@ -780,7 +780,7 @@ void World::bodyActivate(PhysicPrimitiveBody* body)
 	}
 }
 //-----------------------------------------------------------------------------
-void World::bodyStop(PhysicPrimitiveBody* body)
+void PhysicWorld::bodyStop(PhysicPrimitiveBody* body)
 {
 	for (uint16_t i = 0; i < body->jointCount; ++i)
 	{
@@ -790,12 +790,12 @@ void World::bodyStop(PhysicPrimitiveBody* body)
 	}
 }
 //-----------------------------------------------------------------------------
-float World::bodyGetAverageSpeed(const PhysicPrimitiveBody* body)
+float PhysicWorld::bodyGetAverageSpeed(const PhysicPrimitiveBody* body)
 {
 	return bodyGetNetSpeed(body) / body->jointCount;
 }
 //-----------------------------------------------------------------------------
-float World::bodyGetNetSpeed(const PhysicPrimitiveBody* body)
+float PhysicWorld::bodyGetNetSpeed(const PhysicPrimitiveBody* body)
 {
 #if APPROXIMATE_NET_SPEED
 	glm::vec3 netV = glm::vec3(0, 0, 0);

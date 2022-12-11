@@ -3,12 +3,11 @@
 #include "Sprite.h"
 #include "DrawHelper.h"
 #include "World.h"
-#include "GenerateMap.h"
+
 #include "Character.h"
 #include "MinimapRender.h"
 //-----------------------------------------------------------------------------
 World world;
-
 MinimapRender minimapRender;
 //-----------------------------------------------------------------------------
 bool StartGameApp()
@@ -20,10 +19,7 @@ bool StartGameApp()
 
 	SpriteChar::Init();
 
-	GenerateMap::GenerateDungeons(map);
-
-	auto pos = GenerateMap::GetFindPosition(map);
-	player.SetPosition(pos.x, pos.y);
+	world.SetMap(L"test");
 
 	return true;
 }
@@ -36,14 +32,15 @@ void CloseGameApp()
 //-----------------------------------------------------------------------------
 void UpdateGameApp(float deltaTime)
 {
-	player.Update(map, deltaTime);
+	world.UpdatePlayer(deltaTime);
 }
 //-----------------------------------------------------------------------------
 void FrameGameApp(float deltaTime)
 {
 	DrawHelper::DrawMainUI();
-	map.Draw(glm::vec2{ player.x, player.y });
+	world.Draw();
+
 	SpriteChar::Flush();
-	minimapRender.Draw(map, player);
+	minimapRender.Draw(world);
 }
 //-----------------------------------------------------------------------------

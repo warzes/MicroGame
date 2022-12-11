@@ -30,7 +30,6 @@
 #include "UI.h"
 #include "Navigation.h"
 #include "Scene.h"
-#include "World.h"
 
 namespace engine
 {

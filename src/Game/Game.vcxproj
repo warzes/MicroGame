@@ -261,7 +261,6 @@
     <ClInclude Include="UI.h" />
     <ClInclude Include="Navigation.h" />
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="World.h" />
     <ClInclude Include="BaseHeader.h" />
     <ClInclude Include="Base.h" />
     <ClInclude Include="Core.h" />
