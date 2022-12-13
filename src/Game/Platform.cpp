@@ -21,11 +21,10 @@
 #	pragma warning(pop)
 #endif
 //=============================================================================
-
 //=============================================================================
 // I/O func
 //=============================================================================
-
+//-------------------------------------------------------------------------
 std::vector<char> FileSystem::Fileload(const char* filename, int* len)
 {
 	FILE* file = nullptr;
@@ -56,10 +55,79 @@ std::vector<char> FileSystem::Fileload(const char* filename, int* len)
 	if (len) *len = 0;
 	return {};
 }
+//-------------------------------------------------------------------------
+std::optional<std::vector<char>> FileSystem::FileToStr(const char* filename, int* outfileLen)
+{
+	if (outfileLen) *outfileLen = 0;
 
+	if (!filename || !filename[0])
+	{
+		LogError("Unknown filename!!!");
+		return std::nullopt;
+	}
+
+	FILE* file = nullptr;	
+	errno_t err;
+	err = fopen_s(&file, filename, "rb");
+	if (err != 0 || !file)
+	{
+		LogError("Unable to open file '" + std::string(filename) + "'");
+		return std::nullopt;
+	}
+
+	int e = fseek(file, 0L, SEEK_END);
+	if (e == -1)
+	{
+		LogError("Unable to seek file '" + std::string(filename) + "'");
+		fclose(file);
+		return std::nullopt;
+	}
+
+	long fileLen = ftell(file);
+	if (fileLen == -1)
+	{
+		LogError("Unable to ftell() file '" + std::string(filename) + "'");
+		fclose(file);
+		return std::nullopt;
+	}
+
+	e = fseek(file, 0, SEEK_SET);
+	if (e == -1)
+	{
+		LogError("Unable to seek file '" + std::string(filename) + "'");
+		fclose(file);
+		return std::nullopt;
+	}
+
+	std::vector<char> contents(fileLen + 1);
+	if (contents.empty() || contents.size() <= 1)
+	{
+		LogError("Memory error!");
+		fclose(file);
+		return std::nullopt;
+	}
+
+	unsigned long bytesRead = fread(contents.data(), fileLen, 1, file);
+	if (bytesRead == 0 && ferror(file))
+	{
+		LogError("Read error");
+		fclose(file);
+		return std::nullopt;
+	}
+
+	fileLen *= (bytesRead == 1);
+	contents[fileLen] = 0;
+
+	fclose(file);
+
+	if (outfileLen) *outfileLen = (int)fileLen + 1;
+
+	return contents;
+}
 //-------------------------------------------------------------------------
+//=============================================================================
 // Input
-//-------------------------------------------------------------------------
+//=============================================================================
 extern GLFWwindow* window;
 
 constexpr auto MAX_KEYBOARD_KEYS = 512;     // Maximum number of keyboard keys supported

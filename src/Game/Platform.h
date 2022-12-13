@@ -8,6 +8,7 @@
 namespace FileSystem
 {
 	std::vector<char> Fileload(const char* filename, int* len);
+	std::optional<std::vector<char>> FileToStr(const char* filename, int* outfileLen = nullptr);
 }
 
 //=============================================================================
