@@ -56,11 +56,11 @@ std::vector<char> FileSystem::Fileload(const char* filename, int* len)
 	return {};
 }
 //-------------------------------------------------------------------------
-std::optional<std::vector<char>> FileSystem::FileToStr(const char* filename, int* outfileLen)
+std::optional<std::vector<char>> FileSystem::FileToMemory(const char* fileName, int* outfileLen)
 {
 	if (outfileLen) *outfileLen = 0;
 
-	if (!filename || !filename[0])
+	if (!fileName || !fileName[0])
 	{
 		LogError("Unknown filename!!!");
 		return std::nullopt;
@@ -68,33 +68,31 @@ std::optional<std::vector<char>> FileSystem::FileToStr(const char* filename, int
 
 	FILE* file = nullptr;	
 	errno_t err;
-	err = fopen_s(&file, filename, "rb");
+	err = fopen_s(&file, fileName, "rb");
 	if (err != 0 || !file)
 	{
-		LogError("Unable to open file '" + std::string(filename) + "'");
+		LogError("Unable to open file '" + std::string(fileName) + "'");
 		return std::nullopt;
 	}
 
-	int e = fseek(file, 0L, SEEK_END);
-	if (e == -1)
+	if (fseek(file, 0L, SEEK_END) != 0)
 	{
-		LogError("Unable to seek file '" + std::string(filename) + "'");
+		LogError("Unable to seek file '" + std::string(fileName) + "'");
 		fclose(file);
 		return std::nullopt;
 	}
 
 	long fileLen = ftell(file);
-	if (fileLen == -1)
+	if (fileLen < 0)
 	{
-		LogError("Unable to ftell() file '" + std::string(filename) + "'");
+		LogError("Unable to ftell() file '" + std::string(fileName) + "'");
 		fclose(file);
 		return std::nullopt;
 	}
 
-	e = fseek(file, 0, SEEK_SET);
-	if (e == -1)
+	if (fseek(file, 0, SEEK_SET) != 0)
 	{
-		LogError("Unable to seek file '" + std::string(filename) + "'");
+		LogError("Unable to seek file '" + std::string(fileName) + "'");
 		fclose(file);
 		return std::nullopt;
 	}
@@ -108,7 +106,7 @@ std::optional<std::vector<char>> FileSystem::FileToStr(const char* filename, int
 	}
 
 	unsigned long bytesRead = fread(contents.data(), fileLen, 1, file);
-	if (bytesRead == 0 && ferror(file))
+	if (bytesRead == 0 || ferror(file))
 	{
 		LogError("Read error");
 		fclose(file);
@@ -124,7 +122,25 @@ std::optional<std::vector<char>> FileSystem::FileToStr(const char* filename, int
 
 	return contents;
 }
-//-------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+const char* FileSystem::GetFileExtension(const char* fileName)
+{
+	// TODO: бывают случаи когда точка используется в имени файла например file.foo.ext
+	// сейчас это не будет работать
+	const char* dot = strrchr(fileName, '.');
+	if (!dot || dot == fileName) return nullptr;
+	return dot;
+}
+//-----------------------------------------------------------------------------
+const char* FileSystem::GetFileName(const char* filePath)
+{
+	const char* latestMatch = nullptr;
+	for (; filePath = strpbrk(filePath, "\\/"), filePath != nullptr; latestMatch = filePath++) {}
+	const char* fileName = latestMatch;
+	if (!fileName) return filePath;
+	return fileName + 1;
+}
+//-----------------------------------------------------------------------------
 //=============================================================================
 // Input
 //=============================================================================

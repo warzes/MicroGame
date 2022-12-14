@@ -33,9 +33,6 @@
     <ClCompile Include="Platform.cpp">
       <Filter>MicroEngine\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="oRenderer.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer.cpp">
       <Filter>MicroEngine\Engine</Filter>
     </ClCompile>
@@ -135,9 +132,6 @@
     <ClInclude Include="Audio.h">
       <Filter>MicroEngine\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="oRenderer.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Renderer.h">
       <Filter>MicroEngine\Engine</Filter>
     </ClInclude>
@@ -181,7 +175,6 @@
     <ClInclude Include="Collisions3.h">
       <Filter>MicroEngine\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="World.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="EngineMath.inl">

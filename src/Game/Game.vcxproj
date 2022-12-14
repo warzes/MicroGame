@@ -223,7 +223,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="oRenderer.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Physics2.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -247,7 +246,6 @@
     <ClInclude Include="Collisions2.h" />
     <ClInclude Include="Collisions3.h" />
     <ClInclude Include="EngineConfig.h" />
-    <ClInclude Include="oRenderer.h" />
     <ClInclude Include="Physics2.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Graphics.h" />

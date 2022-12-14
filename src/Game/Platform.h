@@ -8,7 +8,12 @@
 namespace FileSystem
 {
 	std::vector<char> Fileload(const char* filename, int* len);
-	std::optional<std::vector<char>> FileToStr(const char* filename, int* outfileLen = nullptr);
+	std::optional<std::vector<char>> FileToMemory(const char* fileName, int* outfileLen = nullptr);
+
+	// Get pointer to extension for a filename string (includes the dot: .png)
+	const char* GetFileExtension(const char* fileName);
+	// Get pointer to filename for a path string
+	const char* GetFileName(const char* filePath);
 }
 
 //=============================================================================
