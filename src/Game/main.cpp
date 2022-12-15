@@ -169,6 +169,14 @@ scene::Transform trans;
 g3d::Model modelTest;
 g3d::Model modelTest2;
 #endif
+
+//[[nodiscard]] [[msvc::intrinsic]] constexpr void ff() noexcept
+//{
+// msvc::intrinsic - оптимизация доступна в предварительной версии
+//	err
+//}
+
+
 int main(
 	[[maybe_unused]] int   argc,
 	[[maybe_unused]] char* argv[])

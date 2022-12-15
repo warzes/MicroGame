@@ -7061,24 +7061,24 @@ GLFWAPI OSMesaContext glfwGetOSMesaContext(GLFWwindow* window);
 
 #ifdef _GLFW_IMPLEMENTATION
 
-#if defined(_WIN32)
-#   define _GLFW_WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
+# define _GLFW_WIN32
 #endif
 #if defined(__linux__)
-#   if !defined(_GLFW_WAYLAND)     // Required for Wayland windowing
+#	if !defined(_GLFW_WAYLAND)     // Required for Wayland windowing
 #       define _GLFW_X11
 #   endif
 #endif
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
-#   define _GLFW_X11
+#	define _GLFW_X11
 #endif
 #if defined(__APPLE__)
-#   define _GLFW_COCOA
-#   define _GLFW_USE_MENUBAR       // To create and populate the menu bar when the first window is created
-#   define _GLFW_USE_RETINA        // To have windows use the full resolution of Retina displays
+#	define _GLFW_COCOA
+#	define _GLFW_USE_MENUBAR       // To create and populate the menu bar when the first window is created
+#	define _GLFW_USE_RETINA        // To have windows use the full resolution of Retina displays
 #endif
 #if defined(__TINYC__)
-#   define _WIN32_WINNT_WINXP      0x0501
+#	define _WIN32_WINNT_WINXP      0x0501
 #endif
 #line 1 "internal.h"
 
@@ -26936,7 +26936,7 @@ GLFWbool _glfwConnectX11(int platformID, _GLFWplatform* platform)
         _glfwGetKeyScancodeX11,
         _glfwSetClipboardStringX11,
         _glfwGetClipboardStringX11,
-#if defined(_GLFW_LINUX_JOYSTICK)
+#if defined(GLFW_BUILD_LINUX_JOYSTICK)
         _glfwInitJoysticksLinux,
         _glfwTerminateJoysticksLinux,
         _glfwPollJoystickLinux,
@@ -28134,7 +28134,7 @@ static GLFWbool waitForAnyEvent(double* timeout)
         { _glfw.x11.emptyEventPipe[0], POLLIN }
     };
 
-#if defined(_GLFW_LINUX_JOYSTICK)
+#if defined(GLFW_BUILD_LINUX_JOYSTICK)
     if (_glfw.joysticksInitialized)
         fds[count++] = (struct pollfd) { _glfw.linjs.inotify, POLLIN };
 #endif
@@ -30829,7 +30829,7 @@ void _glfwPollEventsX11(void)
 {
     drainEmptyEvents();
 
-#if defined(_GLFW_LINUX_JOYSTICK)
+#if defined(GLFW_BUILD_LINUX_JOYSTICK)
     if (_glfw.joysticksInitialized)
         _glfwDetectJoystickConnectionLinux();
 #endif
@@ -32535,7 +32535,7 @@ GLFWbool _glfwConnectWayland(int platformID, _GLFWplatform* platform)
         _glfwGetKeyScancodeWayland,
         _glfwSetClipboardStringWayland,
         _glfwGetClipboardStringWayland,
-#if defined(_GLFW_LINUX_JOYSTICK)
+#if defined(GLFW_BUILD_LINUX_JOYSTICK)
         _glfwInitJoysticksLinux,
         _glfwTerminateJoysticksLinux,
         _glfwPollJoystickLinux,
