@@ -51,6 +51,12 @@
     <ClCompile Include="MinimapRender.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
+    <ClCompile Include="GameStateManager.cpp">
+      <Filter>GameState</Filter>
+    </ClCompile>
+    <ClCompile Include="GameExplorerState.cpp">
+      <Filter>GameState</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MicroEngine">
@@ -64,6 +70,9 @@
     </Filter>
     <Filter Include="World">
       <UniqueIdentifier>{0569972e-b30b-4477-ab6e-77301fce67c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameState">
+      <UniqueIdentifier>{8aceb007-42b3-4ed0-a05e-a2342df92e22}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -94,8 +103,18 @@
     <ClInclude Include="MinimapRender.h">
       <Filter>Framework</Filter>
     </ClInclude>
+    <ClInclude Include="IGameState.h">
+      <Filter>GameState</Filter>
+    </ClInclude>
+    <ClInclude Include="GameStateManager.h">
+      <Filter>GameState</Filter>
+    </ClInclude>
+    <ClInclude Include="GameExplorerState.h">
+      <Filter>GameState</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="RPG.MD" />
+    <None Include="GD.MD" />
   </ItemGroup>
 </Project>

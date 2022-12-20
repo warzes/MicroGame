@@ -1,11 +1,10 @@
 ﻿#pragma once
 
-#include "Sprite.h"
 #include "DrawHelper.h"
-#include "World.h"
-
+#include "GameStateManager.h"
+#include "GameExplorerState.h"
 #include "Character.h"
-#include "MinimapRender.h"
+
 //-----------------------------------------------------------------------------
 //механика боя такая
 //бой происходит в режиме боя. игра переходит в режим боя при контакте с монстром (т оесть игрок и монстр стоят рядом на соседних клетках).при этом не важно кто первым коснулся врага, очередность определяется ролевой системой
@@ -21,40 +20,35 @@
 //
 //Стрельба - действует только в режиме иследования, так как в бою сложно стрелять.
 
-World world;
-MinimapRender minimapRender;
+
+GameExplorerState gameExplorerState;
 //-----------------------------------------------------------------------------
 bool StartGameApp()
 {
-	if (!minimapRender.Create())
-		return false;
-
 	RenderSystem::SetFrameColor(glm::vec3(0.15, 0.15, 0.15));
 
-	SpriteChar::Init();
+	if (!gameExplorerState.Create())
+		return false;
 
-	world.SetMap(L"test");
+	GameStateManager::SetState(&gameExplorerState);
 
 	return true;
 }
 //-----------------------------------------------------------------------------
 void CloseGameApp()
 {
-	SpriteChar::Close();
-	minimapRender.Destroy();
+	GameStateManager::SetState(nullptr);
+	gameExplorerState.Destroy();
 }
 //-----------------------------------------------------------------------------
 void UpdateGameApp(float deltaTime)
 {
-	world.UpdatePlayer(deltaTime);
+
+	GameStateManager::Update(deltaTime);
 }
 //-----------------------------------------------------------------------------
 void FrameGameApp(float deltaTime)
 {
-	DrawHelper::DrawMainUI();
-	world.Draw();
-
-	SpriteChar::Flush();
-	minimapRender.Draw(world);
+	GameStateManager::Frame(deltaTime);	
 }
 //-----------------------------------------------------------------------------

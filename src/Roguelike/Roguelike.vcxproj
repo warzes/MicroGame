@@ -227,6 +227,8 @@
     <ClCompile Include="DrawHelper.cpp" />
     <ClCompile Include="DrawTextHelper.cpp" />
     <ClCompile Include="EngineImpl.cpp" />
+    <ClCompile Include="GameExplorerState.cpp" />
+    <ClCompile Include="GameStateManager.cpp" />
     <ClCompile Include="GenerateMap.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MinimapRender.cpp" />
@@ -245,7 +247,10 @@
     <ClInclude Include="DrawHelper.h" />
     <ClInclude Include="GameApp.h" />
     <ClInclude Include="GameConfig.h" />
+    <ClInclude Include="GameStateManager.h" />
     <ClInclude Include="GenerateMap.h" />
+    <ClInclude Include="GameExplorerState.h" />
+    <ClInclude Include="IGameState.h" />
     <ClInclude Include="MinimapRender.h" />
     <ClInclude Include="privateGenerateMap.h" />
     <ClInclude Include="Sprite.h" />
@@ -254,6 +259,7 @@
     <ClInclude Include="World.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="GD.MD" />
     <None Include="RPG.MD" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
