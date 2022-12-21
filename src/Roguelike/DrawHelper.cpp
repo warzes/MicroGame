@@ -109,7 +109,7 @@ void DrawHelper::DrawMainUI()
 	GetScreenWorldViewport(leftScreen, rightScreen, topScreen, bottomScreen);
 
 	// позиция названия карты
-	const int offstepNameX = (nameMap.length() / 2.0f) / (16.0f / TileSize);
+	const int offstepNameX = (nameMap.length() / 2.0f) / (16.0f / TileSize); // TODO: сделать и использовать тут функцию возврата длины строки
 	const int skip1 = (rightScreen / 2.0f - offstepNameX);
 	const int skip2 = (rightScreen / 2.0f + offstepNameX);
 	DrawHelper::DrawRect(leftScreen, rightScreen, topScreen, bottomScreen, skip1, skip2, nameMap);
@@ -129,6 +129,22 @@ void DrawHelper::DrawMainUI()
 
 	GetScreenLogViewport(leftScreen, rightScreen, topScreen, bottomScreen);
 	DrawHelper::DrawRect(leftScreen, rightScreen, topScreen, bottomScreen);
+}
+//-----------------------------------------------------------------------------
+void DrawHelper::DrawBattleUI()
+{
+	// границы окон
+	int leftScreen = 1;
+	int rightScreen = ScreenHeight * GetFrameBufferAspectRatio() / TileSize - 1;
+	int topScreen = 1;
+	int bottomScreen = ScreenHeight / TileSize - 1;
+
+	std::wstring text = L"Битва";
+	const int offstepNameX = (text.length() / 2.0f) / (16.0f / TileSize); // TODO: сделать и использовать тут функцию возврата длины строки
+	const int skip1 = (rightScreen / 2.0f - offstepNameX-2);
+	const int skip2 = (rightScreen / 2.0f + offstepNameX+2);
+
+	DrawHelper::DrawRect(leftScreen, rightScreen, topScreen, bottomScreen, skip1, skip2, text);
 }
 //-----------------------------------------------------------------------------
 void DrawHelper::DrawTree(const glm::vec2& pos, int num)
@@ -162,6 +178,11 @@ void DrawHelper::DrawGrass(const glm::vec2& pos, int num)
 	else if (num == 2) SpriteChar::DrawInMapScreen({ pos.x, pos.y }, { 11, 4 }, glm::vec4(0.1f, 1.0f, 0.3f, 1.0f));
 	else if (num == 3) SpriteChar::DrawInMapScreen({ pos.x, pos.y }, { 14, 3 }, glm::vec4(0.1f, 1.0f, 0.3f, 1.0f));
 	else if (num == 4) SpriteChar::DrawInMapScreen({ pos.x, pos.y }, { 12, 3 }, glm::vec4(0.1f, 1.0f, 0.3f, 1.0f));
+}
+//-----------------------------------------------------------------------------
+void DrawHelper::DrawEnemy(const glm::vec2& pos)
+{
+	SpriteChar::DrawInMapScreen({ pos.x, pos.y }, { 1, 35 }, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 }
 //-----------------------------------------------------------------------------
 void DrawHelper::DrawFloor(const glm::vec2& pos, int num, const glm::vec4& color)

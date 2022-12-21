@@ -1,43 +1,32 @@
 #include "stdafx.h"
-#include "GameExplorerState.h"
+#include "GameBattleState.h"
 #include "Sprite.h"
 #include "DrawHelper.h"
 //-----------------------------------------------------------------------------
-bool GameExplorerState::Create()
+bool GameBattleState::Create()
 {
-	if (!m_minimapRender.Create())
-		return false;
-
-	SpriteChar::Init();
-
-	m_world.SetMap(L"test");
 	return true;
 }
 //-----------------------------------------------------------------------------
-void GameExplorerState::Destroy()
-{
-	SpriteChar::Close();
-	m_minimapRender.Destroy();
-}
-//-----------------------------------------------------------------------------
-void GameExplorerState::Start()
+void GameBattleState::Destroy()
 {
 }
 //-----------------------------------------------------------------------------
-void GameExplorerState::Stop()
+void GameBattleState::Start()
 {
 }
 //-----------------------------------------------------------------------------
-void GameExplorerState::Update(float deltaTime)
+void GameBattleState::Stop()
 {
-	m_world.Update(deltaTime);
 }
 //-----------------------------------------------------------------------------
-void GameExplorerState::Render(float deltaTime)
+void GameBattleState::Update(float deltaTime)
 {
-	DrawHelper::DrawMainUI();
-	m_world.Draw();
+}
+//-----------------------------------------------------------------------------
+void GameBattleState::Render(float deltaTime)
+{
+	DrawHelper::DrawBattleUI();
 	SpriteChar::Flush();
-	m_minimapRender.Draw(m_world);
 }
 //-----------------------------------------------------------------------------

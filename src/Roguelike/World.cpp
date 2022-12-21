@@ -2,88 +2,8 @@
 #include "World.h"
 #include "DrawHelper.h"
 #include "GenerateMap.h"
-//-----------------------------------------------------------------------------
-void Object::Draw(const glm::vec2& pos)
-{
-	if (type == Tree1)
-		DrawHelper::DrawTree(pos);
-}
-//-----------------------------------------------------------------------------
-void Tile::Draw(const glm::vec2& pos)
-{
-	if (object) 
-		object->Draw(pos);
-	else
-	{
-		if (type == None) return;
-
-		else if (type == Grass1) DrawHelper::DrawGrass(pos, 1);
-		else if (type == Grass2) DrawHelper::DrawGrass(pos, 2);
-		else if (type == Grass3) DrawHelper::DrawGrass(pos, 3);
-		else if (type == Grass4) DrawHelper::DrawGrass(pos, 4);
-
-		else if (type == Floor1) DrawHelper::DrawFloor(pos, 1, color);
-		else if (type == Floor2) DrawHelper::DrawFloor(pos, 2, color);
-		else if (type == Floor3) DrawHelper::DrawFloor(pos, 3, color);
-		else if (type == Floor4) DrawHelper::DrawFloor(pos, 4, color);
-
-		else if (type == Wall1) DrawHelper::DrawWall(pos, 1, color);
-	}
-}
-//-----------------------------------------------------------------------------
-void Map::Create()
-{
-	for (int x = 0; x < SizeMap; x++)
-	{
-		for (int y = 0; y < SizeMap; y++)
-		{
-			int r = rand() % 3;
-			if (r == 0) tiles[x][y].type = Tile::Grass1;
-			else if (r == 1) tiles[x][y].type = Tile::Grass2;
-			else if (r == 2) tiles[x][y].type = Tile::Grass3;
-			else tiles[x][y].type = Tile::Grass4;
-		}
-	}
-
-	for (int i = 0; i < 100; i++)
-	{
-		int x = rand() % SizeMap-1;
-		int y = rand() % SizeMap-1;
-
-		tiles[x][y].object = new Object;
-		tiles[x][y].object->type = Object::Tree1;
-	}
-}
-//-----------------------------------------------------------------------------
-void Map::Draw(const glm::vec2& playerPos)
-{
-	int leftMapScreen = 1;
-	int rightMapScreen = 40;
-	int topMapScreen = 1;
-	int bottomMapScreen = 31;
-	DrawHelper::GetScreenWorldViewport(leftMapScreen, rightMapScreen, topMapScreen, bottomMapScreen);
-
-	const int widthMapScreen = (rightMapScreen - leftMapScreen);
-	const int heightMapScreen = (bottomMapScreen - topMapScreen);
-	const int halfWidthMapScreen = widthMapScreen / 2;
-	const int halfHeightMapScreen = heightMapScreen / 2;
-
-	// рисуется в пределах окна мира
-	for (int x = 0; x < widthMapScreen; x++)
-	{
-		for (int y = 0; y < heightMapScreen; y++)
-		{
-			const int worldX = x + playerPos.x - halfWidthMapScreen;
-			const int worldY = y + playerPos.y - halfHeightMapScreen+1;
-			if (worldX < 0 || worldX >= SizeMap || worldY < 0 || worldY >= SizeMap) continue;
-
-			// не рисовать тайл под игроком
-			if (worldX == playerPos.x && worldY == playerPos.y) continue;
-
-			tiles[worldX][worldY].Draw(glm::vec2(x + leftMapScreen, y + topMapScreen));
-		}
-	}
-}
+#include "GameStateManager.h"
+#include "GameBattleState.h"
 //-----------------------------------------------------------------------------
 void World::SetMap(const std::wstring& name)
 {
@@ -98,11 +18,77 @@ void World::SetMap(const std::wstring& name)
 
 	auto pos = GenerateMap::GetFindPosition(m_map[0]);
 	m_player.SetPosition(pos.x, pos.y);
+
+	m_map[0].npc.resize(3);
+	for (size_t i = 0; i < m_map[0].npc.size(); i++)
+	{
+		auto pos = GenerateMap::GetFindPosition(m_map[0]);
+		m_map[0].npc[i].SetPosition(pos.x, pos.y);
+	}
+
+	m_turn = TurnStatus::BeginTurn;
 }
 //-----------------------------------------------------------------------------
-void World::UpdatePlayer(float deltaTime)
+void World::Update(float deltaTime)
 {
-	m_player.Update(m_map[0], deltaTime);
+	if (m_turn == TurnStatus::BeginTurn)
+	{
+		// ЧТо-нибудь что должно быть в начале хода. А именно хилы, счетчики эффектов и т.д.
+		m_turn = TurnStatus::Player;
+	}
+	else if (m_turn == TurnStatus::Player)
+	{
+		if (m_player.Turn(m_map[0], deltaTime))
+		{
+			m_turn = TurnStatus::World;
+		}
+	}
+	else if (m_turn == TurnStatus::World)
+	{
+		// Ход мира (монстров, нпс, событий и т.д.)
+
+
+		//int r = rand() % 10;
+		//if (r < 5)
+		//{
+		//	// после битвы начинается новый ход
+		//	{
+		//		m_pauseStep = 0.0f;
+		//		m_isPause = false;
+		//		m_turn = TurnStatus::BeginTurn;
+		//	}
+		//	GameStateManager::SetState(&gameBattleState);
+		//}
+
+		m_turn = TurnStatus::EndTurn;
+	}
+	else if (m_turn == TurnStatus::EndTurn)
+	{
+		// Что-то что должно быть в конце	
+		m_turn = TurnStatus::PauseTime;
+	}
+	else if (m_turn == TurnStatus::PauseTime)
+	{
+		// пауза перед следующим ходом
+		{
+			constexpr const float speedStep = 15.0f;
+			if (!m_isPause)
+			{
+				m_isPause = true;
+				m_pauseStep = 1.0f;
+			}
+			else
+			{
+				if (m_pauseStep > 0.0f)
+					m_pauseStep -= speedStep * deltaTime;
+				else
+				{
+					m_isPause = false;
+					m_turn = TurnStatus::BeginTurn;
+				}
+			}
+		}
+	}
 }
 //-----------------------------------------------------------------------------
 void World::Draw()

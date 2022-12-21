@@ -1,5 +1,10 @@
 #include "stdafx.h"
 #include "GameStateManager.h"
+#include "GameBattleState.h"
+#include "GameExplorerState.h"
+//-----------------------------------------------------------------------------
+GameExplorerState gameExplorerState;
+GameBattleState gameBattleState;
 //-----------------------------------------------------------------------------
 IGameState* currentState = nullptr;
 //-----------------------------------------------------------------------------

@@ -4,7 +4,7 @@
 #include "World.h"
 #include "MinimapRender.h"
 
-class GameExplorerState final : public IGameState
+class GameBattleState final : public IGameState
 {
 public:
 	bool Create() final;
@@ -17,7 +17,5 @@ public:
 	void Render(float deltaTime) final;
 
 private:
-
 	World m_world;
-	MinimapRender m_minimapRender;
 };

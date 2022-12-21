@@ -3,6 +3,7 @@
 #include "DrawHelper.h"
 #include "GameStateManager.h"
 #include "GameExplorerState.h"
+#include "GameBattleState.h"
 #include "Character.h"
 
 //-----------------------------------------------------------------------------
@@ -20,8 +21,6 @@
 //
 //Стрельба - действует только в режиме иследования, так как в бою сложно стрелять.
 
-
-GameExplorerState gameExplorerState;
 //-----------------------------------------------------------------------------
 bool StartGameApp()
 {
@@ -29,6 +28,9 @@ bool StartGameApp()
 
 	if (!gameExplorerState.Create())
 		return false;
+	if (!gameBattleState.Create())
+		return false;
+
 
 	GameStateManager::SetState(&gameExplorerState);
 
@@ -38,6 +40,7 @@ bool StartGameApp()
 void CloseGameApp()
 {
 	GameStateManager::SetState(nullptr);
+	gameBattleState.Destroy();
 	gameExplorerState.Destroy();
 }
 //-----------------------------------------------------------------------------

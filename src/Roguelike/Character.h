@@ -7,7 +7,7 @@ class Player
 public:
 	void SetPosition(int nx, int ny) { x = nx; y = ny; }
 
-	void Update(Map& map, float deltaTime);
+	bool Turn(Map& map, float deltaTime);
 
 	int x;
 	int y;

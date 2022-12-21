@@ -1,89 +1,27 @@
 #pragma once
 
 #include "Character.h"
+#include "Map.h"
 
-class Object
+// механизм фаз хода
+enum class TurnStatus
 {
-public:
-	void Draw(const glm::vec2& pos);
+	BeginTurn,
 
-	enum ObjectType
-	{
-		None,
-		Tree1
-	};
+	Player,
+	World,
 
-	ObjectType type = None;
+	EndTurn,
+
+	PauseTime
 };
-
-class Tile
-{
-public:
-	void Draw(const glm::vec2& pos);
-
-	bool IsFloor() const
-	{
-		return type == Floor1 || type == Floor2 || type == Floor3 || type == Floor4;
-	}
-
-	bool IsWall() const
-	{
-		return type == Wall1;
-	}
-
-	Object* object = nullptr;
-
-	enum TileType
-	{
-		None,
-		Grass1,
-		Grass2,
-		Grass3,
-		Grass4,
-
-		Floor1,
-		Floor2,
-		Floor3,
-		Floor4,
-		Wall1,
-	};
-	TileType type = None;
-	glm::vec4 color = glm::vec4(1.0f);
-
-	bool moveFree = true;
-};
-
-enum class MapType
-{
-	Dungeons
-};
-
-class Map
-{
-public:
-	void Create();
-
-	void Draw(const glm::vec2& playerPos);
-
-	bool IsFreeMove(int x, int y) const
-	{
-		return tiles[x][y].moveFree;
-	}
-
-	Tile tiles[SizeMap][SizeMap];
-
-	MapType type = MapType::Dungeons;
-	std::wstring name;
-};
-
-
 
 class World
 {
 public:
 	void SetMap(const std::wstring& name);
 
-	void UpdatePlayer(float deltaTime);
+	void Update(float deltaTime);
 
 	void Draw();
 
@@ -95,4 +33,10 @@ private:
 	std::vector<Map> m_map;
 	unsigned m_currentMapId = 0;
 	Player m_player;
+
+	TurnStatus m_turn = TurnStatus::BeginTurn;
+
+	// переменные для паузы между ходами
+	float m_pauseStep = 0.0f;
+	bool m_isPause = false;
 };

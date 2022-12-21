@@ -107,6 +107,20 @@ void MinimapRender::Draw(const World& world)
 		addQuad(posX, posY, sizeX, sizeY, offsetX, offsetY, glm::vec3(0.0f, 0.2f, 1.0f));
 	}
 
+	// add enemy
+	{
+		for (size_t i = 0; i < world.GetCurrentMap().npc.size(); i++)
+		{
+			const float posX = left * TileSize + world.GetCurrentMap().npc[i].x * sizeX + TileSize / 2.0f;
+			const float posY = top * TileSize + world.GetCurrentMap().npc[i].y * sizeY + TileSize / 2.0f;
+			// чтобы четче видеть
+			const float offsetX = sizeX / 2.0f;
+			const float offsetY = sizeY / 2.0f;
+
+			addQuad(posX, posY, sizeX, sizeY, offsetX, offsetY, glm::vec3(1.0f, 0.2f, 0.0f));
+		}
+	}
+
 	m_shaderProgramQuad.Bind();
 	m_shaderProgramQuad.SetUniform(m_ortho, DrawHelper::GetOrtho());
 

@@ -14,9 +14,12 @@ public:
 
 	static void DrawMainUI();
 
+	static void DrawBattleUI();
+
 	static void DrawTree(const glm::vec2& pos, int num  =1);
 
 	static void DrawGrass(const glm::vec2& pos, int num);
+	static void DrawEnemy(const glm::vec2& pos);
 
 	static void DrawFloor(const glm::vec2& pos, int num, const glm::vec4& color);
 	static void DrawWall(const glm::vec2& pos, int num, const glm::vec4& color);
