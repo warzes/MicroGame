@@ -17,13 +17,19 @@ void World::SetMap(const std::wstring& name)
 	GenerateMap::GenerateDungeons(m_map[0]);
 	m_map[0].Create(&m_player);
 
-	auto pos = GenerateMap::GetFindPosition(m_map[0]);
-	m_player.SetPosition(pos.x, pos.y);
+	int maxIt = 30;
+	while (maxIt > 0)
+	{
+		auto pos = GenerateMap::GetFindPosition(m_map[0]);
+		if (m_player.SetPosition(m_map[0], pos.x, pos.y) == StopMoveEvent::Free)
+			break;
+		maxIt--;
+	}
 
 	m_map[0].npc.resize(3);
 	for (size_t i = 0; i < m_map[0].npc.size(); i++)
 	{
-		int maxIt = 30;
+		maxIt = 30;
 		while (maxIt > 0)
 		{
 			auto pos = GenerateMap::GetFindPosition(m_map[0]);

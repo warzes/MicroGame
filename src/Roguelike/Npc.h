@@ -1,21 +1,12 @@
 #pragma once
 
-class Tile;
-class Map;
+#include "CoreGameClass.h"
 
 enum class NpcReactionType
 {
 	Enemy,
 	Ally,
 	Neutral
-};
-
-enum class StopMoveEvent
-{
-	Free,
-	Tile,
-	Player,
-	Npc
 };
 
 class Npc

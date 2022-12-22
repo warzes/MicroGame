@@ -1,11 +1,11 @@
 #pragma once
 
-class Map;
+#include "CoreGameClass.h"
 
 class Player
 {
 public:
-	void SetPosition(int nx, int ny) { x = nx; y = ny; }
+	StopMoveEvent SetPosition(Map& map, int nx, int ny);
 
 	bool Turn(Map& map, float deltaTime);
 

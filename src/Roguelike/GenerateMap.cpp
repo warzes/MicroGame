@@ -30,16 +30,16 @@ void GenerateMap::GenerateDungeons(Map& map)
 			case GenTile::DownStairs:
 				{
 					int r = rand() % 3;
-					if (r == 0) map.tiles[x][y].type = Tile::Floor1;
+					if (r == 0)      map.tiles[x][y].type = Tile::Floor1;
 					else if (r == 1) map.tiles[x][y].type = Tile::Floor2;
 					else if (r == 2) map.tiles[x][y].type = Tile::Floor3;
-					else map.tiles[x][y].type = Tile::Floor4;
+					else             map.tiles[x][y].type = Tile::Floor4;
 				}
 				break;
 
 			case GenTile::Wall:
 				map.tiles[x][y].type = Tile::Wall1;
-				map.tiles[x][y].moveFree = false;
+				map.tiles[x][y].IsFreeMove = false;
 				break;
 			default:
 				break;

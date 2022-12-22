@@ -3,21 +3,21 @@
 #include "World.h"
 //-----------------------------------------------------------------------------
 // TODO: если заработает то убрать функцию
-inline void stepAndPause(int eventKey, float& timePause, int& position, bool& isTurn, float time, int positionMod)
-{
-	if (IsKeyboardKeyUp(eventKey)) timePause = 0.0f;
-
-	if (IsKeyboardKeyDown(eventKey))
-	{
-		if (timePause > 0.0f) timePause -= time;
-		else
-		{
-			isTurn = true;
-			position += positionMod;
-			timePause = 1.0f;
-		}
-	}
-}
+//inline void stepAndPause(int eventKey, float& timePause, int& position, bool& isTurn, float time, int positionMod)
+//{
+//	if (IsKeyboardKeyUp(eventKey)) timePause = 0.0f;
+//
+//	if (IsKeyboardKeyDown(eventKey))
+//	{
+//		if (timePause > 0.0f) timePause -= time;
+//		else
+//		{
+//			isTurn = true;
+//			position += positionMod;
+//			timePause = 1.0f;
+//		}
+//	}
+//}
 //-----------------------------------------------------------------------------
 inline void step(int eventKey, int& position, bool& isTurn, int positionMod)
 {
@@ -26,6 +26,16 @@ inline void step(int eventKey, int& position, bool& isTurn, int positionMod)
 		isTurn = true;
 		position += positionMod;
 	}
+}
+//-----------------------------------------------------------------------------
+StopMoveEvent Player::SetPosition(Map& map, int nx, int ny)
+{
+	const StopMoveEvent curEvent = map.IsFreeMove(nx, ny);
+	if (curEvent != StopMoveEvent::Free)
+		return curEvent;
+	x = nx;
+	y = ny;
+	return StopMoveEvent::Free;
 }
 //-----------------------------------------------------------------------------
 bool Player::Turn(Map& map, float deltaTime)
@@ -50,11 +60,10 @@ bool Player::Turn(Map& map, float deltaTime)
 	step(KEY_A, newX, IsTurn, -1);
 	step(KEY_D, newX, IsTurn, +1);
 
-	if (IsTurn && map.IsFreeMove(newX, newY))
+	if (IsTurn)
 	{
-		x = newX;
-		y = newY;
-		return true;
+		if (SetPosition(map, newX, newY) == StopMoveEvent::Free)
+			return true;
 	}
 
 	return false;

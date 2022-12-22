@@ -33,11 +33,6 @@ public:
 		return type == Wall1;
 	}
 
-	bool IsSolid() const
-	{
-		return IsWall() || npc;
-	}
-
 	Object* object = nullptr;
 
 	Npc* npc = nullptr;
@@ -59,8 +54,7 @@ public:
 	};
 	TileType type = None;
 	glm::vec4 color = glm::vec4(1.0f);
-
-	bool moveFree = true;
+	bool IsFreeMove = true;
 };
 
 enum class MapType
@@ -75,10 +69,7 @@ public:
 
 	void Draw();
 
-	bool IsFreeMove(int x, int y) const
-	{
-		return tiles[x][y].moveFree;
-	}
+	StopMoveEvent IsFreeMove(int x, int y) const;
 
 	Tile tiles[SizeMap][SizeMap];
 

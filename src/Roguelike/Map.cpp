@@ -36,40 +36,19 @@ void Tile::Draw(const glm::vec2& pos)
 void Map::Create(Player* player)
 {
 	this->player = player;
-
-	//for (int x = 0; x < SizeMap; x++)
-	//{
-	//	for (int y = 0; y < SizeMap; y++)
-	//	{
-	//		int r = rand() % 3;
-	//		if (r == 0) tiles[x][y].type = Tile::Grass1;
-	//		else if (r == 1) tiles[x][y].type = Tile::Grass2;
-	//		else if (r == 2) tiles[x][y].type = Tile::Grass3;
-	//		else tiles[x][y].type = Tile::Grass4;
-	//	}
-	//}
-
-	//for (int i = 0; i < 100; i++)
-	//{
-	//	int x = rand() % SizeMap - 1;
-	//	int y = rand() % SizeMap - 1;
-
-	//	tiles[x][y].object = new Object;
-	//	tiles[x][y].object->type = Object::Tree1;
-	//}
 }
 //-----------------------------------------------------------------------------
 void Map::Draw()
 {
-	int leftMapScreen = 1;
-	int rightMapScreen = 40;
-	int topMapScreen = 1;
+	int leftMapScreen   = 1;
+	int rightMapScreen  = 40;
+	int topMapScreen    = 1;
 	int bottomMapScreen = 31;
 	DrawHelper::GetScreenWorldViewport(leftMapScreen, rightMapScreen, topMapScreen, bottomMapScreen);
 
-	const int widthMapScreen = (rightMapScreen - leftMapScreen);
-	const int heightMapScreen = (bottomMapScreen - topMapScreen);
-	const int halfWidthMapScreen = widthMapScreen / 2;
+	const int widthMapScreen      = (rightMapScreen - leftMapScreen);
+	const int heightMapScreen     = (bottomMapScreen - topMapScreen);
+	const int halfWidthMapScreen  = widthMapScreen / 2;
 	const int halfHeightMapScreen = heightMapScreen / 2;
 
 	// рисуется в пределах окна мира
@@ -87,5 +66,14 @@ void Map::Draw()
 			tiles[worldX][worldY].Draw(glm::vec2(x + leftMapScreen, y + topMapScreen));
 		}
 	}
+}
+//-----------------------------------------------------------------------------
+StopMoveEvent Map::IsFreeMove(int x, int y) const
+{
+	if (player->x == x && player->y == y) return StopMoveEvent::Player;
+	if (tiles[x][y].npc) return StopMoveEvent::Npc;
+	if (!tiles[x][y].IsFreeMove) return StopMoveEvent::Tile;
+
+	return StopMoveEvent::Free;
 }
 //-----------------------------------------------------------------------------

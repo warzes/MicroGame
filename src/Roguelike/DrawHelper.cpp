@@ -22,10 +22,10 @@ glm::mat4 DrawHelper::GetOrtho()
 #if 0 // тряска камеры
 	static float tr = 0.0f;
 	static bool rev = false;
-	
+
 	if (rev == false) tr += 0.03f;
 	else tr -= 0.03f;
-	
+
 	if (tr > 1.0f) rev = true;
 	if (tr < -1.0f) rev = false;
 
@@ -45,7 +45,7 @@ void DrawHelper::GetScreenWorldViewport(int& left, int& right, int& top, int& bo
 //-----------------------------------------------------------------------------
 void DrawHelper::GetScreenMiniMapViewport(int& left, int& right, int& top, int& bottom)
 {
-	left = ScreenHeight * GetFrameBufferAspectRatio() / TileSize - 13+1;
+	left = ScreenHeight * GetFrameBufferAspectRatio() / TileSize - 13 + 1;
 	right = left + 11;
 	top = 1;
 	bottom = 11;
@@ -56,7 +56,7 @@ void DrawHelper::GetScreenInfoPlayerViewport(int& left, int& right, int& top, in
 	left = ScreenHeight * GetFrameBufferAspectRatio() / TileSize - 13 + 1;
 	right = left + 11;
 	top = 12;
-	bottom = ScreenHeight / TileSize -1;
+	bottom = ScreenHeight / TileSize - 1;
 }
 //-----------------------------------------------------------------------------
 void DrawHelper::GetScreenLogViewport(int& left, int& right, int& top, int& bottom)
@@ -120,7 +120,7 @@ void DrawHelper::DrawMainUI()
 		const int playerY = (bottomScreen - topScreen) / 2 + topScreen - 1;
 		SpriteChar::Draw({ playerX, playerY }, { 1, 35 }, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	}
-	
+
 	GetScreenMiniMapViewport(leftScreen, rightScreen, topScreen, bottomScreen);
 	DrawHelper::DrawRect(leftScreen, rightScreen, topScreen, bottomScreen);
 
@@ -141,8 +141,8 @@ void DrawHelper::DrawBattleUI()
 
 	std::wstring text = L"Битва";
 	const int offstepNameX = (text.length() / 2.0f) / (16.0f / TileSize); // TODO: сделать и использовать тут функцию возврата длины строки
-	const int skip1 = (rightScreen / 2.0f - offstepNameX-2);
-	const int skip2 = (rightScreen / 2.0f + offstepNameX+2);
+	const int skip1 = (rightScreen / 2.0f - offstepNameX - 2);
+	const int skip2 = (rightScreen / 2.0f + offstepNameX + 2);
 
 	DrawHelper::DrawRect(leftScreen, rightScreen, topScreen, bottomScreen, skip1, skip2, text);
 }
@@ -151,22 +151,22 @@ void DrawHelper::DrawTree(const glm::vec2& pos, int num)
 {
 	for (int i = 0; i < num; i++)
 	{
-		SpriteChar::DrawInMapScreen({ pos.x - 1, pos.y - 1 - i*1 }, { 7, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
-		SpriteChar::DrawInMapScreen({ pos.x,     pos.y - 1 - i*1 }, { 10, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
-		SpriteChar::DrawInMapScreen({ pos.x + 1, pos.y - 1 - i*1 }, { 8, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
+		SpriteChar::DrawInMapScreen({ pos.x - 1, pos.y - 1 - i * 1 }, { 7, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
+		SpriteChar::DrawInMapScreen({ pos.x,     pos.y - 1 - i * 1 }, { 10, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
+		SpriteChar::DrawInMapScreen({ pos.x + 1, pos.y - 1 - i * 1 }, { 8, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
 	}
 
 	for (int i = 0; i < num; i++)
 	{
-		SpriteChar::DrawInMapScreen({ pos.x - 1 - i*1, pos.y }, { 12, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
-		SpriteChar::DrawInMapScreen({ pos.x + 1 + i*1, pos.y }, { 13, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
+		SpriteChar::DrawInMapScreen({ pos.x - 1 - i * 1, pos.y }, { 12, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
+		SpriteChar::DrawInMapScreen({ pos.x + 1 + i * 1, pos.y }, { 13, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
 	}
 
 	for (int i = 0; i < num; i++)
 	{
-		SpriteChar::DrawInMapScreen({ pos.x - 1, pos.y + 1 + i*1}, { 6, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
-		SpriteChar::DrawInMapScreen({ pos.x,     pos.y + 1 + i*1}, { 11, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
-		SpriteChar::DrawInMapScreen({ pos.x + 1, pos.y + 1 + i*1}, { 9, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
+		SpriteChar::DrawInMapScreen({ pos.x - 1, pos.y + 1 + i * 1 }, { 6, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
+		SpriteChar::DrawInMapScreen({ pos.x,     pos.y + 1 + i * 1 }, { 11, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
+		SpriteChar::DrawInMapScreen({ pos.x + 1, pos.y + 1 + i * 1 }, { 9, 11 }, glm::vec4(0.1f, 1.0f, 0.2f, 1.0f));
 	}
 
 	SpriteChar::DrawInMapScreen({ pos.x, pos.y }, { 10, 3 }, glm::vec4(1.0f, 0.8f, 0.2f, 1.0f));

@@ -133,6 +133,9 @@
     <ClInclude Include="privateGenerateMap.h">
       <Filter>World\Generator</Filter>
     </ClInclude>
+    <ClInclude Include="CoreGameClass.h">
+      <Filter>World</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="RPG.MD" />

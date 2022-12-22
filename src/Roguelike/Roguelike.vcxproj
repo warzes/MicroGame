@@ -247,6 +247,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Character.h" />
+    <ClInclude Include="CoreGameClass.h" />
     <ClInclude Include="DrawHelper.h" />
     <ClInclude Include="GameApp.h" />
     <ClInclude Include="GameBattleState.h" />
