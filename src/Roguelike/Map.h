@@ -2,6 +2,8 @@
 
 #include "Npc.h"
 
+class Player;
+
 class Object
 {
 public:
@@ -69,9 +71,9 @@ enum class MapType
 class Map
 {
 public:
-	void Create();
+	void Create(Player* player);
 
-	void Draw(const glm::vec2& playerPos);
+	void Draw();
 
 	bool IsFreeMove(int x, int y) const
 	{
@@ -79,6 +81,8 @@ public:
 	}
 
 	Tile tiles[SizeMap][SizeMap];
+
+	Player* player = nullptr;
 
 	MapType type = MapType::Dungeons;
 	std::wstring name;

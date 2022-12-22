@@ -15,6 +15,7 @@ void World::SetMap(const std::wstring& name)
 	m_map.push_back({});
 
 	GenerateMap::GenerateDungeons(m_map[0]);
+	m_map[0].Create(&m_player);
 
 	auto pos = GenerateMap::GetFindPosition(m_map[0]);
 	m_player.SetPosition(pos.x, pos.y);
@@ -26,7 +27,7 @@ void World::SetMap(const std::wstring& name)
 		while (maxIt > 0)
 		{
 			auto pos = GenerateMap::GetFindPosition(m_map[0]);
-			if (m_map[0].npc[i].SetPosition(m_map[0], pos.x, pos.y))
+			if (m_map[0].npc[i].SetPosition(m_map[0], pos.x, pos.y) == StopMoveEvent::Free)
 				break;
 			maxIt--;
 		}
@@ -99,6 +100,6 @@ void World::Update(float deltaTime)
 //-----------------------------------------------------------------------------
 void World::Draw()
 {
-	m_map[0].Draw(glm::vec2{ m_player.x, m_player.y });
+	m_map[0].Draw();
 }
 //-----------------------------------------------------------------------------

@@ -10,10 +10,18 @@ enum class NpcReactionType
 	Neutral
 };
 
+enum class StopMoveEvent
+{
+	Free,
+	Tile,
+	Player,
+	Npc
+};
+
 class Npc
 {
 public:
-	bool SetPosition(Map& map, int nx, int ny);
+	StopMoveEvent SetPosition(Map& map, int nx, int ny);
 	void Draw(const glm::vec2& pos);
 
 	NpcReactionType reactionType = NpcReactionType::Enemy;
