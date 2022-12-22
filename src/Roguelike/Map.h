@@ -31,7 +31,14 @@ public:
 		return type == Wall1;
 	}
 
+	bool IsSolid() const
+	{
+		return IsWall() || npc;
+	}
+
 	Object* object = nullptr;
+
+	Npc* npc = nullptr;
 
 	enum TileType
 	{
@@ -45,6 +52,7 @@ public:
 		Floor2,
 		Floor3,
 		Floor4,
+
 		Wall1,
 	};
 	TileType type = None;

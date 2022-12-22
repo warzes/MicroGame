@@ -12,6 +12,8 @@ void Tile::Draw(const glm::vec2& pos)
 {
 	if (object)
 		object->Draw(pos);
+	else if (npc)
+		npc->Draw(pos);
 	else
 	{
 		if (type == None) return;
@@ -78,24 +80,25 @@ void Map::Draw(const glm::vec2& playerPos)
 
 			// не рисовать тайл под игроком
 			if (worldX == playerPos.x && worldY == playerPos.y) continue;
-			//  не рисовать тайл под врагами
-			// TODO: медленно, переделать
-			bool isNotVisible = false;
-			for (size_t i = 0; i < npc.size(); i++)
-			{
-				if (worldX == npc[i].x && worldY == npc[i].y)
-				{
-					isNotVisible = true;
-					break;
-				}
-			}
-			if (isNotVisible) continue;
+
+			////  не рисовать тайл под врагами
+			//// TODO: медленно, переделать
+			//bool isNotVisible = false;
+			//for (size_t i = 0; i < npc.size(); i++)
+			//{
+			//	if (worldX == npc[i].x && worldY == npc[i].y)
+			//	{
+			//		isNotVisible = true;
+			//		break;
+			//	}
+			//}
+			//if (isNotVisible) continue;
 
 			tiles[worldX][worldY].Draw(glm::vec2(x + leftMapScreen, y + topMapScreen));
 		}
 	}
 
-	for (size_t i = 0; i < npc.size(); i++)
+	/*for (size_t i = 0; i < npc.size(); i++)
 	{
 		int leftEnemy = playerPos.x - halfWidthMapScreen;
 		int rightEnemy = playerPos.x + halfWidthMapScreen;
@@ -107,5 +110,5 @@ void Map::Draw(const glm::vec2& playerPos)
 		{
 			npc[i].Draw(glm::vec2(npc[i].x - leftEnemy + leftMapScreen, npc[i].y - topEnemy + topMapScreen));
 		}
-	}
+	}*/
 }

@@ -1,5 +1,8 @@
 #pragma once
 
+class Tile;
+class Map;
+
 enum class NpcReactionType
 {
 	Enemy,
@@ -10,10 +13,12 @@ enum class NpcReactionType
 class Npc
 {
 public:
-	void SetPosition(int nx, int ny) { x = nx; y = ny; }
+	bool SetPosition(Map& map, int nx, int ny);
 	void Draw(const glm::vec2& pos);
 
 	NpcReactionType reactionType = NpcReactionType::Enemy;
+
+	Tile* tileRoot = nullptr;
 
 	int x = 0;
 	int y = 0;

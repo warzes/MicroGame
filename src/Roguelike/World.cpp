@@ -22,8 +22,14 @@ void World::SetMap(const std::wstring& name)
 	m_map[0].npc.resize(3);
 	for (size_t i = 0; i < m_map[0].npc.size(); i++)
 	{
-		auto pos = GenerateMap::GetFindPosition(m_map[0]);
-		m_map[0].npc[i].SetPosition(pos.x, pos.y);
+		int maxIt = 30;
+		while (maxIt > 0)
+		{
+			auto pos = GenerateMap::GetFindPosition(m_map[0]);
+			if (m_map[0].npc[i].SetPosition(m_map[0], pos.x, pos.y))
+				break;
+			maxIt--;
+		}
 	}
 
 	m_turn = TurnStatus::BeginTurn;
