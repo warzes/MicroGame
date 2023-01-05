@@ -41,6 +41,7 @@ void LogPrint(const char* str);
 void LogWarning(const char* str);
 void LogError(const char* str);
 
+void Fatal(const std::string& str);
 
 inline void LogPrint(const std::string& str)
 {

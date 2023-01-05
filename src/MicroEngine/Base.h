@@ -71,32 +71,37 @@ inline bool EqualsF(float a, float b, float eps)
 	return (fabs(a - b) < eps);
 }
 
-inline constexpr int Min(int a, int b) { return a < b ? a : b; }
-inline constexpr float Min(float a, float b) { return a < b ? a : b; }
-//template<typename T> inline constexpr T Min(const T& a, const T& b) { return a < b ? a : b; }
+template<class T>
+inline constexpr void Swap(T& left, T& right) noexcept
+{
+	T tmp = std::move(left);
+	left = std::move(right);
+	right = std::move(tmp);
+}
+
+inline constexpr int Min(int a, int b) noexcept { return a < b ? a : b; }
+inline constexpr float Min(float a, float b) noexcept { return a < b ? a : b; }
 inline constexpr glm::vec3 Min(const glm::vec3& v1, const glm::vec3& v2)
 {
 	return { Min(v1.x, v2.x), Min(v1.y, v2.y), Min(v1.z, v2.z) };
 }
 
-inline constexpr int Max(int a, int b) { return a > b ? a : b; }
-inline constexpr float Max(float a, float b) { return a > b ? a : b; }
-//template<typename T> inline constexpr T Max(const T& a, const T& b) { return a > b ? a : b; }
+inline constexpr int Max(int a, int b) noexcept { return a > b ? a : b; }
+inline constexpr float Max(float a, float b) noexcept { return a > b ? a : b; }
 inline constexpr glm::vec3 Max(const glm::vec3& v1, const glm::vec3& v2)
 {
 	return { Max(v1.x, v2.x), Max(v1.y, v2.y), Max(v1.z, v2.z) };
 }
 
-inline constexpr int Clamp(int a, int min, int max) { return Max(Min(a, max), min); }
-inline constexpr float Clamp(float a, float min, float max) { return Max(Min(a, max), min); }
-//template<typename T> inline constexpr T Clamp(const T& a, const T& min, const T& max) { return Max(Min(a, max), min); }
+inline constexpr int Clamp(int a, int min, int max) noexcept { return Max(Min(a, max), min); }
+inline constexpr float Clamp(float a, float min, float max) noexcept { return Max(Min(a, max), min); }
 
-inline constexpr float Lerp(float lower, float upper, float gradient)
+inline constexpr float Lerp(float lower, float upper, float gradient) noexcept
 {
 	return lower + (upper - lower) * Max(0.0f, Min(gradient, 1.0f));
 }
 
-inline constexpr glm::vec3 Mix(const glm::vec3& a, const glm::vec3& b, float t)
+inline constexpr glm::vec3 Mix(const glm::vec3& a, const glm::vec3& b, float t) noexcept
 {
 	return (a * (1 - t)) + (b * (t));
 }

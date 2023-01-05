@@ -1,10 +1,12 @@
 ﻿#include "stdafx.h"
 #include "Engine.h"
-//=============================================================================
+//-----------------------------------------------------------------------------
 #if defined(_MSC_VER)
-//#	pragma comment( lib, "3rdparty.lib" )
+#	pragma comment( lib, "3rdparty.lib" )
 #endif
-//=============================================================================
+//-----------------------------------------------------------------------------
+bool IsExitRequested = true;
+//-----------------------------------------------------------------------------
 namespace engine
 {
 	namespace
@@ -15,7 +17,7 @@ namespace engine
 		int64_t frameTimeLast = 0;
 		int64_t frameTimeDelta = 0;
 		float deltaTime = 0.0f;
-		bool IsExitRequested = true;
+
 	}
 
 	bool CreateEngine(const EngineCreateInfo& createInfo)

@@ -2,10 +2,6 @@
 #include "Base.h"
 #include "Core.h"
 //-----------------------------------------------------------------------------
-#if defined(_WIN32) && defined(_DEBUG)
-extern "C" __declspec(dllimport) void __stdcall OutputDebugStringA(const char*);
-#endif
-//-----------------------------------------------------------------------------
 //=============================================================================
 // Times
 //=============================================================================
@@ -58,35 +54,24 @@ float Time::GetFPS()
 // Logging
 //=============================================================================
 //-----------------------------------------------------------------------------
-namespace
-{
-	constexpr auto LogSeperator = "********************************************************************************************************";
+constexpr auto LogSeperator = "********************************************************************************************************";
 #if defined(_WIN32) || defined(__linux__)
-	FILE* logFile = nullptr;
+FILE* logFile = nullptr;
 #endif
-}
 //-----------------------------------------------------------------------------
-void logPrint(const char* simplePrefix, const char* clrPrefix, const char* str)
+#if defined(_WIN32) && defined(_DEBUG)
+extern "C" __declspec(dllimport) void __stdcall OutputDebugStringA(const char*);
+inline void win32PrintDebug(const char* simplePrefix, const char* str)
 {
-#if defined(__ANDROID__)
-	__android_log_write(ANDROID_LOG_INFO, "SE_APP", str);
-#elif defined(__EMSCRIPTEN__)
-	emscripten_log(EM_LOG_CONSOLE, "%s", str);
-#else
-#	if defined(_WIN32) && defined(_DEBUG)
-
-	if (simplePrefix)
-		OutputDebugStringA((std::string(simplePrefix) + str).c_str());
-	else
-		OutputDebugStringA(str);
+	if (simplePrefix) OutputDebugStringA((std::string(simplePrefix) + str).c_str());
+	else OutputDebugStringA(str);
 	OutputDebugStringA("\n");
-#	endif
-
-	if (clrPrefix)
-		puts((std::string(clrPrefix) + str).c_str());
-	else
-		puts(str);
-
+}
+#endif
+//-----------------------------------------------------------------------------
+#if defined(_WIN32) || defined(__linux__)
+inline void printToFile(const char* simplePrefix, const char* str)
+{
 	if (logFile)
 	{
 		if (simplePrefix)
@@ -95,6 +80,34 @@ void logPrint(const char* simplePrefix, const char* clrPrefix, const char* str)
 			fputs(str, logFile);
 		fputs("\n", logFile);
 	}
+}
+#endif
+//-----------------------------------------------------------------------------
+#if defined(_WIN32) || defined(__linux__)
+void printToConsole(const char* clrPrefix, const char* str)
+{
+	if (clrPrefix)
+		puts((std::string(clrPrefix) + str).c_str());
+	else
+		puts(str);
+}
+#endif
+//-----------------------------------------------------------------------------
+void logPrint(const char* simplePrefix, const char* clrPrefix, const char* str)
+{
+#if defined(__ANDROID__)
+	__android_log_write(ANDROID_LOG_INFO, "SE_APP", str);
+#elif defined(__EMSCRIPTEN__)
+	emscripten_log(EM_LOG_CONSOLE, "%s", str);
+#elif defined(_WIN32)
+#	if defined(_DEBUG)
+	win32PrintDebug(simplePrefix, str);
+#	endif
+	printToConsole(clrPrefix, str);
+	printToFile(simplePrefix, str);
+#else
+	printToConsole(clrPrefix, str);
+	printToFile(simplePrefix, str);
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -148,5 +161,13 @@ void LogWarning(const char* str)
 void LogError(const char* str)
 {
 	logPrint("[ ERROR   ] : ", "[ \033[31mERROR\033[0m   ] : ", str);
+}
+//-----------------------------------------------------------------------------
+void Fatal(const std::string& str)
+{
+	extern bool IsExitRequested;
+
+	IsExitRequested = true;
+	LogError(str);
 }
 //-----------------------------------------------------------------------------
