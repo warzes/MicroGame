@@ -27,6 +27,15 @@
     <ClCompile Include="tiny_obj_loader.cpp" />
     <ClCompile Include="tritri.c" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="glad\gl.h" />
+    <ClInclude Include="glfwMinimalHeader.h" />
+    <ClInclude Include="glfwSingleFile.h" />
+    <ClInclude Include="KHR\khrplatform.h" />
+    <ClInclude Include="stb\stb_image.h" />
+    <ClInclude Include="stb\stb_truetype.h" />
+    <ClInclude Include="tiny_obj_loader.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

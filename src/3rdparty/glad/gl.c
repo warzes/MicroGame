@@ -26,8 +26,6 @@
 extern "C" {
 #endif
 
-
-
 int GLAD_GL_VERSION_1_0 = 0;
 int GLAD_GL_VERSION_1_1 = 0;
 int GLAD_GL_VERSION_1_2 = 0;
@@ -1755,6 +1753,7 @@ int gladLoadGLUserPtr( GLADuserptrloadfunc load, void *userptr) {
 
     return version;
 }
+
 
 int gladLoadGL( GLADloadfunc load) {
     return gladLoadGLUserPtr( glad_gl_get_proc_from_userptr, GLAD_GNUC_EXTENSION (void*) load);

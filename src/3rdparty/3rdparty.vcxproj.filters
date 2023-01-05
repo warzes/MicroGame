@@ -4,9 +4,54 @@
     <ClCompile Include="tritri.c" />
     <ClCompile Include="coldet2Impl.cpp" />
     <ClCompile Include="GJKImpl.c" />
-    <ClCompile Include="glfwImpl.c" />
-    <ClCompile Include="stb.cpp" />
-    <ClCompile Include="tiny_obj_loader.cpp" />
-    <ClCompile Include="glad\gl.c" />
+    <ClCompile Include="glad\gl.c">
+      <Filter>glad</Filter>
+    </ClCompile>
+    <ClCompile Include="glfwImpl.c">
+      <Filter>glfw</Filter>
+    </ClCompile>
+    <ClCompile Include="tiny_obj_loader.cpp">
+      <Filter>tiny obj loader</Filter>
+    </ClCompile>
+    <ClCompile Include="stb.cpp">
+      <Filter>stb</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="KHR\khrplatform.h">
+      <Filter>glad</Filter>
+    </ClInclude>
+    <ClInclude Include="glad\gl.h">
+      <Filter>glad</Filter>
+    </ClInclude>
+    <ClInclude Include="glfwSingleFile.h">
+      <Filter>glfw</Filter>
+    </ClInclude>
+    <ClInclude Include="glfwMinimalHeader.h">
+      <Filter>glfw</Filter>
+    </ClInclude>
+    <ClInclude Include="tiny_obj_loader.h">
+      <Filter>tiny obj loader</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_image.h">
+      <Filter>stb</Filter>
+    </ClInclude>
+    <ClInclude Include="stb\stb_truetype.h">
+      <Filter>stb</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="glad">
+      <UniqueIdentifier>{fb62ae35-c38d-45b5-b10e-9f9b03028ac0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="glfw">
+      <UniqueIdentifier>{4092718e-8671-46f1-94e5-300ee060b4cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tiny obj loader">
+      <UniqueIdentifier>{7f6c54cc-62d7-4091-b003-456b6967f3ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="stb">
+      <UniqueIdentifier>{889cda86-a0fd-480d-92e4-79feb57ee06e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>
