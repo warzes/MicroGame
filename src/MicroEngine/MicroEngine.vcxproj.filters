@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="Engine.h" />
+    <ClInclude Include="Audio.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Base.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseHeader.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Collisions.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Collisions2.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Collisions3.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Container.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineConfig.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineMath.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Navigation.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics2.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Platform.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Collisions.inl">
+      <Filter>Engine</Filter>
+    </None>
+    <None Include="Collisions3.inl">
+      <Filter>Engine</Filter>
+    </None>
+    <None Include="EngineMath.inl">
+      <Filter>Engine</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Core.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineMath.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics2.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Platform.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="TempGJK.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Engine">
+      <UniqueIdentifier>{5f64167f-1beb-4553-bd17-f2518185ee19}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

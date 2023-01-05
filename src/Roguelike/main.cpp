@@ -1,5 +1,9 @@
 ﻿#include "stdafx.h"
 #include "GameApp.h"
+#if defined(_MSC_VER)
+#	pragma comment( lib, "MicroEngine.lib" )
+#	pragma comment( lib, "3rdparty.lib" )
+#endif
 //-----------------------------------------------------------------------------
 int main(
 	[[maybe_unused]] int   argc,

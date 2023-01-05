@@ -3,6 +3,10 @@
 #include "LauncherApp.h"
 #include <iostream>
 #include <array>
+#if defined(_MSC_VER)
+#	pragma comment( lib, "MicroEngine.lib" )
+#	pragma comment( lib, "3rdparty.lib" )
+#endif
 //-----------------------------------------------------------------------------
 //https://github.com/Chr157i4n/OpenGL_Game
 // https://github.com/yagero/glsl-demo

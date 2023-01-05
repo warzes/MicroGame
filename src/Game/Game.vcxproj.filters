@@ -2,71 +2,11 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Engine.cpp">
-      <Filter>MicroEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\3rdparty\glad\gl.c">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClCompile>
-    <ClCompile Include="..\3rdparty\stb.cpp">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClCompile>
-    <ClCompile Include="..\3rdparty\tiny_obj_loader.cpp">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClCompile>
-    <ClCompile Include="..\3rdparty\glfwImpl.c">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="..\3rdparty\GJKImpl.c">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClCompile>
-    <ClCompile Include="Core.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="EngineMath.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="TempGJK.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="Platform.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics2.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\3rdparty\tritri.c">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClCompile>
-    <ClCompile Include="..\3rdparty\coldet2Impl.cpp">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClCompile>
-    <ClCompile Include="Utility.cpp">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="MicroEngine">
       <UniqueIdentifier>{9226570f-0c72-4013-b454-0697f540be56}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MicroEngine\3rdparty">
-      <UniqueIdentifier>{86a6bab6-665f-43ea-ad04-d04d22e7bc8f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MicroEngine\Engine">
-      <UniqueIdentifier>{b42f46d1-9048-470e-9844-ffc7ad6d3ac7}</UniqueIdentifier>
     </Filter>
     <Filter Include="Test">
       <UniqueIdentifier>{91d5147d-f507-453d-bfc2-847de32dbeb6}</UniqueIdentifier>
@@ -76,9 +16,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Engine.h">
-      <Filter>MicroEngine</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="LauncherApp.h" />
     <ClInclude Include="Test001Triangles.h">
@@ -102,54 +39,6 @@
     <ClInclude Include="Test100SimpleCollisions.h">
       <Filter>Test</Filter>
     </ClInclude>
-    <ClInclude Include="EngineConfig.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseHeader.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Base.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Core.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Container.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="EngineMath.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Collisions.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Utility.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Platform.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Audio.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="UI.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Navigation.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Test200PhysX.h">
       <Filter>Test</Filter>
     </ClInclude>
@@ -159,9 +48,6 @@
     <ClInclude Include="Test101SimpleFPS.h">
       <Filter>Test</Filter>
     </ClInclude>
-    <ClInclude Include="Physics2.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Test202MicroPhys.h">
       <Filter>Test</Filter>
     </ClInclude>
@@ -169,22 +55,5 @@
     <ClInclude Include="TestNNew2.h">
       <Filter>Test</Filter>
     </ClInclude>
-    <ClInclude Include="Collisions2.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Collisions3.h">
-      <Filter>MicroEngine\Engine</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="EngineMath.inl">
-      <Filter>MicroEngine\Engine</Filter>
-    </None>
-    <None Include="Collisions.inl">
-      <Filter>MicroEngine\Engine</Filter>
-    </None>
-    <None Include="Collisions3.inl">
-      <Filter>MicroEngine\Engine</Filter>
-    </None>
   </ItemGroup>
 </Project>
