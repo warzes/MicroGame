@@ -5,9 +5,6 @@
 #include "Renderer.h"
 #include "Graphics.h"
 
-#include <stb/stb_truetype.h>
-#include <tiny_obj_loader.h>
-
 static Camera* last_camera = nullptr;
 
 Camera::Camera()

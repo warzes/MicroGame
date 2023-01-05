@@ -3,9 +3,8 @@
 #include "Core.h"
 #include "Platform.h"
 #include "Renderer.h"
-#include <stb/stb_image.h>
 //-----------------------------------------------------------------------------
-#if defined(_WIN32) && 0
+#if defined(_WIN32)
 extern "C"
 {
 	// NVIDIA: Force usage of NVidia GPU in case there is an integrated graphics unit as well, if we don't do this we risk getting the integrated graphics unit and hence a horrible performance

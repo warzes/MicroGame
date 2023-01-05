@@ -3,24 +3,6 @@
 #include "Core.h"
 #include "Platform.h"
 //=============================================================================
-#if defined(_MSC_VER)
-#	pragma warning(disable : 5045)
-#	pragma warning(push, 0)
-#endif
-
-#define GLFW_INCLUDE_NONE
-#if 1
-#	define GLFW_NATIVE_INCLUDE_NONE
-#	include <glfwSingleFile.h>
-#else
-#	include <GLFW/glfw3.h>
-#endif
-#undef GLFW_INCLUDE_NONE
-
-#if defined(_MSC_VER)
-#	pragma warning(pop)
-#endif
-//=============================================================================
 //=============================================================================
 // I/O func
 //=============================================================================
