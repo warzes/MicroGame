@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="World.cpp">
+      <Filter>Temp</Filter>
+    </ClCompile>
+    <ClCompile Include="FileSystem.cpp">
+      <Filter>Temp\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="MicroString.cpp">
+      <Filter>Temp\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Streams.cpp">
+      <Filter>Temp\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="ZipFile.cpp">
+      <Filter>Temp\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="utf8Conv.cpp">
+      <Filter>Temp\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="TempBase.cpp">
+      <Filter>Temp\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Geom.cpp">
+      <Filter>Temp\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="glemu.cpp">
+      <Filter>Temp\Core</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="World.h">
+      <Filter>Temp</Filter>
+    </ClInclude>
+    <ClInclude Include="FileSystem.h">
+      <Filter>Temp\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="MicroString.h">
+      <Filter>Temp\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Streams.h">
+      <Filter>Temp\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="TempBase.h">
+      <Filter>Temp\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="ZipFile.h">
+      <Filter>Temp\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="ByteOrder.h">
+      <Filter>Temp\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="utf8Conv.h">
+      <Filter>Temp\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Geom.h">
+      <Filter>Temp\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="glemu.h">
+      <Filter>Temp\Core</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Temp">
+      <UniqueIdentifier>{cbe9486b-c7b9-4645-a486-f111bef4b96b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Temp\Core">
+      <UniqueIdentifier>{55f76ea1-be78-4818-9641-7513b3a25346}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\3rdparty\zdll.lib" />
+  </ItemGroup>
+</Project>

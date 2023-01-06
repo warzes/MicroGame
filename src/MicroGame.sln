@@ -44,6 +44,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Engine", "Engine", "{3D8EA6
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Project", "Project", "{B19916C8-D1AF-4DD3-BAED-EDFB0E83CAA8}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IsekaiWorld", "IsekaiWorld\IsekaiWorld.vcxproj", "{E838BD04-7B1B-45C4-B34B-738EA878717F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{96CF5A63-6FF9-472E-9E2E-F0C64DDB26AB} = {96CF5A63-6FF9-472E-9E2E-F0C64DDB26AB}
+		{C3C2F010-EF1C-4593-A348-FE7D34722D34} = {C3C2F010-EF1C-4593-A348-FE7D34722D34}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -100,6 +106,14 @@ Global
 		{96CF5A63-6FF9-472E-9E2E-F0C64DDB26AB}.Release|x64.Build.0 = Release|x64
 		{96CF5A63-6FF9-472E-9E2E-F0C64DDB26AB}.Release|x86.ActiveCfg = Release|Win32
 		{96CF5A63-6FF9-472E-9E2E-F0C64DDB26AB}.Release|x86.Build.0 = Release|Win32
+		{E838BD04-7B1B-45C4-B34B-738EA878717F}.Debug|x64.ActiveCfg = Debug|x64
+		{E838BD04-7B1B-45C4-B34B-738EA878717F}.Debug|x64.Build.0 = Debug|x64
+		{E838BD04-7B1B-45C4-B34B-738EA878717F}.Debug|x86.ActiveCfg = Debug|Win32
+		{E838BD04-7B1B-45C4-B34B-738EA878717F}.Debug|x86.Build.0 = Debug|Win32
+		{E838BD04-7B1B-45C4-B34B-738EA878717F}.Release|x64.ActiveCfg = Release|x64
+		{E838BD04-7B1B-45C4-B34B-738EA878717F}.Release|x64.Build.0 = Release|x64
+		{E838BD04-7B1B-45C4-B34B-738EA878717F}.Release|x86.ActiveCfg = Release|Win32
+		{E838BD04-7B1B-45C4-B34B-738EA878717F}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

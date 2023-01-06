@@ -2443,14 +2443,46 @@ const glm::mat4& GetCurrentProjectionMatrix()
 //-----------------------------------------------------------------------------
 bool RenderSystem::Create(const RenderSystem::CreateInfo& createInfo)
 {
+	const char* vendor = (const char*)glGetString(GL_VENDOR);
+	const char* renderer = (const char*)glGetString(GL_RENDERER);
+	const char* version = (const char*)glGetString(GL_VERSION);
+	const char* glslstr = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+
 	LogPrint("OpenGL device information:");
-	LogPrint("    > Vendor:   " + std::string((const char*)glGetString(GL_VENDOR)));
-	LogPrint("    > Renderer: " + std::string((const char*)glGetString(GL_RENDERER)));
-	LogPrint("    > Version:  " + std::string((const char*)glGetString(GL_VERSION)));
-	LogPrint("    > GLSL:     " + std::string((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION)));
+	LogPrint("    > Renderer: " + std::string(renderer) + " (" + std::string(vendor) + ")");
+	LogPrint("    > Version:  " + std::string(version));
+	LogPrint("    > GLSL:     " + std::string(glslstr));
+
+	bool mesa = false, intel = false, ati = false, nvidia = false;
+	if (strstr(renderer, "Mesa") || strstr(version, "Mesa"))
+	{
+		mesa = true;
+		if (strstr(renderer, "Intel")) intel = true;
+	}
+	else if (strstr(vendor, "NVIDIA"))
+		nvidia = true;
+	else if (strstr(vendor, "ATI") || strstr(vendor, "Advanced Micro Devices"))
+		ati = true;
+	else if (strstr(vendor, "Intel"))
+		intel = true;
+
+	//int glversion = 0;
+	//uint32_t glmajorversion, glminorversion;
+	//if (sscanf(version, " %u.%u", &glmajorversion, &glminorversion) != 2) glversion = 100;
+	//else glversion = glmajorversion * 100 + glminorversion * 10;
+	//if (glversion < 440)
+	//{
+	//	Fatal("OpenGL 4.4 or greater is required!");
+	//	return false;
+	//}
 
 	LogPrint("OpenGL limits:");
 	GLint capability = 0;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &capability);
+	LogPrint("    > GL_MAX_TEXTURE_SIZE: " + std::to_string(capability));
+	glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &capability);
+	LogPrint("    > GL_MAX_CUBE_MAP_TEXTURE_SIZE: " + std::to_string(capability));
+
 	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, &capability);
 	LogPrint("    > GL_MAX_VERTEX_UNIFORM_COMPONENTS: " + std::to_string(capability));
 	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &capability);

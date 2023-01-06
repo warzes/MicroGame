@@ -15,4 +15,6 @@ Thumbs.db
 /bin/x64/FirstRPG_Release.*
 /bin/x64/Roguelike_Debug.*
 /bin/x64/Roguelike_Release.*
+/bin/x64/IsekaiWorld_Debug.*
+/bin/x64/IsekaiWorld_Release.*
 /bin/Log.txt
