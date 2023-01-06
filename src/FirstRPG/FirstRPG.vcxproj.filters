@@ -3,38 +3,6 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="..\3rdparty\tiny_obj_loader.cpp">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClCompile>
-    <ClCompile Include="..\3rdparty\glfwImpl.c">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClCompile>
-    <ClCompile Include="..\3rdparty\stb.cpp">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClCompile>
-    <ClCompile Include="..\3rdparty\glad\gl.c">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClCompile>
-    <ClCompile Include="EngineImpl.cpp">
-      <Filter>MicroEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\3rdparty\GJKImpl.c">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClCompile>
-    <ClCompile Include="..\3rdparty\tritri.c">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClCompile>
-    <ClCompile Include="..\3rdparty\coldet2Impl.cpp">
-      <Filter>MicroEngine\3rdparty</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="MicroEngine">
-      <UniqueIdentifier>{9226570f-0c72-4013-b454-0697f540be56}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MicroEngine\3rdparty">
-      <UniqueIdentifier>{86a6bab6-665f-43ea-ad04-d04d22e7bc8f}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />

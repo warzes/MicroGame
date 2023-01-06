@@ -5,9 +5,6 @@
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="MicroEngine">
-      <UniqueIdentifier>{9226570f-0c72-4013-b454-0697f540be56}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Test">
       <UniqueIdentifier>{91d5147d-f507-453d-bfc2-847de32dbeb6}</UniqueIdentifier>
     </Filter>
