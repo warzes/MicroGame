@@ -3,76 +3,284 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="World.cpp">
-      <Filter>Temp</Filter>
-    </ClCompile>
-    <ClCompile Include="FileSystem.cpp">
-      <Filter>Temp\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="MicroString.cpp">
-      <Filter>Temp\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Streams.cpp">
-      <Filter>Temp\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="ZipFile.cpp">
-      <Filter>Temp\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="utf8Conv.cpp">
-      <Filter>Temp\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="TempBase.cpp">
-      <Filter>Temp\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Geom.cpp">
-      <Filter>Temp\Core</Filter>
+    <ClCompile Include="geom.cpp">
+      <Filter>temp\Shared</Filter>
     </ClCompile>
     <ClCompile Include="glemu.cpp">
-      <Filter>Temp\Core</Filter>
+      <Filter>temp\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="glexts.cpp">
+      <Filter>temp\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="tools.cpp">
+      <Filter>temp\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="zip.cpp">
+      <Filter>temp\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="command.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="bih.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="lightmap.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="octa.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="texture.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="world.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="blob.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="blend.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="client.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="console.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="cubeloader.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="decal.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="dynlight.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="3dgui.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="menus.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="glare.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="grass.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="material.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="movie.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="normal.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="objset.cpp">
+      <Filter>temp\rp</Filter>
+    </ClCompile>
+    <ClCompile Include="octaedit.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="octarender.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="physics.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="pvs.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="rendergl.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="rendermodel.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="renderparticles.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="rendersky.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="rendertext.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="renderva.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="server.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="shader.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="shadowmap.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="sound.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="rpg.cpp">
+      <Filter>temp\rp</Filter>
+    </ClCompile>
+    <ClCompile Include="stream.cpp">
+      <Filter>temp\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="worldio.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="water.cpp">
+      <Filter>temp\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="entities.cpp">
+      <Filter>temp\rp</Filter>
+    </ClCompile>
+    <ClCompile Include="ent.cpp">
+      <Filter>temp\rp</Filter>
+    </ClCompile>
+    <ClCompile Include="tempMain.cpp" />
+    <ClCompile Include="Log.cpp">
+      <Filter>temp\Engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="World.h">
-      <Filter>Temp</Filter>
+    <ClInclude Include="command.h">
+      <Filter>temp\Shared</Filter>
     </ClInclude>
-    <ClInclude Include="FileSystem.h">
-      <Filter>Temp\Core</Filter>
+    <ClInclude Include="cube.h">
+      <Filter>temp\Shared</Filter>
     </ClInclude>
-    <ClInclude Include="MicroString.h">
-      <Filter>Temp\Core</Filter>
+    <ClInclude Include="ents.h">
+      <Filter>temp\Shared</Filter>
     </ClInclude>
-    <ClInclude Include="Streams.h">
-      <Filter>Temp\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="TempBase.h">
-      <Filter>Temp\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="ZipFile.h">
-      <Filter>Temp\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="ByteOrder.h">
-      <Filter>Temp\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="utf8Conv.h">
-      <Filter>Temp\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Geom.h">
-      <Filter>Temp\Core</Filter>
+    <ClInclude Include="geom.h">
+      <Filter>temp\Shared</Filter>
     </ClInclude>
     <ClInclude Include="glemu.h">
-      <Filter>Temp\Core</Filter>
+      <Filter>temp\Shared</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="Temp">
-      <UniqueIdentifier>{cbe9486b-c7b9-4645-a486-f111bef4b96b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Temp\Core">
-      <UniqueIdentifier>{55f76ea1-be78-4818-9641-7513b3a25346}</UniqueIdentifier>
-    </Filter>
+    <ClInclude Include="iengine.h">
+      <Filter>temp\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="igame.h">
+      <Filter>temp\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="tools.h">
+      <Filter>temp\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="tengine.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="octa.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="texture.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="world.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="bih.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="lightmap.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="tempgl.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="explosion.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="depthfx.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="animmodel.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="iqm.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="lensflare.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="lightning.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="md2.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="md3.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="md5.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="mpr.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="obj.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="ragdoll.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="rendertarget.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="skelmodel.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="smd.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="rpg.h">
+      <Filter>temp\rp</Filter>
+    </ClInclude>
+    <ClInclude Include="rpgent.h">
+      <Filter>temp\rp</Filter>
+    </ClInclude>
+    <ClInclude Include="rpgobj.h">
+      <Filter>temp\rp</Filter>
+    </ClInclude>
+    <ClInclude Include="stats.h">
+      <Filter>temp\rp</Filter>
+    </ClInclude>
+    <ClInclude Include="textedit.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="vertmodel.h">
+      <Filter>temp\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugNew.h">
+      <Filter>temp</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\3rdparty\zdll.lib" />
+    <Library Include="..\3rdparty\SDL2.lib" />
+    <Library Include="..\3rdparty\SDL2_image.lib" />
+    <Library Include="..\3rdparty\SDL2_mixer.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="temp">
+      <UniqueIdentifier>{e6441312-62dc-43a0-a32d-4eedc0f533f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="temp\Shared">
+      <UniqueIdentifier>{0a29cfca-76bd-4dd0-abe8-c1999f9ac5e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="temp\Engine">
+      <UniqueIdentifier>{b3ef7da8-abf5-43df-b07a-180e2f56a05f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="temp\rp">
+      <UniqueIdentifier>{0eaf6591-0f94-4c95-a60b-d30b8e7584c2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

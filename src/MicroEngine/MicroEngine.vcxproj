@@ -30,7 +30,9 @@
     <ClInclude Include="Engine.h" />
     <ClInclude Include="EngineConfig.h" />
     <ClInclude Include="EngineMath.h" />
+    <ClInclude Include="FileSystem.h" />
     <ClInclude Include="Graphics.h" />
+    <ClInclude Include="Input.h" />
     <ClInclude Include="Navigation.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="Physics2.h" />
@@ -40,6 +42,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="Utility.h" />
+    <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Collisions.inl" />
@@ -50,7 +53,9 @@
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EngineMath.cpp" />
+    <ClCompile Include="FileSystem.cpp" />
     <ClCompile Include="Graphics.cpp" />
+    <ClCompile Include="Input.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Physics2.cpp" />
     <ClCompile Include="Platform.cpp" />
@@ -64,6 +69,7 @@
     </ClCompile>
     <ClCompile Include="TempGJK.cpp" />
     <ClCompile Include="Utility.cpp" />
+    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

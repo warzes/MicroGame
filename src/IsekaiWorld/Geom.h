@@ -1,22 +1,5 @@
 #pragma once
 
-#include "TempBase.h"
-
-#define PI  (3.1415927f)
-#define PI2 (2*PI)
-#define SQRT2 (1.4142136f)
-#define SQRT3 (1.7320508f)
-#define RAD (PI / 180.0f)
-
-#ifdef _WIN32
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-#ifndef M_LN2
-#define M_LN2 0.693147180559945309417
-#endif
-#endif
-
 struct vec;
 struct vec4;
 
@@ -63,7 +46,7 @@ struct vec2
 	vec2& min(float f) { x = ::Min(x, f); y = ::Min(y, f); return *this; }
 	vec2& max(float f) { x = ::Max(x, f); y = ::Max(y, f); return *this; }
 	vec2& abs() { x = fabs(x); y = fabs(y); return *this; }
-	vec2& clamp(float l, float h) { x = Clamp(x, l, h); y = Clamp(y, l, h); return *this; }
+	vec2& clamp(float l, float h) { x = ::clamp(x, l, h); y = ::clamp(y, l, h); return *this; }
 	vec2& reflect(const vec2& n) { float k = 2 * dot(n); x -= k * n.x; y -= k * n.y; return *this; }
 	vec2& lerp(const vec2& b, float t) { x += (b.x - x) * t; y += (b.y - y) * t; return *this; }
 	vec2& lerp(const vec2& a, const vec2& b, float t) { x = a.x + (b.x - a.x) * t; y = a.y + (b.y - a.y) * t; return *this; }
@@ -144,7 +127,7 @@ struct vec
 	vec& max(const vec& o) { x = ::Max(x, o.x); y = ::Max(y, o.y); z = ::Max(z, o.z); return *this; }
 	vec& min(float f) { x = ::Min(x, f); y = ::Min(y, f); z = ::Min(z, f); return *this; }
 	vec& max(float f) { x = ::Max(x, f); y = ::Max(y, f); z = ::Max(z, f); return *this; }
-	vec& clamp(float f, float h) { x = ::Clamp(x, f, h); y = ::Clamp(y, f, h); z = ::Clamp(z, f, h); return *this; }
+	vec& clamp(float f, float h) { x = ::clamp(x, f, h); y = ::clamp(y, f, h); z = ::clamp(z, f, h); return *this; }
 	vec& abs() { x = fabs(x); y = fabs(y); z = fabs(z); return *this; }
 	float magnitude2() const { return sqrtf(dot2(*this)); }
 	float magnitude() const { return sqrtf(squaredlen()); }
@@ -256,7 +239,7 @@ struct vec
 	{
 		return vec(((color >> 16) & 0xFF) * (1.0f / 255.0f), ((color >> 8) & 0xFF) * (1.0f / 255.0f), (color & 0xFF) * (1.0f / 255.0f));
 	}
-	int tohexcolor() const { return (int(::Clamp(r, 0.0f, 1.0f) * 255) << 16) | (int(::Clamp(g, 0.0f, 1.0f) * 255) << 8) | int(::Clamp(b, 0.0f, 1.0f) * 255); }
+	int tohexcolor() const { return (int(::clamp(r, 0.0f, 1.0f) * 255) << 16) | (int(::clamp(g, 0.0f, 1.0f) * 255) << 8) | int(::clamp(b, 0.0f, 1.0f) * 255); }
 };
 
 inline vec2::vec2(const vec& v) : x(v.x), y(v.y) {}
@@ -631,9 +614,8 @@ struct matrix3
 
 	void transpose()
 	{
-		Swap(a.y, b.x); 
-		Swap(a.z, c.x);
-		Swap(b.z, c.y);
+		swap(a.y, b.x); swap(a.z, c.x);
+		swap(b.z, c.y);
 	}
 
 	template<class M>
@@ -923,9 +905,8 @@ struct matrix4x3
 	void transpose()
 	{
 		d = vec(a.dot(d), b.dot(d), c.dot(d)).neg();
-		Swap(a.y, b.x); 
-		Swap(a.z, c.x);
-		Swap(b.z, c.y);
+		swap(a.y, b.x); swap(a.z, c.x);
+		swap(b.z, c.y);
 	}
 
 	void transpose(const matrix4x3& o)
@@ -1200,7 +1181,7 @@ struct ivec
 	ivec& min(int n) { x = ::Min(x, n); y = ::Min(y, n); z = ::Min(z, n); return *this; }
 	ivec& max(int n) { x = ::Max(x, n); y = ::Max(y, n); z = ::Max(z, n); return *this; }
 	ivec& abs() { x = ::abs(x); y = ::abs(y); z = ::abs(z); return *this; }
-	ivec& clamp(int l, int h) { x = ::Clamp(x, l, h); y = ::Clamp(y, l, h); z = ::Clamp(z, l, h); return *this; }
+	ivec& clamp(int l, int h) { x = ::clamp(x, l, h); y = ::clamp(y, l, h); z = ::clamp(z, l, h); return *this; }
 	ivec& cross(const ivec& a, const ivec& b) { x = a.y * b.z - a.z * b.y; y = a.z * b.x - a.x * b.z; z = a.x * b.y - a.y * b.x; return *this; }
 	int dot(const ivec& o) const { return x * o.x + y * o.y + z * o.z; }
 	float dist(const plane& p) const { return x * p.x + y * p.y + z * p.z + p.offset; }
@@ -1643,9 +1624,9 @@ struct matrix4
 
 	void transpose()
 	{
-		Swap(a.y, b.x); Swap(a.z, c.x); Swap(a.w, d.x);
-		Swap(b.z, c.y); Swap(b.w, d.y);
-		Swap(c.w, d.z);
+		swap(a.y, b.x); swap(a.z, c.x); swap(a.w, d.x);
+		swap(b.z, c.y); swap(b.w, d.y);
+		swap(c.w, d.z);
 	}
 
 	void transpose(const matrix4& m)

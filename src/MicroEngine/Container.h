@@ -220,8 +220,6 @@ public:
 	uint8_t flags = 0;
 };
 
-typedef DataBuf<uint8_t> ucharbuf;
-
 template <class T>
 class Vector
 {

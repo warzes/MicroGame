@@ -995,7 +995,7 @@ namespace tempMath
 	}
 }
 
-namespace collide
+namespace collides
 {
 	using namespace tempMath;
 

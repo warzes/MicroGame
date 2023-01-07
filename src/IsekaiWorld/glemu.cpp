@@ -1,7 +1,8 @@
 #include "stdafx.h"
-#include "glemu.h"
+#include "cube.h"
+#include "DebugNew.h"
 
-//extern int intel_mapbufferrange_bug;
+extern int intel_mapbufferrange_bug;
 
 namespace gle
 {
@@ -31,8 +32,8 @@ namespace gle
 	static GLenum primtype = GL_TRIANGLES;
 	static uchar* lastbuf = NULL;
 	static bool changedattribs = false;
-	static Vector<GLint> multidrawstart;
-	static Vector<GLsizei> multidrawcount;
+	static vector<GLint> multidrawstart;
+	static vector<GLsizei> multidrawcount;
 
 #define MAXQUADS (0x10000/4)
 	static GLuint quadindexes = 0;
@@ -206,7 +207,7 @@ namespace gle
 	void begin(GLenum mode, int numverts)
 	{
 		primtype = mode;
-		//if (!intel_mapbufferrange_bug)
+		if (!intel_mapbufferrange_bug)
 		{
 			int len = numverts * vertexsize;
 			if (vbooffset + len >= MAXVBOSIZE)
@@ -219,30 +220,30 @@ namespace gle
 			}
 			else if (!lastvertexsize) glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			void* buf = glMapBufferRange(GL_ARRAY_BUFFER, vbooffset, len, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
-			if (buf) attribbuf.Reset((uchar*)buf, len);
+			if (buf) attribbuf.reset((uchar*)buf, len);
 		}
 	}
 
 	void multidraw()
 	{
-		int start = multidrawstart.Length() ? multidrawstart.Last() + multidrawcount.Last() : 0,
-			count = attribbuf.Length() / vertexsize - start;
+		int start = multidrawstart.length() ? multidrawstart.last() + multidrawcount.last() : 0,
+			count = attribbuf.length() / vertexsize - start;
 		if (count > 0)
 		{
-			multidrawstart.Add(start);
-			multidrawcount.Add(count);
+			multidrawstart.add(start);
+			multidrawcount.add(count);
 		}
 	}
 
 	int end()
 	{
-		uchar* buf = attribbuf.GetBuf();
-		if (attribbuf.Empty())
+		uchar* buf = attribbuf.getbuf();
+		if (attribbuf.empty())
 		{
 			if (buf != attribdata)
 			{
 				glUnmapBuffer(GL_ARRAY_BUFFER);
-				attribbuf.Reset(attribdata, MAXVBOSIZE);
+				attribbuf.reset(attribdata, MAXVBOSIZE);
 			}
 			return 0;
 		}
@@ -250,7 +251,7 @@ namespace gle
 		{
 			if (buf == attribdata)
 			{
-				if (vbooffset + attribbuf.Length() >= MAXVBOSIZE)
+				if (vbooffset + attribbuf.length() >= MAXVBOSIZE)
 				{
 					if (!vbo) glGenBuffers(1, &vbo);
 					glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -258,28 +259,28 @@ namespace gle
 					vbooffset = 0;
 				}
 				else if (!lastvertexsize) glBindBuffer(GL_ARRAY_BUFFER, vbo);
-				void* dst = /*intel_mapbufferrange_bug ? NULL :*/
-					glMapBufferRange(GL_ARRAY_BUFFER, vbooffset, attribbuf.Length(), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+				void* dst = intel_mapbufferrange_bug ? NULL :
+					glMapBufferRange(GL_ARRAY_BUFFER, vbooffset, attribbuf.length(), GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
 				if (dst)
 				{
-					memcpy(dst, attribbuf.GetBuf(), attribbuf.Length());
+					memcpy(dst, attribbuf.getbuf(), attribbuf.length());
 					glUnmapBuffer(GL_ARRAY_BUFFER);
 				}
-				else glBufferSubData(GL_ARRAY_BUFFER, vbooffset, attribbuf.Length(), attribbuf.GetBuf());
+				else glBufferSubData(GL_ARRAY_BUFFER, vbooffset, attribbuf.length(), attribbuf.getbuf());
 			}
 			else glUnmapBuffer(GL_ARRAY_BUFFER);
 			buf = (uchar*)0 + vbooffset;
 			if (vertexsize == lastvertexsize && buf >= lastbuf)
 			{
 				start = int(buf - lastbuf) / vertexsize;
-				if (primtype == GL_QUADS && (start % 4 || start + attribbuf.Length() / vertexsize >= 4 * MAXQUADS))
+				if (primtype == GL_QUADS && (start % 4 || start + attribbuf.length() / vertexsize >= 4 * MAXQUADS))
 					start = 0;
 				else buf = lastbuf;
 			}
-			vbooffset += attribbuf.Length();
+			vbooffset += attribbuf.length();
 		}
 		setattribs(buf);
-		int numvertexes = attribbuf.Length() / vertexsize;
+		int numvertexes = attribbuf.length() / vertexsize;
 		if (primtype == GL_QUADS)
 		{
 			if (!quadsenabled) enablequads();
@@ -295,17 +296,17 @@ namespace gle
 		}
 		else
 		{
-			if (multidrawstart.Length())
+			if (multidrawstart.length())
 			{
 				multidraw();
 				if (start) loopv(multidrawstart) multidrawstart[i] += start;
-				glMultiDrawArrays(primtype, multidrawstart.GetBuf(), multidrawcount.GetBuf(), multidrawstart.Length());
-				multidrawstart.SetSize(0);
-				multidrawcount.SetSize(0);
+				glMultiDrawArrays(primtype, multidrawstart.getbuf(), multidrawcount.getbuf(), multidrawstart.length());
+				multidrawstart.setsize(0);
+				multidrawcount.setsize(0);
 			}
 			else glDrawArrays(primtype, start, numvertexes);
 		}
-		attribbuf.Reset(attribdata, MAXVBOSIZE);
+		attribbuf.reset(attribdata, MAXVBOSIZE);
 		return numvertexes;
 	}
 
@@ -323,7 +324,7 @@ namespace gle
 		if (!defaultvao) glGenVertexArrays(1, &defaultvao);
 		glBindVertexArray(defaultvao);
 		attribdata = new uchar[MAXVBOSIZE];
-		attribbuf.Reset(attribdata, MAXVBOSIZE);
+		attribbuf.reset(attribdata, MAXVBOSIZE);
 	}
 
 	void cleanup()
@@ -331,8 +332,10 @@ namespace gle
 		disable();
 
 		if (quadindexes) { glDeleteBuffers(1, &quadindexes); quadindexes = 0; }
+
 		if (vbo) { glDeleteBuffers(1, &vbo); vbo = 0; }
 		vbooffset = MAXVBOSIZE;
+
 		if (defaultvao) { glDeleteVertexArrays(1, &defaultvao); defaultvao = 0; }
 	}
 }

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Geom.h"
-
 namespace gle
 {
 	enum
@@ -32,14 +30,14 @@ namespace gle
 #define GLE_DEFATTRIB(name, type, defaultsize, defaultformat) \
 	static inline void def##name(int size = defaultsize, int format = defaultformat) { defattrib(type, size, format); }
 
-	GLE_DEFATTRIB(vertex, ATTRIB_VERTEX, 3, GL_FLOAT)
-	GLE_DEFATTRIB(color, ATTRIB_COLOR, 3, GL_FLOAT)
-	GLE_DEFATTRIB(texcoord0, ATTRIB_TEXCOORD0, 2, GL_FLOAT)
-	GLE_DEFATTRIB(texcoord1, ATTRIB_TEXCOORD1, 2, GL_FLOAT)
-	GLE_DEFATTRIB(normal, ATTRIB_NORMAL, 3, GL_FLOAT)
-	GLE_DEFATTRIB(tangent, ATTRIB_TANGENT, 4, GL_FLOAT)
+	GLE_DEFATTRIB(vertex,     ATTRIB_VERTEX,     3, GL_FLOAT)
+	GLE_DEFATTRIB(color,      ATTRIB_COLOR,      3, GL_FLOAT)
+	GLE_DEFATTRIB(texcoord0,  ATTRIB_TEXCOORD0,  2, GL_FLOAT)
+	GLE_DEFATTRIB(texcoord1,  ATTRIB_TEXCOORD1,  2, GL_FLOAT)
+	GLE_DEFATTRIB(normal,     ATTRIB_NORMAL,     3, GL_FLOAT)
+	GLE_DEFATTRIB(tangent,    ATTRIB_TANGENT,    4, GL_FLOAT)
 	GLE_DEFATTRIB(boneweight, ATTRIB_BONEWEIGHT, 4, GL_UNSIGNED_BYTE)
-	GLE_DEFATTRIB(boneindex, ATTRIB_BONEINDEX, 4, GL_UNSIGNED_BYTE)
+	GLE_DEFATTRIB(boneindex,  ATTRIB_BONEINDEX,  4, GL_UNSIGNED_BYTE)
 
 #define GLE_INITATTRIB(name, index, suffix, type) \
 	static inline void name##suffix(type x) { glVertexAttrib1##suffix##(index, x); } \
@@ -70,11 +68,11 @@ namespace gle
 	static inline void tangent(const vec4& v) { glVertexAttrib4fv(ATTRIB_TANGENT, v.v); }
 
 #define GLE_ATTRIBPOINTER(name, index, defaultnormalized, defaultsize, defaulttype, prepare) \
-		static inline void enable##name() { prepare; glEnableVertexAttribArray(index); } \
-		static inline void disable##name() { glDisableVertexAttribArray(index); } \
-		static inline void name##pointer(int stride, const void *data, GLenum type = defaulttype, int size = defaultsize, GLenum normalized = defaultnormalized) { \
-		prepare; \
-		glVertexAttribPointer(index, size, type, normalized, stride, data); \
+	static inline void enable##name() { prepare; glEnableVertexAttribArray(index); } \
+	static inline void disable##name() { glDisableVertexAttribArray(index); } \
+	static inline void name##pointer(int stride, const void *data, GLenum type = defaulttype, int size = defaultsize, GLenum normalized = defaultnormalized) { \
+	prepare; \
+	glVertexAttribPointer(index, size, type, normalized, stride, data); \
 	}
 
 	static inline void enableattrib(int index) { disable(); glEnableVertexAttribArray(index); }
@@ -88,7 +86,7 @@ namespace gle
 	GLE_ATTRIBPOINTER(boneweight, ATTRIB_BONEWEIGHT, GL_TRUE, 4, GL_UNSIGNED_BYTE, )
 	GLE_ATTRIBPOINTER(boneindex, ATTRIB_BONEINDEX, GL_FALSE, 4, GL_UNSIGNED_BYTE, )
 
-		static inline void bindebo(GLuint ebo) { disable(); glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo); }
+	static inline void bindebo(GLuint ebo) { disable(); glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo); }
 	static inline void clearebo() { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); }
 	static inline void bindvbo(GLuint vbo) { disable(); glBindBuffer(GL_ARRAY_BUFFER, vbo); }
 	static inline void clearvbo() { glBindBuffer(GL_ARRAY_BUFFER, 0); }
@@ -96,9 +94,9 @@ namespace gle
 	template<class T>
 	static inline void attrib(T x)
 	{
-		if (attribbuf.Check(sizeof(T)))
+		if (attribbuf.check(sizeof(T)))
 		{
-			T* buf = (T*)attribbuf.Pad(sizeof(T));
+			T* buf = (T*)attribbuf.pad(sizeof(T));
 			buf[0] = x;
 		}
 	}
@@ -106,9 +104,9 @@ namespace gle
 	template<class T>
 	static inline void attrib(T x, T y)
 	{
-		if (attribbuf.Check(2 * sizeof(T)))
+		if (attribbuf.check(2 * sizeof(T)))
 		{
-			T* buf = (T*)attribbuf.Pad(2 * sizeof(T));
+			T* buf = (T*)attribbuf.pad(2 * sizeof(T));
 			buf[0] = x;
 			buf[1] = y;
 		}
@@ -117,9 +115,9 @@ namespace gle
 	template<class T>
 	static inline void attrib(T x, T y, T z)
 	{
-		if (attribbuf.Check(3 * sizeof(T)))
+		if (attribbuf.check(3 * sizeof(T)))
 		{
-			T* buf = (T*)attribbuf.Pad(3 * sizeof(T));
+			T* buf = (T*)attribbuf.pad(3 * sizeof(T));
 			buf[0] = x;
 			buf[1] = y;
 			buf[2] = z;
@@ -129,9 +127,9 @@ namespace gle
 	template<class T>
 	static inline void attrib(T x, T y, T z, T w)
 	{
-		if (attribbuf.Check(4 * sizeof(T)))
+		if (attribbuf.check(4 * sizeof(T)))
 		{
-			T* buf = (T*)attribbuf.Pad(4 * sizeof(T));
+			T* buf = (T*)attribbuf.pad(4 * sizeof(T));
 			buf[0] = x;
 			buf[1] = y;
 			buf[2] = z;
@@ -142,7 +140,7 @@ namespace gle
 	template<size_t N, class T>
 	static inline void attribv(const T* v)
 	{
-		attribbuf.Put((const uchar*)v, N * sizeof(T));
+		attribbuf.put((const uchar*)v, N * sizeof(T));
 	}
 
 #define GLE_ATTRIB(suffix, type) \

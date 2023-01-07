@@ -1,6 +1,6 @@
 #include "Collisions.h"
 
-namespace collide
+namespace collides
 {
 	static inline Hit hits[16] = { 0 };
 	static inline int hit_index = -1;

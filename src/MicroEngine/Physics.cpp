@@ -1,7 +1,6 @@
 ﻿#include "stdafx.h"
 #include "Core.h"
 #include "Physics.h"
-#include "Platform.h"
 #if USE_PHYSX5
 //-----------------------------------------------------------------------------
 //#if defined(_MSC_VER)

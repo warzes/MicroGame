@@ -1,5 +1,6 @@
 #include "stdafx.h"
-#include "Geom.h"
+#include "cube.h"
+#include "DebugNew.h"
 
 static inline double det2x2(double a, double b, double c, double d) { return a * d - b * c; }
 static inline double det3x3(

@@ -1,8 +1,8 @@
 ﻿#include "stdafx.h"
 #include "Base.h"
 #include "Core.h"
-#include "Platform.h"
 #include "Renderer.h"
+#include "Window.h"
 //-----------------------------------------------------------------------------
 #if defined(_WIN32)
 extern "C"
@@ -2392,7 +2392,7 @@ void FrameBuffer::Bind(const glm::vec3& color)
 void FrameBuffer::MainFrameBufferBind()
 {
 	if (RendererState::currentFrameBuffer) glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, GetFrameBufferWidth(), GetFrameBufferHeight());
+	glViewport(0, 0, GetRenderWidth(), GetRenderHeight());
 	glClearColor(RendererState::ClearColor.x, RendererState::ClearColor.y, RendererState::ClearColor.z, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	RendererState::currentFrameBuffer = nullptr;
@@ -2518,14 +2518,14 @@ bool RenderSystem::Create(const RenderSystem::CreateInfo& createInfo)
 	glClearDepth(1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	glViewport(0, 0, GetFrameBufferWidth(), GetFrameBufferHeight());
+	glViewport(0, 0, GetRenderWidth(), GetRenderHeight());
 
 	RendererState::perspectiveFOV = createInfo.PerspectiveFOV;
 	RendererState::perspectiveNear = createInfo.PerspectiveNear;
 	RendererState::perspectiveFar = createInfo.PerspectiveFar;
 
-	const float FOVY = glm::atan(glm::tan(glm::radians(RendererState::perspectiveFOV) / 2.0f) / GetFrameBufferAspectRatio()) * 2.0f;
-	RendererState::projectionMatrix = glm::perspective(FOVY, GetFrameBufferAspectRatio(), RendererState::perspectiveNear, RendererState::perspectiveFar);
+	const float FOVY = glm::atan(glm::tan(glm::radians(RendererState::perspectiveFOV) / 2.0f) / GetRenderAspectRatio()) * 2.0f;
+	RendererState::projectionMatrix = glm::perspective(FOVY, GetRenderAspectRatio(), RendererState::perspectiveNear, RendererState::perspectiveFar);
 
 	return true;
 }
@@ -2543,14 +2543,14 @@ void RenderSystem::SetFrameColor(const glm::vec3 clearColor)
 //-----------------------------------------------------------------------------
 void RenderSystem::BeginFrame()
 {
-	if (RendererState::framebufferWidth != GetFrameBufferWidth() || RendererState::framebufferHeight != GetFrameBufferHeight())
+	if (RendererState::framebufferWidth != GetRenderWidth() || RendererState::framebufferHeight != GetRenderHeight())
 	{
-		RendererState::framebufferWidth = GetFrameBufferWidth();
-		RendererState::framebufferHeight = GetFrameBufferHeight();
+		RendererState::framebufferWidth = GetRenderWidth();
+		RendererState::framebufferHeight = GetRenderHeight();
 		glViewport(0, 0, RendererState::framebufferWidth, RendererState::framebufferHeight);
 		glScissor(0, 0, RendererState::framebufferWidth, RendererState::framebufferHeight);
-		const float FOVY = glm::atan(glm::tan(glm::radians(RendererState::perspectiveFOV) / 2.0f) / GetFrameBufferAspectRatio()) * 2.0f;
-		RendererState::projectionMatrix = glm::perspective(FOVY, GetFrameBufferAspectRatio(), RendererState::perspectiveNear, RendererState::perspectiveFar);
+		const float FOVY = glm::atan(glm::tan(glm::radians(RendererState::perspectiveFOV) / 2.0f) / GetRenderAspectRatio()) * 2.0f;
+		RendererState::projectionMatrix = glm::perspective(FOVY, GetRenderAspectRatio(), RendererState::perspectiveNear, RendererState::perspectiveFar);
 	}
 
 	//glClearDepthf(1.0f);

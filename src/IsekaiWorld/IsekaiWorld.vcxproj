@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{E838BD04-7B1B-45C4-B34B-738EA878717F}</ProjectGuid>
+    <ProjectGuid>{D1B165A9-904F-4A57-8400-A20072AFFCBC}</ProjectGuid>
     <RootNamespace>Game</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -181,37 +181,107 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="FileSystem.cpp" />
-    <ClCompile Include="Geom.cpp" />
+    <ClCompile Include="3dgui.cpp" />
+    <ClCompile Include="bih.cpp" />
+    <ClCompile Include="blend.cpp" />
+    <ClCompile Include="blob.cpp" />
+    <ClCompile Include="client.cpp" />
+    <ClCompile Include="command.cpp" />
+    <ClCompile Include="console.cpp" />
+    <ClCompile Include="cubeloader.cpp" />
+    <ClCompile Include="decal.cpp" />
+    <ClCompile Include="dynlight.cpp" />
+    <ClCompile Include="ent.cpp" />
+    <ClCompile Include="entities.cpp" />
+    <ClCompile Include="geom.cpp" />
+    <ClCompile Include="glare.cpp" />
     <ClCompile Include="glemu.cpp" />
+    <ClCompile Include="glexts.cpp" />
+    <ClCompile Include="grass.cpp" />
+    <ClCompile Include="lightmap.cpp" />
+    <ClCompile Include="Log.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MicroString.cpp" />
+    <ClCompile Include="material.cpp" />
+    <ClCompile Include="menus.cpp" />
+    <ClCompile Include="movie.cpp" />
+    <ClCompile Include="normal.cpp" />
+    <ClCompile Include="objset.cpp" />
+    <ClCompile Include="octa.cpp" />
+    <ClCompile Include="octaedit.cpp" />
+    <ClCompile Include="octarender.cpp" />
+    <ClCompile Include="physics.cpp" />
+    <ClCompile Include="pvs.cpp" />
+    <ClCompile Include="rendergl.cpp" />
+    <ClCompile Include="rendermodel.cpp" />
+    <ClCompile Include="renderparticles.cpp" />
+    <ClCompile Include="rendersky.cpp" />
+    <ClCompile Include="rendertext.cpp" />
+    <ClCompile Include="renderva.cpp" />
+    <ClCompile Include="rpg.cpp" />
+    <ClCompile Include="server.cpp" />
+    <ClCompile Include="shader.cpp" />
+    <ClCompile Include="shadowmap.cpp" />
+    <ClCompile Include="sound.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Streams.cpp" />
-    <ClCompile Include="TempBase.cpp" />
-    <ClCompile Include="utf8Conv.cpp" />
-    <ClCompile Include="World.cpp" />
-    <ClCompile Include="ZipFile.cpp" />
+    <ClCompile Include="stream.cpp" />
+    <ClCompile Include="tempMain.cpp" />
+    <ClCompile Include="texture.cpp" />
+    <ClCompile Include="tools.cpp" />
+    <ClCompile Include="water.cpp" />
+    <ClCompile Include="world.cpp" />
+    <ClCompile Include="worldio.cpp" />
+    <ClCompile Include="zip.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ByteOrder.h" />
-    <ClInclude Include="FileSystem.h" />
-    <ClInclude Include="Geom.h" />
+    <ClInclude Include="animmodel.h" />
+    <ClInclude Include="bih.h" />
+    <ClInclude Include="command.h" />
+    <ClInclude Include="cube.h" />
+    <ClInclude Include="DebugNew.h" />
+    <ClInclude Include="depthfx.h" />
+    <ClInclude Include="ents.h" />
+    <ClInclude Include="explosion.h" />
+    <ClInclude Include="geom.h" />
     <ClInclude Include="glemu.h" />
-    <ClInclude Include="MicroString.h" />
+    <ClInclude Include="iengine.h" />
+    <ClInclude Include="igame.h" />
+    <ClInclude Include="iqm.h" />
+    <ClInclude Include="lensflare.h" />
+    <ClInclude Include="lightmap.h" />
+    <ClInclude Include="lightning.h" />
+    <ClInclude Include="md2.h" />
+    <ClInclude Include="md3.h" />
+    <ClInclude Include="md5.h" />
+    <ClInclude Include="model.h" />
+    <ClInclude Include="mpr.h" />
+    <ClInclude Include="obj.h" />
+    <ClInclude Include="octa.h" />
+    <ClInclude Include="ragdoll.h" />
+    <ClInclude Include="rendertarget.h" />
+    <ClInclude Include="rpg.h" />
+    <ClInclude Include="rpgent.h" />
+    <ClInclude Include="rpgobj.h" />
+    <ClInclude Include="skelmodel.h" />
+    <ClInclude Include="smd.h" />
+    <ClInclude Include="stats.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="Streams.h" />
-    <ClInclude Include="TempBase.h" />
-    <ClInclude Include="utf8Conv.h" />
-    <ClInclude Include="World.h" />
-    <ClInclude Include="ZipFile.h" />
+    <ClInclude Include="tempgl.h" />
+    <ClInclude Include="tengine.h" />
+    <ClInclude Include="textedit.h" />
+    <ClInclude Include="texture.h" />
+    <ClInclude Include="tools.h" />
+    <ClInclude Include="vertmodel.h" />
+    <ClInclude Include="world.h" />
   </ItemGroup>
   <ItemGroup>
+    <Library Include="..\3rdparty\SDL2.lib" />
+    <Library Include="..\3rdparty\SDL2_image.lib" />
+    <Library Include="..\3rdparty\SDL2_mixer.lib" />
     <Library Include="..\3rdparty\zdll.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "EngineMath.h"
 
-namespace collide
+namespace collides
 {
 
 #define GJK_FLT_MAX FLT_MAX // 3.40282347E+38F

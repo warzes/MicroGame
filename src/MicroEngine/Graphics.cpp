@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "Core.h"
 #include "EngineMath.h"
-#include "Platform.h"
+#include "Window.h"
+#include "Input.h"
 #include "Renderer.h"
 #include "Graphics.h"
 
@@ -505,7 +506,7 @@ void DebugDraw::DrawCapsule(const glm::vec3& from, const glm::vec3& to, float r,
 
 void DebugDraw::DrawDiamond(const glm::vec3& from, const glm::vec3& to, float size, unsigned rgb)
 {
-	Poly p = collide::Diamond(from, to, size);
+	Poly p = collides::Diamond(from, to, size);
 	glm::vec3* dmd = p.verts.data();
 
 	glm::vec3* a = dmd + 0;

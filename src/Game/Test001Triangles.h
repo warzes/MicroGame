@@ -162,7 +162,7 @@ void FrameTest(float deltaTime)
 {
 	static float dt = 0.0f;
 	dt += deltaTime;
-	float ratio = GetFrameBufferAspectRatio();
+	float ratio = GetRenderAspectRatio();
 	
 	glm::mat4 mvp = glm::mat4(1.0f);
 	mvp = glm::rotate(mvp, dt, glm::vec3(0.0f, 0.0f, 1.0f));

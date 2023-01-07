@@ -10,9 +10,9 @@ glm::mat4 DrawHelper::GetOrtho()
 {
 	static float screenAspect = 0.0f;
 	static glm::mat4 ortho;
-	if (screenAspect != GetFrameBufferAspectRatio())
+	if (screenAspect != GetRenderAspectRatio())
 	{
-		screenAspect = GetFrameBufferAspectRatio();
+		screenAspect = GetRenderAspectRatio();
 		const float widthHeight = ScreenHeight;
 		const float widthScreen = widthHeight * screenAspect;
 		ortho = glm::ortho(0.0f, widthScreen, widthHeight, 0.0f, 0.0f, 1.0f);
@@ -38,14 +38,14 @@ glm::mat4 DrawHelper::GetOrtho()
 void DrawHelper::GetScreenWorldViewport(int& left, int& right, int& top, int& bottom)
 {
 	left = 1;
-	right = ScreenHeight * GetFrameBufferAspectRatio() / TileSize - 13;
+	right = ScreenHeight * GetRenderAspectRatio() / TileSize - 13;
 	top = 1;
 	bottom = ScreenHeight / TileSize - 9;
 }
 //-----------------------------------------------------------------------------
 void DrawHelper::GetScreenMiniMapViewport(int& left, int& right, int& top, int& bottom)
 {
-	left = ScreenHeight * GetFrameBufferAspectRatio() / TileSize - 13 + 1;
+	left = ScreenHeight * GetRenderAspectRatio() / TileSize - 13 + 1;
 	right = left + 11;
 	top = 1;
 	bottom = 11;
@@ -53,7 +53,7 @@ void DrawHelper::GetScreenMiniMapViewport(int& left, int& right, int& top, int& 
 //-----------------------------------------------------------------------------
 void DrawHelper::GetScreenInfoPlayerViewport(int& left, int& right, int& top, int& bottom)
 {
-	left = ScreenHeight * GetFrameBufferAspectRatio() / TileSize - 13 + 1;
+	left = ScreenHeight * GetRenderAspectRatio() / TileSize - 13 + 1;
 	right = left + 11;
 	top = 12;
 	bottom = ScreenHeight / TileSize - 1;
@@ -62,7 +62,7 @@ void DrawHelper::GetScreenInfoPlayerViewport(int& left, int& right, int& top, in
 void DrawHelper::GetScreenLogViewport(int& left, int& right, int& top, int& bottom)
 {
 	left = 1;
-	right = ScreenHeight * GetFrameBufferAspectRatio() / TileSize - 13;
+	right = ScreenHeight * GetRenderAspectRatio() / TileSize - 13;
 	top = ScreenHeight / TileSize - 8;
 	bottom = ScreenHeight / TileSize - 1;
 }
@@ -135,7 +135,7 @@ void DrawHelper::DrawBattleUI()
 {
 	// границы окон
 	int leftScreen = 1;
-	int rightScreen = ScreenHeight * GetFrameBufferAspectRatio() / TileSize - 1;
+	int rightScreen = ScreenHeight * GetRenderAspectRatio() / TileSize - 1;
 	int topScreen = 1;
 	int bottomScreen = ScreenHeight / TileSize - 1;
 

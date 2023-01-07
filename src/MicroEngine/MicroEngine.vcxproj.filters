@@ -44,9 +44,6 @@
     <ClInclude Include="Physics2.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Platform.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Renderer.h">
       <Filter>Engine</Filter>
     </ClInclude>
@@ -60,6 +57,18 @@
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="FileSystem.h">
+      <Filter>Engine\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.h">
+      <Filter>Engine\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
+      <Filter>Engine\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="Platform.h">
+      <Filter>Engine\Platform</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Collisions.inl">
@@ -89,9 +98,6 @@
     <ClCompile Include="Physics2.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Platform.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -105,10 +111,25 @@
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="FileSystem.cpp">
+      <Filter>Engine\Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="Window.cpp">
+      <Filter>Engine\Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="Input.cpp">
+      <Filter>Engine\Platform</Filter>
+    </ClCompile>
+    <ClCompile Include="Platform.cpp">
+      <Filter>Engine\Platform</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Engine">
       <UniqueIdentifier>{5f64167f-1beb-4553-bd17-f2518185ee19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Platform">
+      <UniqueIdentifier>{23a43558-ba2f-4724-a5ad-0a8f11b503eb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
