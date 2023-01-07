@@ -4,6 +4,12 @@
 #include "Window.h"
 //-------------------------------------------------------------------------
 extern GLFWwindow* window;
+extern KeyCallback KeyEvent;
+extern CharCallback CharEvent;
+extern MouseButtonCallback MouseButtonEvent;
+extern MouseMoveCallback MouseMoveEvent;
+extern MouseScrollCallback MouseScrollEvent;
+extern MouseCursorEnterCallback MouseCursorEnterEvent;
 //-------------------------------------------------------------------------
 constexpr auto MAX_KEYBOARD_KEYS = 512;     // Maximum number of keyboard keys supported
 constexpr auto MAX_KEY_PRESSED_QUEUE = 16;  // Maximum number of keys in the key input queue
@@ -37,27 +43,20 @@ struct
 	glm::vec2 currentWheelMove = glm::vec2(0.0f);         // Registers current mouse wheel variation
 	glm::vec2 previousWheelMove = glm::vec2(0.0f);        // Registers previous mouse wheel variation
 } Mouse;
-//-------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-void cursorEnterCallback(GLFWwindow* /*window*/, int enter) noexcept
-{
-	Mouse.cursorOnScreen = (enter == GLFW_TRUE);
-}
 //-----------------------------------------------------------------------------
 void keyCallback(GLFWwindow* /*window*/, int key, int /*scancode*/, int action, int mods) noexcept
 {
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, GLFW_TRUE);
-
 	if (key < 0) return;    // Security check, macOS fn key generates -1
 
 	// WARNING: GLFW could return GLFW_REPEAT, we need to consider it as 1 to work properly with our implementation (IsKeyDown/IsKeyUp checks)
 	if (action == GLFW_RELEASE) Keyboard.currentKeyState[key] = 0;
 	else Keyboard.currentKeyState[key] = 1;
 
+#if defined(_WIN32) || defined(__linux__)
 	// WARNING: Check if CAPS/NUM key modifiers are enabled and force down state for those keys
 	if (((key == KEY_CAPS_LOCK) && ((mods & GLFW_MOD_CAPS_LOCK) > 0)) ||
 		((key == KEY_NUM_LOCK) && ((mods & GLFW_MOD_NUM_LOCK) > 0))) Keyboard.currentKeyState[key] = 1;
+#endif
 
 	// Check if there is space available in the key queue
 	if ((Keyboard.keyPressedQueueCount < MAX_KEY_PRESSED_QUEUE) && (action == GLFW_PRESS))
@@ -66,6 +65,12 @@ void keyCallback(GLFWwindow* /*window*/, int key, int /*scancode*/, int action, 
 		Keyboard.keyPressedQueue[Keyboard.keyPressedQueueCount] = key;
 		Keyboard.keyPressedQueueCount++;
 	}
+}
+//-----------------------------------------------------------------------------
+void keyCallbackUser(GLFWwindow* window, int key, int scancode, int action, int mods) noexcept
+{
+	keyCallback(window, key, scancode, action, mods);
+	KeyEvent(key, action == GLFW_RELEASE);
 }
 //-----------------------------------------------------------------------------
 // GLFW3 Char Key Callback, runs on key down (gets equivalent unicode char value)
@@ -85,6 +90,12 @@ void charCallback(GLFWwindow* /*window*/, unsigned int key) noexcept
 	}
 }
 //-----------------------------------------------------------------------------
+void charCallbackUser(GLFWwindow* window, unsigned int key) noexcept
+{
+	charCallback(window, key);
+	CharEvent(key);
+}
+//-----------------------------------------------------------------------------
 void mouseButtonCallback(GLFWwindow* /*window*/, int button, int action, int /*mods*/) noexcept
 {
 	// WARNING: GLFW could only return GLFW_PRESS (1) or GLFW_RELEASE (0) for now,
@@ -94,8 +105,6 @@ void mouseButtonCallback(GLFWwindow* /*window*/, int button, int action, int /*m
 //-----------------------------------------------------------------------------
 void mouseButtonCallbackUser(GLFWwindow* window, int button, int action, int mods) noexcept
 {
-	extern MouseButtonCallback MouseButtonEvent;
-
 	mouseButtonCallback(window, button, action, mods);
 	MouseButtonEvent(button, action);
 }
@@ -106,24 +115,43 @@ void mouseCursorPosCallback(GLFWwindow* /*window*/, double x, double y) noexcept
 	Mouse.currentPosition.y = (float)y;
 }
 //-----------------------------------------------------------------------------
+void mouseCursorPosCallbackUser(GLFWwindow* window, double x, double y) noexcept
+{
+	mouseCursorPosCallback(window, x, y);
+	MouseMoveEvent(static_cast<int>(x), static_cast<int>(y));
+}
+//-----------------------------------------------------------------------------
 void mouseScrollCallback(GLFWwindow* /*window*/, double xoffset, double yoffset) noexcept
 {
 	Mouse.currentWheelMove = { (float)xoffset, (float)yoffset };
 }
 //-----------------------------------------------------------------------------
-void SetInputCallback(GLFWwindow* window)
+void mouseScrollCallbackUser(GLFWwindow* window, double xoffset, double yoffset) noexcept
 {
-	extern MouseButtonCallback MouseButtonEvent;
-
-	glfwSetKeyCallback(window, keyCallback);
-	glfwSetCharCallback(window, charCallback);
-
-	if (MouseButtonEvent) glfwSetMouseButtonCallback(window, mouseButtonCallbackUser);
-	else  glfwSetMouseButtonCallback(window, mouseButtonCallback);
-
-	glfwSetCursorPosCallback(window, mouseCursorPosCallback);
-	glfwSetScrollCallback(window, mouseScrollCallback);
-	glfwSetCursorEnterCallback(window, cursorEnterCallback);
+	mouseScrollCallback(window, xoffset, yoffset);
+	MouseScrollEvent(xoffset, yoffset);
+}
+//-----------------------------------------------------------------------------
+void cursorEnterCallback(GLFWwindow* /*window*/, int enter) noexcept
+{
+	Mouse.cursorOnScreen = (enter == GLFW_TRUE);
+}
+//-------------------------------------------------------------------------
+void cursorEnterCallbackUser(GLFWwindow* window, int enter) noexcept
+{
+	cursorEnterCallback(window, enter);
+	MouseCursorEnterEvent(enter == GLFW_TRUE);
+}
+//-----------------------------------------------------------------------------
+void InitInput(GLFWwindow* window)
+{
+	// Set input callback events
+	glfwSetKeyCallback(window, KeyEvent ? keyCallbackUser : keyCallback);
+	glfwSetCharCallback(window, CharEvent ? charCallbackUser : charCallback);
+	glfwSetMouseButtonCallback(window, MouseButtonEvent ? mouseButtonCallbackUser : mouseButtonCallback);
+	glfwSetCursorPosCallback(window, MouseMoveEvent ? mouseCursorPosCallbackUser : mouseCursorPosCallback);	
+	glfwSetScrollCallback(window, MouseScrollEvent ? mouseScrollCallbackUser : mouseScrollCallback);
+	glfwSetCursorEnterCallback(window, MouseCursorEnterEvent ?cursorEnterCallbackUser : cursorEnterCallback);
 
 	extern int FrameBufferWidth;
 	extern int FrameBufferHeight;
@@ -154,9 +182,8 @@ void UpdateInput()
 //-------------------------------------------------------------------------
 bool IsKeyboardKeyPressed(int key)
 {
-	bool pressed = false;
-	if ((Keyboard.previousKeyState[key] == 0) && (Keyboard.currentKeyState[key] == 1)) pressed = true;
-	return pressed;
+	if ((Keyboard.previousKeyState[key] == 0) && (Keyboard.currentKeyState[key] == 1)) return true;
+	return false;
 }
 //-------------------------------------------------------------------------
 bool IsKeyboardKeyDown(int key)
@@ -167,9 +194,8 @@ bool IsKeyboardKeyDown(int key)
 //-------------------------------------------------------------------------
 bool IsKeyboardKeyReleased(int key)
 {
-	bool released = false;
-	if ((Keyboard.previousKeyState[key] == 1) && (Keyboard.currentKeyState[key] == 0)) released = true;
-	return released;
+	if ((Keyboard.previousKeyState[key] == 1) && (Keyboard.currentKeyState[key] == 0)) return true;
+	return false;
 }
 //-------------------------------------------------------------------------
 bool IsKeyboardKeyUp(int key)
@@ -222,23 +248,20 @@ int GetCharPressed()
 //-------------------------------------------------------------------------
 bool IsMouseButtonPressed(int button)
 {
-	bool pressed = false;
-	if ((Mouse.currentButtonState[button] == 1) && (Mouse.previousButtonState[button] == 0)) pressed = true;
-	return pressed;
+	if ((Mouse.currentButtonState[button] == 1) && (Mouse.previousButtonState[button] == 0)) return true;
+	return false;
 }
 //-------------------------------------------------------------------------
 bool IsMouseButtonDown(int button)
 {
-	bool down = false;
-	if (Mouse.currentButtonState[button] == 1) down = true;
-	return down;
+	if (Mouse.currentButtonState[button] == 1) return true;
+	return false;
 }
 //-------------------------------------------------------------------------
 bool IsMouseButtonReleased(int button)
 {
-	bool released = false;
-	if ((Mouse.currentButtonState[button] == 0) && (Mouse.previousButtonState[button] == 1)) released = true;
-	return released;
+	if ((Mouse.currentButtonState[button] == 0) && (Mouse.previousButtonState[button] == 1)) return true;
+	return false;
 }
 //-------------------------------------------------------------------------
 bool IsMouseButtonUp(int button)
@@ -258,18 +281,20 @@ int GetMouseY()
 //-------------------------------------------------------------------------
 glm::vec2 GetMousePosition()
 {
-	glm::vec2 position = glm::vec2{ 0 };
-	position.x = (Mouse.currentPosition.x + Mouse.offset.x) * Mouse.scale.x;
-	position.y = (Mouse.currentPosition.y + Mouse.offset.y) * Mouse.scale.y;
-	return position;
+	return
+	{
+		(Mouse.currentPosition.x + Mouse.offset.x) * Mouse.scale.x,
+		(Mouse.currentPosition.y + Mouse.offset.y) * Mouse.scale.y,
+	};
 }
 //-------------------------------------------------------------------------
 glm::vec2 GetMouseDelta()
 {
-	glm::vec2 delta = glm::vec2{ 0 };
-	delta.x = Mouse.currentPosition.x - Mouse.previousPosition.x;
-	delta.y = Mouse.currentPosition.y - Mouse.previousPosition.y;
-	return delta;
+	return
+	{
+		Mouse.currentPosition.x - Mouse.previousPosition.x,
+		Mouse.currentPosition.y - Mouse.previousPosition.y
+	};
 }
 //-------------------------------------------------------------------------
 void SetMousePosition(int x, int y)
@@ -288,7 +313,7 @@ void SetMouseScale(float scaleX, float scaleY)
 	Mouse.scale = { scaleX, scaleY };
 }
 //-------------------------------------------------------------------------
-float GetMouseWheelDelta()
+float GetMouseWheelMove()
 {
 	float result = 0.0f;
 	if (fabsf(Mouse.currentWheelMove.x) > fabsf(Mouse.currentWheelMove.y)) result = (float)Mouse.currentWheelMove.x;
@@ -296,22 +321,11 @@ float GetMouseWheelDelta()
 	return result;
 }
 //-------------------------------------------------------------------------
-glm::vec2 GetMouseWheelDeltaV()
+glm::vec2 GetMouseWheelMoveV()
 {
 	glm::vec2 result = glm::vec2{ 0 };
 	result = Mouse.currentWheelMove;
 	return result;
-}
-//-------------------------------------------------------------------------
-void SetMouseCursor(int cursor)
-{
-	//Mouse.cursor = cursor;
-	//if (cursor == MOUSE_CURSOR_DEFAULT) glfwSetCursor(privateImpl::window, NULL);
-	//else
-	//{
-	//	// NOTE: We are relating internal GLFW enum values to our MouseCursor enum values
-	//	glfwSetCursor(privateImpl::window, glfwCreateStandardCursor(0x00036000 + cursor));
-	//}
 }
 //-------------------------------------------------------------------------
 void SetMouseLock(bool lock)

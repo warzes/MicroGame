@@ -143,8 +143,7 @@ glm::vec2 GetMouseDelta();                      // Get mouse delta between frame
 void SetMousePosition(int x, int y);            // Set mouse position XY
 void SetMouseOffset(int offsetX, int offsetY);  // Set mouse offset
 void SetMouseScale(float scaleX, float scaleY); // Set mouse scaling
-float GetMouseWheelDelta();                     // Get mouse wheel movement for X or Y, whichever is larger
-glm::vec2 GetMouseWheelDeltaV();                // Get mouse wheel movement for both X and Y
-void SetMouseCursor(int cursor);                // Set mouse cursor
+float GetMouseWheelMove();                      // Get mouse wheel movement for X or Y, whichever is larger
+glm::vec2 GetMouseWheelMoveV();                 // Get mouse wheel movement for both X and Y
 void SetMouseLock(bool lock);                   // Enables/Disables cursor(lock/unlock cursor)
 bool IsCursorOnScreen();                        // Check if cursor is on the screen

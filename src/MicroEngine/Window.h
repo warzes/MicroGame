@@ -5,7 +5,19 @@
 //=============================================================================
 
 typedef void (*WindowResizeCallback)(int width, int height);
+#if defined(_WIN32) || defined(__linux__)
+typedef void (*WindowMaximizeCallback)(bool maximize);
+#endif
+typedef void (*WindowMinimizeCallback)(bool minimized);
+typedef void (*WindowFocusCallback)(bool focused);
+
+
+typedef void (*KeyCallback)(int key, bool isPressed);
+typedef void (*CharCallback)(unsigned int key);
 typedef void (*MouseButtonCallback)(int button, int action);
+typedef void (*MouseMoveCallback)(int x, int y);
+typedef void (*MouseScrollCallback)(double xoffset, double yoffset);
+typedef void (*MouseCursorEnterCallback)(bool enter);
 
 struct WindowCreateInfo
 {
@@ -19,7 +31,18 @@ struct WindowCreateInfo
 
 	// callback
 	WindowResizeCallback WindowResizeEvent = nullptr;
+#if defined(_WIN32) || defined(__linux__)
+	WindowMaximizeCallback WindowMaximizeEvent = nullptr;
+#endif
+	WindowMaximizeCallback WindowMinimizeEvent = nullptr;
+	WindowFocusCallback WindowFocusEvent = nullptr;
+
+	KeyCallback KeyEvent = nullptr;
+	CharCallback CharEvent = nullptr;
 	MouseButtonCallback MouseButtonEvent = nullptr;
+	MouseMoveCallback MouseMoveEvent = nullptr;
+	MouseScrollCallback MouseScrollEvent = nullptr;
+	MouseCursorEnterCallback MouseCursorEnterEvent = nullptr;
 };
 
 bool CreateWindowSystem(const WindowCreateInfo& createInfo);

@@ -10,9 +10,22 @@ int FrameBufferWidth = 0;
 int FrameBufferHeight = 0;
 float FrameBufferAspectRatio = 0.0f;
 bool Fullscreen = false;
+bool WindowMaximized = false;
+bool WindowMinimized = false;
+bool WindowFocus = true;
 //-----------------------------------------------------------------------------
 WindowResizeCallback WindowResizeEvent = nullptr;
+#if defined(_WIN32) || defined(__linux__)
+WindowMaximizeCallback WindowMaximizeEvent = nullptr;
+#endif
+WindowMaximizeCallback WindowMinimizeEvent = nullptr;
+WindowFocusCallback WindowFocusEvent = nullptr;
+KeyCallback KeyEvent = nullptr;
+CharCallback CharEvent = nullptr;
 MouseButtonCallback MouseButtonEvent = nullptr;
+MouseMoveCallback MouseMoveEvent = nullptr;
+MouseScrollCallback MouseScrollEvent = nullptr;
+MouseCursorEnterCallback MouseCursorEnterEvent = nullptr;
 //-----------------------------------------------------------------------------
 void errorCallback(int error, const char* description) noexcept
 {
@@ -34,6 +47,43 @@ void windowSizeCallbackUser(GLFWwindow* window, int width, int height) noexcept
 	WindowResizeEvent(width, height);
 }
 //-----------------------------------------------------------------------------
+#if defined(_WIN32) || defined(__linux__)
+void windowMaximizeCallback(GLFWwindow* /*window*/, int maximized) noexcept
+{
+	WindowMaximized = maximized == GL_TRUE;
+}
+#endif
+//-----------------------------------------------------------------------------
+#if defined(_WIN32) || defined(__linux__)
+void windowMaximizeCallbackUser(GLFWwindow* window, int maximized) noexcept
+{
+	windowMaximizeCallback(window, maximized);
+	WindowMaximizeEvent(maximized == GL_TRUE);
+}
+#endif
+//-----------------------------------------------------------------------------
+void windowMinimizeCallback(GLFWwindow* /*window*/, int minimized) noexcept
+{
+	WindowMinimized = minimized == GL_TRUE;
+}
+//-----------------------------------------------------------------------------
+void windowMinimizeCallbackUser(GLFWwindow* window, int minimized) noexcept
+{
+	windowMinimizeCallback(window, minimized);
+	WindowMinimizeEvent(minimized == GL_TRUE);
+}
+//-----------------------------------------------------------------------------
+void windowFocusCallback(GLFWwindow* /*window*/, int focused) noexcept
+{
+	WindowFocus = focused == GL_TRUE;
+}
+//-----------------------------------------------------------------------------
+void windowFocusCallbackUser(GLFWwindow* window, int focused) noexcept
+{
+	windowFocusCallback(window, focused);
+	WindowFocusEvent(focused == GL_TRUE);
+}
+//-----------------------------------------------------------------------------
 bool CreateWindowSystem(const WindowCreateInfo& createInfo)
 {
 	assert(!window);
@@ -45,7 +95,7 @@ bool CreateWindowSystem(const WindowCreateInfo& createInfo)
 		LogError("GLFW: Failed to initialize GLFW");
 		return false;
 	}
-
+	glfwDefaultWindowHints();  // Set default windows hints
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -72,13 +122,24 @@ bool CreateWindowSystem(const WindowCreateInfo& createInfo)
 	FrameBufferAspectRatio = static_cast<float>(FrameBufferWidth) / static_cast<float>(FrameBufferHeight);
 
 	WindowResizeEvent = createInfo.WindowResizeEvent;
+	WindowMaximizeEvent = createInfo.WindowMaximizeEvent;
+	WindowMinimizeEvent = createInfo.WindowMinimizeEvent;
+	WindowFocusEvent = createInfo.WindowFocusEvent;
+	KeyEvent = createInfo.KeyEvent;
+	CharEvent = createInfo.CharEvent;
 	MouseButtonEvent = createInfo.MouseButtonEvent;
+	MouseMoveEvent = createInfo.MouseMoveEvent;
+	MouseScrollEvent = createInfo.MouseScrollEvent;
 
-	if (WindowResizeEvent) glfwSetWindowSizeCallback(window, windowSizeCallbackUser);
-	else glfwSetWindowSizeCallback(window, windowSizeCallback);
+	glfwSetWindowSizeCallback(window, WindowResizeEvent ? windowSizeCallbackUser : windowSizeCallback);
+#if !defined(PLATFORM_WEB)
+	glfwSetWindowMaximizeCallback(window, WindowMaximizeEvent ? windowMaximizeCallbackUser : windowMaximizeCallback);
+#endif
+	glfwSetWindowIconifyCallback(window, WindowMinimizeEvent ? windowMinimizeCallbackUser : windowMinimizeCallback);
+	glfwSetWindowFocusCallback(window, WindowFocusEvent ? windowFocusCallbackUser : windowFocusCallback);
 
-	extern void SetInputCallback(GLFWwindow * window);
-	SetInputCallback(window);
+	extern void InitInput(GLFWwindow*);
+	InitInput(window);
 	
 	glfwMakeContextCurrent(window);
 
