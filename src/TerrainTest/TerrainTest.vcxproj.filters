@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="..\3rdparty\imgui\imgui.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\imgui\imgui_demo.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\imgui\imgui_draw.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\imgui\imgui_impl_glfw.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\imgui\imgui_impl_opengl3.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\imgui\imgui_tables.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\imgui\imgui_widgets.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\FastNoise.cpp">
+      <Filter>FastNoise</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="GameApp.h" />
+    <ClInclude Include="Camera.h">
+      <Filter>temp</Filter>
+    </ClInclude>
+    <ClInclude Include="Cubemap.h">
+      <Filter>temp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rdparty\imgui\imstb_truetype.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rdparty\imgui\imconfig.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rdparty\imgui\imgui.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rdparty\imgui\imgui_impl_glfw.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rdparty\imgui\imgui_impl_opengl3.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rdparty\imgui\imgui_internal.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rdparty\imgui\imstb_rectpack.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rdparty\imgui\imstb_textedit.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Entity.h">
+      <Filter>temp</Filter>
+    </ClInclude>
+    <ClInclude Include="Framebuffer.h">
+      <Filter>temp</Filter>
+    </ClInclude>
+    <ClInclude Include="Heightmap.h">
+      <Filter>temp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rdparty\FastNoise.h">
+      <Filter>FastNoise</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>temp</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager.h">
+      <Filter>temp</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>temp</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>temp</Filter>
+    </ClInclude>
+    <ClInclude Include="TexturedModel.h">
+      <Filter>temp</Filter>
+    </ClInclude>
+    <ClInclude Include="Wavefront.h">
+      <Filter>temp</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>temp</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h">
+      <Filter>temp</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>temp</Filter>
+    </ClInclude>
+    <ClInclude Include="Water.h">
+      <Filter>temp</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>temp</Filter>
+    </ClInclude>
+    <ClInclude Include="DiffuseShader.h">
+      <Filter>temp\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="BloomShader.h">
+      <Filter>temp\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="BlurShader.h">
+      <Filter>temp\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="FilterShader.h">
+      <Filter>temp\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="LumaShader.h">
+      <Filter>temp\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="QuadShader.h">
+      <Filter>temp\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyboxShader.h">
+      <Filter>temp\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainShader.h">
+      <Filter>temp\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="WaterShader.h">
+      <Filter>temp\shader</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="temp">
+      <UniqueIdentifier>{541574b2-3ea3-4dde-b0a9-7ab70cf34014}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{385f2786-4368-4d8b-96a1-862b5e854b17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FastNoise">
+      <UniqueIdentifier>{dcbecdad-b259-4799-b321-5f1cb10b5996}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="temp\shader">
+      <UniqueIdentifier>{57c1e217-9b72-40ca-a4db-f131cd9c84e5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

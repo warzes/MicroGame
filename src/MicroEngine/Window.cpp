@@ -95,7 +95,7 @@ bool CreateWindowSystem(const WindowCreateInfo& createInfo)
 		LogError("GLFW: Failed to initialize GLFW");
 		return false;
 	}
-	glfwDefaultWindowHints();  // Set default windows hints
+
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
