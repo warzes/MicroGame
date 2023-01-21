@@ -17,7 +17,6 @@ namespace engine
 		int64_t frameTimeLast = 0;
 		int64_t frameTimeDelta = 0;
 		float deltaTime = 0.0f;
-
 	}
 
 	bool CreateEngine(const EngineCreateInfo& createInfo)

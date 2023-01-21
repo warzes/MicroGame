@@ -27,6 +27,7 @@ enum KeyboardKey
 	KEY_NINE = 57,           // Key: 9
 	KEY_SEMICOLON = 59,      // Key: ;
 	KEY_EQUAL = 61,          // Key: =
+
 	KEY_A = 65,              // Key: A | a
 	KEY_B = 66,              // Key: B | b
 	KEY_C = 67,              // Key: C | c

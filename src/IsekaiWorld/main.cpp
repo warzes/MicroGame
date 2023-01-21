@@ -9,8 +9,6 @@
 void resetfpshistory();
 void limitfps(int& millis, int curmillis);
 void updatefpshistory(int millis);
-void setupScreen();
-void restorevsync();
 void inputgrab(bool on, bool delay = false);
 void ignoremousemotion();
 void checkinput();
@@ -19,20 +17,68 @@ void quit(); // normal exit
 #define SCR_MINH 200
 #define SCR_MAXW 10000
 #define SCR_MAXH 10000
+int focused = 0;
+
+void WindowFocusFunc(bool focused)
+{
+	extern bool shouldgrab;
+	if (focused)
+	{
+		shouldgrab = true;
+	}
+	else
+	{
+		shouldgrab = false;
+		focused = -1;
+	}
+}
+
+void MouseEnterFunc(bool enter)
+{
+	extern bool shouldgrab;
+
+	if (enter)
+	{
+		shouldgrab = false;
+		focused = 1;
+	}
+	else
+	{
+		shouldgrab = false;
+		focused = -1;
+	}
+}
+
+void WindowMinimizeFunc(bool minimize)
+{
+	minimized = minimize == true;
+}
 
 void MouseBtnFunc(int button, int action) noexcept
 {
 	if (button == 0) processkey(-1, action == 1/*GLFW_PRESS*/);
 	if (button == 1) processkey(-3, action == 1/*GLFW_PRESS*/);
 	if (button == 2) processkey(-2, action == 1/*GLFW_PRESS*/);
+	/*case SDL_BUTTON_X1: processkey(-6, event.button.state == SDL_PRESSED); break;
+	case SDL_BUTTON_X2: processkey(-7, event.button.state == SDL_PRESSED); break;
+	case SDL_BUTTON_X2 + 1: processkey(-10, event.button.state == SDL_PRESSED); break;
+	case SDL_BUTTON_X2 + 2: processkey(-11, event.button.state == SDL_PRESSED); break;
+	case SDL_BUTTON_X2 + 3: processkey(-12, event.button.state == SDL_PRESSED); break;*/
+}
+
+void KeyFunc(int key, int mod, bool isPressed)
+{
+	extern int keyrepeatmask;
+	//if (keyrepeatmask || !IsKeyboardKeyPressed(key)/*event.key.repeat */ )
+		processkey(key, isPressed, mod/*event.key.keysym.mod | SDL_GetModState()*/);
 }
 
 void WindowResizeFunc(int width, int height) noexcept
 {
 	extern int scr_w;
 	extern int scr_h;
-	extern int fullscreendesktop;
-	if (!fullscreendesktop)
+	//extern int fullscreendesktop;
+	//if (!fullscreendesktop)
 	{
 		scr_w = clamp(GetRenderWidth(), SCR_MINW, SCR_MAXW);
 		scr_h = clamp(GetRenderHeight(), SCR_MINH, SCR_MAXH);
@@ -51,12 +97,16 @@ int main(
 	engine::EngineCreateInfo createInfo;
 	createInfo.Window.Width = 1366;
 	createInfo.Window.Height = 768;
+	createInfo.Window.WindowFocusEvent = WindowFocusFunc;
+	createInfo.Window.MouseCursorEnterEvent = MouseEnterFunc;
+	createInfo.Window.WindowMinimizeEvent = WindowMinimizeFunc;
 	createInfo.Window.WindowResizeEvent = WindowResizeFunc;
 	createInfo.Window.MouseButtonEvent = MouseBtnFunc;
+	createInfo.Window.KeyEvent = KeyFunc;
 
 	if (engine::CreateEngine(createInfo))
 	{
-		//SetMouseLock(true);
+		SetMouseLock(true);
 
 		initing = INIT_RESET;
 
@@ -71,8 +121,6 @@ int main(
 			fatal("Unable to initialize SDL: %s", SDL_GetError());
 
 		game::initclient();
-
-		setupScreen();
 
 		OpenGLCheckExtensions();
 		OpenGLInit();
@@ -116,7 +164,6 @@ int main(
 		//..
 		initing = NOT_INITING;
 		
-		restorevsync();
 		loadshaders();
 		initparticles();
 		initdecals();

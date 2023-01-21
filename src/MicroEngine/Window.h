@@ -11,8 +11,7 @@ typedef void (*WindowMaximizeCallback)(bool maximize);
 typedef void (*WindowMinimizeCallback)(bool minimized);
 typedef void (*WindowFocusCallback)(bool focused);
 
-
-typedef void (*KeyCallback)(int key, bool isPressed);
+typedef void (*KeyCallback)(int key, int mod, bool isPressed);
 typedef void (*CharCallback)(unsigned int key);
 typedef void (*MouseButtonCallback)(int button, int action);
 typedef void (*MouseMoveCallback)(int x, int y);

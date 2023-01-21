@@ -70,7 +70,7 @@ void keyCallback(GLFWwindow* /*window*/, int key, int /*scancode*/, int action, 
 void keyCallbackUser(GLFWwindow* window, int key, int scancode, int action, int mods) noexcept
 {
 	keyCallback(window, key, scancode, action, mods);
-	KeyEvent(key, action == GLFW_RELEASE);
+	KeyEvent(key, mods, action != GLFW_RELEASE);
 }
 //-----------------------------------------------------------------------------
 // GLFW3 Char Key Callback, runs on key down (gets equivalent unicode char value)
